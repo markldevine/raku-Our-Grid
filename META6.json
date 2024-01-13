@@ -1,0 +1,21 @@
+{
+  "auth": "zef:markldevine",
+  "authors": [ "Mark Devine <mark@markdevine.com>" ],
+  "depends": [
+    "Our::Grid"
+  ],
+  "description": "",
+  "license": "Artistic-2.0",
+  "meta-version": 0,
+  "name": "Our::Grid",
+  "perl": "6.*",
+  "provides": {
+    "Our::Grid": "lib/Our/Grid.rakumod"
+  },
+  "resources": [],
+  "source-url": "https://github.com/markldevine/rake-Our-Grid.git",
+  "tags": [
+    "Our"
+  ],
+  "version": "0.0.1"
+}
