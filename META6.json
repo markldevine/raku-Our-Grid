@@ -4,7 +4,7 @@
   "depends": [
     "Our::Grid"
   ],
-  "description": "",
+  "description": "Generic Grid of Rows of Cells -- used for manipulating tabular data",
   "license": "Artistic-2.0",
   "meta-version": 0,
   "name": "Our::Grid",
