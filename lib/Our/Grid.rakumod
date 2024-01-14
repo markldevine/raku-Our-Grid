@@ -5,6 +5,11 @@ class Cell {
     has Mu  $.data;
 }
 
+class Row {
+    has Int     $.number-of-columns;
+    has Record  $.record;
+}
+
 class Record {
     has Cell    @.cells;
     has Int:D   @.max-cells             is required;
