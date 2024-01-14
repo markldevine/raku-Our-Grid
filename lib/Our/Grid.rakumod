@@ -8,8 +8,8 @@ class Cell {
 class Record {
     has Cell    @.cells;
     has Int:D   @.max-cells             is required;
-    has Bool    $.horizontal-limit      = 0;
-    has Bool    $.vertical-expansion    = 0;
+    has Int:D   $.horizontal-limit      = 0;
+    has Int:D   $.vertical-expansion    = 0;
 
     method add-cell (Cell:D $cell) {
         die 'Cell limit <' ~ self.cell-limit ~ '> exceeded!' if @!cells.elems > self.cell-limit;
@@ -17,13 +17,17 @@ class Record {
     }
 }
 
-has Record  @.records;
+has @.footer;
+has @.header;
+has @.left-margin;
+has @.right-margin;
+has @.records;
 
 submethod TWEAK {
     ;
 }
 
-method add-record (Record:D $record!) {
+method add-grid-record ($record!) {
     @!records.push: $record;
 }
 
