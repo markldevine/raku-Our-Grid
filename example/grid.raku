@@ -4,7 +4,6 @@ use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Data::Dump::Tree;
 use Our::Grid;
-use Terminal::ANSIColor;
 
 my Our::Grid $grid .= new;
 my $record          = [];
