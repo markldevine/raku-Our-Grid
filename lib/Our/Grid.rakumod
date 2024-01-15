@@ -1,5 +1,7 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
+#   https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
+
 use NativeCall;
 
 class winsize is repr('CStruct') {
@@ -23,6 +25,7 @@ sub term-size(--> winsize) {
 }
 
 enum Text-Colors is export (
+    reset               => 0,
     black               => 16,
     blue                => 21,
     cyan                => 51,
@@ -45,7 +48,7 @@ enum Text-Effects is export (
     strike       => 9,
 );
 
-sub color (Str:D :$text!, Text-Colors :$fg, Text-Colors :$bg, :$ef) {
+sub ANSI (Str:D :$text!, Text-Colors :$fg, Text-Colors :$bg, :$ef) is export {
     my $foreground = $fg;
     my $background = $bg;
     my @e;
@@ -58,7 +61,7 @@ sub color (Str:D :$text!, Text-Colors :$fg, Text-Colors :$bg, :$ef) {
     for @e -> $e {
         @effects.push: $e.value if $e ~~ Text-Effects && 1 <= $e < 60;
     }
-    printf("%s%s%s%s%s\n",
+    return sprintf("%s%s%s%s%s",
         @effects.elems  ?? "\o33[" ~ @effects.join(';') ~ 'm'       !! '',
         $foreground     ?? "\o33[38;5;" ~ $foreground.value ~ 'm'   !! '',
         $background     ?? "\o33[48;5;" ~ $background.value ~ 'm'   !! '',
@@ -67,8 +70,6 @@ sub color (Str:D :$text!, Text-Colors :$fg, Text-Colors :$bg, :$ef) {
     );
 }
 
-#color(:text("black + black-contrast"),      :fg(black),     :ef(invert));
-
 class Point {
     has $.x;
     has $.y;
@@ -76,10 +77,16 @@ class Point {
 
 class Cell {
     has Point   $.position;
-    has Int     $.foreground            = 0;
-    has Int     $.background            = 0;
+    has Int     $.foreground            = reset;
+    has Int     $.background            = reset;
     has Mu      $.effects               = ();
     has Str:D   $.text                  is required;
+
+submethod TWEAK {
+
+}
+
+    method ansi { return ANSI(:$!text, :fg($!foreground), :bg($!background), :ef($!effects)); }
 }
 
 class Record {
@@ -99,7 +106,7 @@ has         @.footer;
 has         @.header;
 has         @.left-margin;
 has         @.right-margin;
-has Record  @.records;
+has         @.records;
 
 has Int $.rows                          = 0;
 has Int $.cols                          = 0;

@@ -58,4 +58,4 @@ color(:text("red + red-contrast"),          :fg(red),       :ef(invert));
 color(:text("white + white-contrast"),      :fg(white),     :ef(invert));
 color(:text("yellow + yellow-contrast"),    :fg(yellow),    :ef(invert));
 
-color(:text("red + red-contrast"),          :fg(yellow),    :bg(red),     :ef(italic));
+color(:text("red + red-contrast"),          :fg(yellow),    :bg(red),     :ef(blink, strike, italic));

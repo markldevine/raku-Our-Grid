@@ -12,17 +12,18 @@ for 'A' .. 'J' -> $data {
     $record = Nil;
     for 1 .. 10 -> $i {
         if $i %% 2 {
-            $record.push: Our::Grid::Cell.new(:data($data x $i));
+            $record.push: Our::Grid::Cell.new(:text($data x $i));
         }
         else {
-            $record.push: Our::Grid::Cell.new(:data($data x $i), :effects());
+            $record.push: Our::Grid::Cell.new(:text($data x $i), :effects(blink));
         }
     }
     $grid.add-grid-record: $record;
 }
 
-#ddt $grid;
-
 for $grid.records -> $record {
-    put $record.list.map({ .data }).join("\t");
+    for $record.list -> $cell {
+        print $cell.ansi ~ "\t";
+    }
+    print "\n";
 }
