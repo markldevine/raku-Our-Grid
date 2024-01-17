@@ -26,4 +26,14 @@ submethod TWEAK {
 ddt self;
 }
 
+method text-print {
+    .print for $!phrases>>.text;
+    print "\n";
+}
+
+method ANSI-print {
+    .print for $!phrases>>.ANSI-fmt;
+    print "\n";
+}
+
 =finish
