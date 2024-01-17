@@ -6,14 +6,15 @@ use Data::Dump::Tree;
 use Our::Phrase;
 
 my @phrases;
-for 'a', 'b', 'c', 0, 1, 2 -> $char {
+#for 'a', 'b', 'c', 0, 1, 2 -> $char {
+for ('a' .. 'z').flat -> $char {
     @phrases.push:  Our::Phrase.new(
-                        :text($char x 2),
-#                       :foreground(white),
+                        :text($char x 1),
+                        :foreground(white),
 #                       :background(yellow),
 #                       :bold,
 #                       :faint,
-#                       :italic,
+                        :italic,
 #                       :underline,
 #                       :blink,
 #                       :reverse,
@@ -26,6 +27,10 @@ for 'a', 'b', 'c', 0, 1, 2 -> $char {
 #                       :alllower,
 #                       :titlecase,
 #                       :titlecaselowercase,
+                        :1spacebefore,
+                        :1spaceafter,
+                        :0tabbefore,
+                        :0tabafter,
                     );
 }
 #for 10 .. 19 -> $char {
@@ -36,8 +41,8 @@ for 'a', 'b', 'c', 0, 1, 2 -> $char {
 #                    );
 #}
 
-.print for @phrases>>.text; print "\n";
-.print for @phrases>>.ANSI-fmt; print "\n";
+print '|'; .print for @phrases>>.TEXT-fmt; print "|\n";
+print '|'; .print for @phrases>>.ANSI-fmt; print "|\n";
 
 =finish
 

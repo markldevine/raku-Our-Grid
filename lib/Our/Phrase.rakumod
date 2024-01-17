@@ -26,10 +26,6 @@ enum ANSI-Effects is export (
     doubleunderline     => 21,
     superscript         => 73,
     subscript           => 74,
-    allupper            => 1_000_000,
-    alllower            => 1_000_001,
-    titlecase           => 1_000_002,
-    titlecaselowercase  => 1_000_003,
 );
 
 has ANSI-Colors $.foreground;                           # \o33[38;5;<n>m    TEXT    \o33[39m
@@ -49,7 +45,38 @@ has Bool        $.allupper;
 has Bool        $.alllower;
 has Bool        $.titlecase;
 has Bool        $.titlecaselowercase;
+has Int         $.spacebefore           = 0;
+has Int         $.spaceafter            = 0;
+has Int         $.tabbefore             = 0;
+has Int         $.tabafter              = 0;
+has Str         $.raw;
 has Str:D       $.text                  is required;
+
+submethod TWEAK {
+    $!raw           = $!text;
+    my $text        = $!raw;
+    if $text ~~ / ^ \d+ $ / {
+        if $!superscript {
+            $text   = integer-to-superscript(+$text);
+        }
+        elsif $!subscript {
+            $text   = integer-to-subscript(+$text);
+        }
+    }
+    if $!allupper {
+        $text       = $text.uc;
+    }
+    elsif $!alllower {
+        $text       = $text.lc;
+    }
+    elsif $!titlecase {
+        $text       = $text.tc;
+    }
+    elsif $!titlecaselowercase {
+        $text       = $text.tclc;
+    }
+    $!text          = $text;
+}
 
 method ANSI-fmt {
     my @pre-effects     = ();
@@ -100,28 +127,50 @@ method ANSI-fmt {
         @pre-effects.push("\o33[21m");
         @post-effects.push("\o33[24m");
     }
-    my $text    = $!text;
-    if $text ~~ / ^ \d+ $ / {
-        if $!superscript {
-            $text   = integer-to-superscript(+$text);
-        }
-        elsif $!subscript {
-            $text   = integer-to-subscript(+$text);
-        }
-    }
-    if $!allupper {
-        $text = $text.uc;
-    }
-    elsif $!alllower {
-        $text = $text.lc;
-    }
-    elsif $!titlecase {
-        $text = $text.tc;
-    }
-    elsif $!titlecaselowercase {
-        $text = $text.tclc;
-    }
-    return sprintf("%s%s%s%s%s", @pre-effects.join, @pre-colors.join, $text, @post-colors.join, @post-effects.join);
+#   self.TEXT-transform;
+#   my $text        = $!text;
+#   if $text ~~ / ^ \d+ $ / {
+#       if $!superscript {
+#           $text   = integer-to-superscript(+$text);
+#       }
+#       elsif $!subscript {
+#           $text   = integer-to-subscript(+$text);
+#       }
+#   }
+#   if $!allupper {
+#       $text       = $text.uc;
+#   }
+#   elsif $!alllower {
+#       $text       = $text.lc;
+#   }
+#   elsif $!titlecase {
+#       $text       = $text.tc;
+#   }
+#   elsif $!titlecaselowercase {
+#       $text       = $text.tclc;
+#   }
+#   $!text          = $text;
+    return sprintf("%s%s%s%s%s%s%s%s%s",
+        $!spacebefore > 0   ?? ' ' xx $!spacebefore !! '',
+        $!tabbefore   > 0   ?? "\t" xx $!tabbefore  !! '',
+        @pre-effects.join,
+        @pre-colors.join,
+        $!text,
+        @post-colors.join,
+        @post-effects.join,
+        $!spaceafter  > 0   ?? ' ' xx $!spaceafter  !! '',
+        $!tabafter    > 0   ?? "\t" xx $!tabafter   !! '',
+    );
+}
+
+method TEXT-fmt {
+    return sprintf("%s%s%s%s%s",
+        $!spacebefore > 0   ?? ' ' xx $!spacebefore !! '',
+        $!tabbefore   > 0   ?? "\t" xx $!tabbefore  !! '',
+        $!text,
+        $!spaceafter  > 0   ?? ' ' xx $!spaceafter  !! '',
+        $!tabafter    > 0   ?? "\t" xx $!tabafter   !! '',
+    );
 }
 
 =finish
