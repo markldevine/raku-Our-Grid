@@ -6,6 +6,7 @@ use Our::Phrase;
 has         $.phrases;
 has         $.ANSI          is built;
 has         $.text;
+has         $.TEXT          is built;
 has Int     $.width         = 0;
 has uint    $.row;
 has uint    $.col;
@@ -24,25 +25,13 @@ submethod BUILD(:$text, :$phrases, :$width, :$row, :$col, *%options) {
 }
 
 submethod TWEAK {
-    $!ANSI          = self.ANSI-fmt;
-    $!text          = self.text-fmt;
-}
-
-method text-fmt {
-    my $string;
     for $!phrases.list -> $phrase {
-        $string    ~= $phrase.text;
+        $!TEXT     ~= $phrase.TEXT-fmt;
     }
-    return $string;
-}
-
-method ANSI-fmt {
-    my $string;
-    $string         = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;
+    $!ANSI          = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;
     for $!phrases.list -> $phrase {
-        $string    ~= $phrase.fmt;
+        $!ANSI     ~= $phrase.ANSI-fmt;
     }
-    return $string;
 }
 
 =finish

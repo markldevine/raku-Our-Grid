@@ -49,33 +49,30 @@ has Int         $.spacebefore           = 0;
 has Int         $.spaceafter            = 0;
 has Int         $.tabbefore             = 0;
 has Int         $.tabafter              = 0;
-has Str         $.raw;
 has Str:D       $.text                  is required;
+has Str         $.TEXT                  is built;
 
 submethod TWEAK {
-    $!raw           = $!text;
-    my $text        = $!raw;
     if $text ~~ / ^ \d+ $ / {
         if $!superscript {
-            $text   = integer-to-superscript(+$text);
+            $!TEXT  = integer-to-superscript(+$text);
         }
         elsif $!subscript {
-            $text   = integer-to-subscript(+$text);
+            $!TEXT  = integer-to-subscript(+$text);
         }
     }
     if $!allupper {
-        $text       = $text.uc;
+        $!TEXT      = $text.uc;
     }
     elsif $!alllower {
-        $text       = $text.lc;
+        $!TEXT      = $text.lc;
     }
     elsif $!titlecase {
-        $text       = $text.tc;
+        $!TEXT      = $text.tc;
     }
     elsif $!titlecaselowercase {
-        $text       = $text.tclc;
+        $!TEXT      = $text.tclc;
     }
-    $!text          = $text;
 }
 
 method ANSI-fmt {
