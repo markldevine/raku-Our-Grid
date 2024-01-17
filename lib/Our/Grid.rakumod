@@ -1,8 +1,7 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-#   https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
-
 use NativeCall;
+use Our::Phrase
 
 class winsize is repr('CStruct') {
     has uint16 $.rows;
@@ -24,52 +23,6 @@ sub term-size(--> winsize) {
     return $winsize;
 }
 
-enum Text-Colors is export (
-    reset               => 0,
-    black               => 16,
-    blue                => 21,
-    cyan                => 51,
-    green               => 46,
-    magenta             => 201,
-    orange              => 202,
-    red                 => 196,
-    white               => 231,
-    yellow              => 226,
-);
-
-enum Text-Effects is export (
-    bold         => 1,
-    faint        => 2,
-    italic       => 3,
-    underline    => 4,
-    blink        => 5,
-    invert       => 7,
-    hide         => 8,
-    strike       => 9,
-);
-
-sub ANSI (Str:D :$text!, Text-Colors :$fg, Text-Colors :$bg, :$ef) is export {
-    my $foreground = $fg;
-    my $background = $bg;
-    my @e;
-    given $ef {
-        when Positional { @e = $_.flat; }
-        when Str        { @e = ($_);    }
-        when Int        { @e = ($_);    }
-    }
-    my @effects;
-    for @e -> $e {
-        @effects.push: $e.value if $e ~~ Text-Effects && 1 <= $e < 60;
-    }
-    return sprintf("%s%s%s%s%s",
-        @effects.elems  ?? "\o33[" ~ @effects.join(';') ~ 'm'       !! '',
-        $foreground     ?? "\o33[38;5;" ~ $foreground.value ~ 'm'   !! '',
-        $background     ?? "\o33[48;5;" ~ $background.value ~ 'm'   !! '',
-        $text,
-        ($foreground || $background || @effects.elems) ?? "\o33[0m" !! ''
-    );
-}
-
 class Point {
     has $.x;
     has $.y;
@@ -77,14 +30,12 @@ class Point {
 
 class Cell {
     has Point   $.position;
-    has Int     $.foreground            = reset;
-    has Int     $.background            = reset;
-    has Mu      $.effects               = ();
-    has Str:D   $.text                  is required;
+    has Str     $.ANSI-string;
+    has         $.phrases;
+    has Int     $.width;
 
-submethod TWEAK {
-
-}
+    submethod TWEAK {
+    }
 
     method ansi { return ANSI(:$!text, :fg($!foreground), :bg($!background), :ef($!effects)); }
 }
