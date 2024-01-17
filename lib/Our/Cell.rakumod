@@ -6,34 +6,41 @@ use Our::Phrase;
 has         $.phrases;
 has         $.text;
 has Int     $.width         = 0;
-has Int     $.x;
-has Int     $.y;
+has Int     $.row;
+has Int     $.col;
 has         %.options;
 
-submethod BUILD(:$text, :$phrases, :$width, :$x, :$y, *%options) {
+submethod BUILD(:$text, :$phrases, :$width, :$row, :$col, *%options) {
     die "Must initialize with either ':text' or ':phrases'" unless $text || $phrases;
     $!text          = $text;
     $!width         = $width with $width;
-    $!x             = $x with $x;
-    $!y             = $y with $y;
-    die "Must send both 'x' & 'y' positional coordinates together" if any($!x.so, $!y.so) && ! all($!x.so, $!y.so);
+    $!row           = $row with $row;
+    $!col           = $col with $col;
+    die "Must send both 'row' & 'col' together" if any($!row.so, $!col.so) && ! all($!row.so, $!col.so);
     %!options       = %options;
     $!phrases       = $phrases with $phrases;
     $!phrases[0]    = Our::Phrase.new(:$!text, |%options) unless $!phrases;
 }
 
 submethod TWEAK {
-ddt self;
+#ddt self;
 }
 
-method text-print {
-    .print for $!phrases>>.text;
-    print "\n";
+method text-fmt {
+    my $string;
+    for $!phrases.list -> $phrase {
+        $string    ~= $phrase.text;
+    }
+    return $string;
 }
 
-method ANSI-print {
-    .print for $!phrases>>.ANSI-fmt;
-    print "\n";
+method ANSI-fmt {
+    my $string;
+    $string         = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;
+    for $!phrases.list -> $phrase {
+        $string    ~= $phrase.ANSI-fmt;
+    }
+    return $string;
 }
 
 =finish
