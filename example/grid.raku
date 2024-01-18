@@ -3,35 +3,24 @@
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Data::Dump::Tree;
-use Our::Phrase;
-
-my $text    = 'a' .. 'z';
-
-my Our::Phrase $phrase .= new(:$text);
-ddt $phrase;
-put $phrase.text;
-
-
-=finish
+use Our::Grid;
 
 my Our::Grid $grid .= new;
 
-my $record          = [];
-
 for 'A' .. 'J' -> $data {
-    $record = Nil;
+    myy $row = Nil;
     for 1 .. 10 -> $i {
         if $i %% 2 {
-            $record.push: Our::Grid::Cell.new(:text($data x $i));
+            $row.push: Our::Grid::Cell.new(:text($data x $i));
         }
         else {
-            $record.push: Our::Grid::Cell.new(:text($data x $i), :effects(blink));
+            $row.push: Our::Grid::Cell.new(:text($data x $i), :italic);
         }
     }
-    $grid.add-grid-record: $record;
+    $grid.add-grid-row: $row;
 }
 
-for $grid.records -> $record {
+for $grid.rows -> $record {
     for $record.list -> $cell {
         print $cell.ansi ~ "\t";
     }
