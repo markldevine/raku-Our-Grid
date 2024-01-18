@@ -24,8 +24,6 @@ enum ANSI-Effects is export (
     hide                => 8,
     strikethrough       => 9,
     doubleunderline     => 21,
-    superscript         => 73,
-    subscript           => 74,
 );
 
 has ANSI-Colors $.foreground;                           # \o33[38;5;<n>m    TEXT    \o33[39m

@@ -35,6 +35,6 @@ $r.add-cell(Our::Grid::Cell.new(:text('Here is number 5...'),   :foreground(yell
 $r.add-cell(Our::Grid::Cell.new(:text('Here is number 6...'),   :foreground(white),     :1spacebefore, :1spaceafter));
 
 put $r.TEXT-fmt;
-#put $r.ANSI-fmt;
+put $r.ANSI-fmt;
 
 =finish

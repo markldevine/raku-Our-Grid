@@ -9,8 +9,8 @@ has         $.ANSI          is built;
 has         $.text;
 has         $.TEXT          is built;
 has uint    $.width         = 0;
-has uint    $.row;
-has uint    $.col;
+has uint    $.row           is rw;
+has uint    $.col           is rw;
 has uint    $.visibility    = 100;              # % of mandatory visibility upon display
 has         %.options;
 
