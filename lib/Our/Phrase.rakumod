@@ -53,25 +53,25 @@ has Str:D       $.text                  is required;
 has Str         $.TEXT                  is built;
 
 submethod TWEAK {
-    if $text ~~ / ^ \d+ $ / {
+    if $!text ~~ / ^ \d+ $ / {
         if $!superscript {
-            $!TEXT  = integer-to-superscript(+$text);
+            $!TEXT  = integer-to-superscript(+$!text);
         }
         elsif $!subscript {
-            $!TEXT  = integer-to-subscript(+$text);
+            $!TEXT  = integer-to-subscript(+$!text);
         }
     }
     if $!allupper {
-        $!TEXT      = $text.uc;
+        $!TEXT      = $!text.uc;
     }
     elsif $!alllower {
-        $!TEXT      = $text.lc;
+        $!TEXT      = $!text.lc;
     }
     elsif $!titlecase {
-        $!TEXT      = $text.tc;
+        $!TEXT      = $!text.tc;
     }
     elsif $!titlecaselowercase {
-        $!TEXT      = $text.tclc;
+        $!TEXT      = $!text.tclc;
     }
 }
 

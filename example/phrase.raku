@@ -41,8 +41,8 @@ for ('a' .. 'z').flat -> $char {
 #                    );
 #}
 
-print '|'; .print for @phrases>>.TEXT-fmt; print "|\n";
-print '|'; .print for @phrases>>.ANSI-fmt; print "|\n";
+print '|'; .print for @phrases>>.TEXT; print "|\n";
+print '|'; .print for @phrases>>.ANSI; print "|\n";
 
 =finish
 
