@@ -50,9 +50,10 @@ has Int         $.spaceafter            = 0;
 has Int         $.tabbefore             = 0;
 has Int         $.tabafter              = 0;
 has Str:D       $.text                  is required;
-has Str         $.TEXT                  is built;
+has Str         $.TEXT;
 
 submethod TWEAK {
+    $!TEXT          = $!text;
     if $!text ~~ / ^ \d+ $ / {
         if $!superscript {
             $!TEXT  = integer-to-superscript(+$!text);
@@ -124,49 +125,26 @@ method ANSI-fmt {
         @pre-effects.push("\o33[21m");
         @post-effects.push("\o33[24m");
     }
-#   self.TEXT-transform;
-#   my $text        = $!text;
-#   if $text ~~ / ^ \d+ $ / {
-#       if $!superscript {
-#           $text   = integer-to-superscript(+$text);
-#       }
-#       elsif $!subscript {
-#           $text   = integer-to-subscript(+$text);
-#       }
-#   }
-#   if $!allupper {
-#       $text       = $text.uc;
-#   }
-#   elsif $!alllower {
-#       $text       = $text.lc;
-#   }
-#   elsif $!titlecase {
-#       $text       = $text.tc;
-#   }
-#   elsif $!titlecaselowercase {
-#       $text       = $text.tclc;
-#   }
-#   $!text          = $text;
     return sprintf("%s%s%s%s%s%s%s%s%s",
-        $!spacebefore > 0   ?? ' ' xx $!spacebefore !! '',
-        $!tabbefore   > 0   ?? "\t" xx $!tabbefore  !! '',
+        $!spacebefore > 0   ?? ' '  xx $!spacebefore    !! '',
+        $!tabbefore   > 0   ?? "\t" xx $!tabbefore      !! '',
         @pre-effects.join,
         @pre-colors.join,
-        $!text,
+        $!TEXT,
         @post-colors.join,
         @post-effects.join,
-        $!spaceafter  > 0   ?? ' ' xx $!spaceafter  !! '',
-        $!tabafter    > 0   ?? "\t" xx $!tabafter   !! '',
+        $!spaceafter  > 0   ?? ' '  xx $!spaceafter     !! '',
+        $!tabafter    > 0   ?? "\t" xx $!tabafter       !! '',
     );
 }
 
 method TEXT-fmt {
     return sprintf("%s%s%s%s%s",
-        $!spacebefore > 0   ?? ' ' xx $!spacebefore !! '',
-        $!tabbefore   > 0   ?? "\t" xx $!tabbefore  !! '',
-        $!text,
-        $!spaceafter  > 0   ?? ' ' xx $!spaceafter  !! '',
-        $!tabafter    > 0   ?? "\t" xx $!tabafter   !! '',
+        $!spacebefore > 0   ?? ' '  xx $!spacebefore    !! '',
+        $!tabbefore   > 0   ?? "\t" xx $!tabbefore      !! '',
+        $!TEXT,
+        $!spaceafter  > 0   ?? ' '  xx $!spaceafter     !! '',
+        $!tabafter    > 0   ?? "\t" xx $!tabafter       !! '',
     );
 }
 

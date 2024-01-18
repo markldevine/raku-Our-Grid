@@ -7,9 +7,9 @@ use Our::Phrase;
 
 my @phrases;
 #for 'a', 'b', 'c', 0, 1, 2 -> $char {
-for ('a' .. 'z').flat -> $char {
+for ('a' .. 'e').flat -> $char {
     @phrases.push:  Our::Phrase.new(
-                        :text($char x 1),
+                        :text($char x 2),
                         :foreground(white),
 #                       :background(yellow),
 #                       :bold,
@@ -28,7 +28,7 @@ for ('a' .. 'z').flat -> $char {
 #                       :titlecase,
 #                       :titlecaselowercase,
                         :1spacebefore,
-                        :1spaceafter,
+                        :0spaceafter,
                         :0tabbefore,
                         :0tabafter,
                     );
@@ -42,7 +42,7 @@ for ('a' .. 'z').flat -> $char {
 #}
 
 print '|'; .print for @phrases>>.TEXT; print "|\n";
-print '|'; .print for @phrases>>.ANSI; print "|\n";
+print '|'; .print for @phrases>>.ANSI-fmt; print "|\n";
 
 =finish
 
