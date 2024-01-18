@@ -1,7 +1,7 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 use NativeCall;
-use Our::Phrase
+use Our::Phrase;
 
 class winsize is repr('CStruct') {
     has uint16 $.rows;
