@@ -7,6 +7,8 @@ has         $.header;
 has         $.footer;
 has         @.rows;
 has         $.term-size;
+has         $.anchor-row;
+has         $.anchor-col;
 
 submethod TWEAK {
     $!term-size = term-size;

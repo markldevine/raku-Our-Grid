@@ -3,6 +3,7 @@ unit class Our::Grid::Cell:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 #   *** take out $.row & $.col logic; set them after the full grid is calculated!
 
 use Our::Grid::Cell::Fragment;
+use Our::Utilities;
 
 has         $.fragments;
 has         $.ANSI              is built;
@@ -33,8 +34,36 @@ submethod TWEAK {
     for $!fragments.list -> $fragment {
         $!TEXT     ~= $fragment.TEXT-fmt;
     }
+    self.ANSI-fmt();
+}
+
+method ANSI-fmt (
+                    ANSI-Colors :$foreground,
+                    ANSI-Colors :$background,
+                                :$bold,
+                                :$faint,
+                                :$italic,
+                                :$underline,
+                                :$blink,
+                                :$reverse,
+                                :$hide,
+                                :$strikethrough,
+                                :$doubleunderline,
+                ) {
+    $!ANSI          = Nil;
     $!ANSI          = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;
     for $!fragments.list -> $fragment {
+        $fragment.foreground        = $foreground   if $foreground;
+        $fragment.background        = $background   if $background;
+        $fragment.bold              = True  if $bold;
+        $fragment.faint             = True  if $faint;
+        $fragment.italic            = True  if $italic;
+        $fragment.underline         = True  if $underline;
+        $fragment.blink             = True  if $blink;
+        $fragment.reverse           = True  if $reverse;
+        $fragment.hide              = True  if $hide;
+        $fragment.strikethrough     = True  if $strikethrough;
+        $fragment.doubleunderline   = True  if $doubleunderline;
         $!ANSI     ~= $fragment.ANSI-fmt;
     }
 }
