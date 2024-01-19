@@ -21,5 +21,5 @@ for 'A' .. 'J' -> $data {
     $grid.add-row: $row;
 }
 
-$grid.TEXT-out;
-$grid.ANSI-out;
+#$grid.TEXT-out;
+$grid.ANSI-out for 1 .. 5;
