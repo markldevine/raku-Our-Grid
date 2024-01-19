@@ -9,34 +9,15 @@ unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 #       - evoke either TEXT or ANSI to .put
 #
 
-use NativeCall;
 use Our::Grid::Row;
 use Our::Grid::Cell;
 use Our::Grid::Cell::Fragment;
+use Our::Utilities;
 
 has         $.header;
 has         $.footer;
 has         @.rows;
 has         $.term-size;
-
-class winsize is repr('CStruct') {
-    has uint16 $.rows;
-    has uint16 $.cols;
-    has uint16 $.xpixels;
-    has uint16 $.ypixels;
-    method gist() {
-        return "rows={self.rows} cols={self.cols} {self.xpixels}x{self.ypixels}"
-    }
-}
-
-constant TIOCGWINSZ = 0x5413;
-
-sub term-size(--> winsize) {
-    sub ioctl(int32 $fd, int32 $cmd, winsize $winsize) is native {*}
-    my winsize $winsize .= new;
-    ioctl(0,TIOCGWINSZ,$winsize);
-    return $winsize;
-}
 
 submethod TWEAK {
     $!term-size = term-size;
@@ -68,7 +49,6 @@ method TEXT-out {
     }
 }
 
-#   *** this could be threaded/hyper if everything is addressed with ANSI position sequences...
 method ANSI-out {
     for @!rows -> $row {
         put $row.ANSI-fmt;

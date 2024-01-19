@@ -5,6 +5,7 @@ use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 use Our::Grid::Row;
 use Our::Grid::Cell;
 use Our::Grid::Cell::Fragment;
+use Our::Utilities;
 
 my Our::Grid::Row $r .= new;
 

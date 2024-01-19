@@ -4,6 +4,7 @@ use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Our::Grid::Cell::Fragment;
 use Our::Grid::Cell;
+use Our::Utilities;
 
 my Our::Grid::Cell $c;
 
