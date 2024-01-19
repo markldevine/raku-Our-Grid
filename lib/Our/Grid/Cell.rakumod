@@ -5,13 +5,16 @@ unit class Our::Grid::Cell:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 use Our::Grid::Cell::Fragment;
 
 has         $.fragments;
-has         $.ANSI          is built;
+has         $.ANSI              is built;
 has         $.text;
-has         $.TEXT          is built;
-has uint    $.width         = 0;
-has uint    $.row           is rw;
-has uint    $.col           is rw;
-has uint    $.visibility    = 100;              # % of mandatory visibility upon display
+has         $.TEXT              is built;
+has Bool    $.justify-left      is rw;
+has Bool    $.justify-center    is rw;
+has Bool    $.justify-right     is rw;
+has uint    $.row               is rw;
+has uint    $.col               is rw;
+has uint    $.visibility        is rw   = 100;      # % of mandatory visibility upon display
+has uint    $.width             is rw;
 has         %.options;
 
 submethod BUILD(:$text, :$fragments, :$width, :$row, :$col, *%options) {

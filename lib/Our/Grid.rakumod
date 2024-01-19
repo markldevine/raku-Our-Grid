@@ -1,17 +1,6 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-#   Grow the Grid dynamically by adding Our::Grid::Row objects
-#       - adjust row count
-#       - adjust col count
-#       - adjust $!row & $!col in each cell, now that we know where they should be (ANSI-only)
-#   method grid-out
-#       - construct a [row;col] array with the Cell objects
-#       - evoke either TEXT or ANSI to .put
-#
-
 use Our::Grid::Row;
-use Our::Grid::Cell;
-use Our::Grid::Cell::Fragment;
 use Our::Utilities;
 
 has         $.header;
