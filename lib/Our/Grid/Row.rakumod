@@ -12,17 +12,17 @@ method add-cell (Our::Grid::Cell:D $cell) {
 }
 
 method TEXT-fmt {
-    my $row = '|';
+    my $row;
     for self.cells -> $cell {
-        $row ~= $cell.TEXT ~ '|';
+        $row ~= $cell.TEXT;
     }
     return $row;
 }
 
 method ANSI-fmt {
-    my $row = '|';
+    my $row;
     for @!cells -> $cell {
-        $row ~= $cell.ANSI ~ '|';
+        $row ~= $cell.ANSI;
     }
     return $row;
 }

@@ -2,11 +2,9 @@
 
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
-use Data::Dump::Tree;
 use Our::Grid::Cell::Fragment;
 
 my @fragments;
-#for 'a', 'b', 'c', 0, 1, 2 -> $char {
 for ('a' .. 'e').flat -> $char {
     @fragments.push:    Our::Grid::Cell::Fragment.new(
                             :text($char x 2),

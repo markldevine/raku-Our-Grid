@@ -10,12 +10,14 @@ unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 #
 
 use NativeCall;
+use Our::Grid::Row;
 use Our::Grid::Cell;
+use Our::Grid::Cell::Fragment;
 
 has         $.header;
 has         $.footer;
 has         @.rows;
-has         $.window-size;
+has         $.term-size;
 
 class winsize is repr('CStruct') {
     has uint16 $.rows;
@@ -42,8 +44,8 @@ submethod TWEAK {
 #                 $term-size.cols;
 }
 
-method add-row ($record!) {
-    @!rows.push: $record;
+method add-row (Our::Grid::Row:D $row!) {
+    @!rows.push: $row;
 }
 
 #   ???????????????????????????????????????????????????????????????????
@@ -62,33 +64,15 @@ method build-grid {
 
 method TEXT-out {
     for @!rows -> $row {
-        for $row.cells -> $cell {
-            put $cell.TEXT;
-        }
+        put $row.TEXT-fmt;
     }
 }
 
 #   *** this could be threaded/hyper if everything is addressed with ANSI position sequences...
 method ANSI-out {
     for @!rows -> $row {
-        for $row.cells -> $cell {
-            print $cell.ANSI;
-        }
-        print "\n";
+        put $row.ANSI-fmt;
     }
-}
-
-=finish
-unit class Our::Grid::Row:api<1>:auth<Mark Devine (mark@markdevine.com)>;
-
-use Our::Grid::Cell;
-
-has Our::Grid::Cell @.cells;
-has                 $.left-row-header;
-has                 $.right-row-header;
-
-method add-cell (Cell:D $cell) {
-    @!cells.push: $cell;
 }
 
 =finish

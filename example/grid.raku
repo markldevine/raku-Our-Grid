@@ -2,27 +2,24 @@
 
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
-use Data::Dump::Tree;
 use Our::Grid;
+use Our::Grid::Cell;
+use Our::Grid::Cell::Fragment;
 
-my Our::Grid $grid .= new;
+my Our::Grid        $grid  .= new;
 
 for 'A' .. 'J' -> $data {
-    myy $row = Nil;
+    my Our::Grid::Row $row .= new;
     for 1 .. 10 -> $i {
         if $i %% 2 {
-            $row.push: Our::Grid::Cell.new(:text($data x $i));
+            $row.add-cell: Our::Grid::Cell.new(:text($data x $i), :1spaceafter);
         }
         else {
-            $row.push: Our::Grid::Cell.new(:text($data x $i), :italic);
+            $row.add-cell: Our::Grid::Cell.new(:text($data x $i), :1spaceafter, :italic, :foreground(green));
         }
     }
-    $grid.add-grid-row: $row;
+    $grid.add-row: $row;
 }
 
-for $grid.rows -> $record {
-    for $record.list -> $cell {
-        print $cell.ansi ~ "\t";
-    }
-    print "\n";
-}
+$grid.TEXT-out;
+$grid.ANSI-out;
