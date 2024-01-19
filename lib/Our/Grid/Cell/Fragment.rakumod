@@ -2,27 +2,27 @@ unit class Our::Grid::Cell::Fragment:api<1>:auth<Mark Devine (mark@markdevine.co
 
 use Our::Utilities;
 
-has ANSI-Colors $.foreground;                           # \o33[38;5;<n>m    TEXT    \o33[39m
-has ANSI-Colors $.background;                           # \o33[48;5;<n>m    TEXT    \o33[49m
-has Bool        $.bold;                                 # \o33[1m           TEXT    \o33[22m
-has Bool        $.faint;                                # \o33[2m           TEXT    \o33[22m
-has Bool        $.italic;                               # \o33[3m           TEXT    \o33[23m
-has Bool        $.underline;                            # \o33[4m           TEXT    \o33[24m
-has Bool        $.blink;                                # \o33[5m           TEXT    \o33[25m
-has Bool        $.reverse;                              # \o33[7m           TEXT    \o33[27m
-has Bool        $.hide;                                 # \o33[8m           TEXT    \o33[28m
-has Bool        $.strikethrough;                        # \o33[9m           TEXT    \o33[29m
-has Bool        $.doubleunderline;                      # \o33[21m          TEXT    \o33[24m
-has Bool        $.superscript;
-has Bool        $.subscript;
-has Bool        $.allupper;
-has Bool        $.alllower;
-has Bool        $.titlecase;
-has Bool        $.titlecaselowercase;
-has Int         $.spacebefore           = 0;
-has Int         $.spaceafter            = 0;
-has Int         $.tabbefore             = 0;
-has Int         $.tabafter              = 0;
+has ANSI-Colors $.foreground            is rw;
+has ANSI-Colors $.background            is rw;
+has Bool        $.bold                  is rw;
+has Bool        $.faint                 is rw;
+has Bool        $.italic                is rw;
+has Bool        $.underline             is rw;
+has Bool        $.blink                 is rw;
+has Bool        $.reverse               is rw;
+has Bool        $.hide                  is rw;
+has Bool        $.strikethrough         is rw;
+has Bool        $.doubleunderline       is rw;
+has Bool        $.superscript           is rw;
+has Bool        $.subscript             is rw;
+has Bool        $.allupper              is rw;
+has Bool        $.alllower              is rw;
+has Bool        $.titlecase             is rw;
+has Bool        $.titlecaselowercase    is rw;
+has Int         $.spacebefore           is rw   = 0;
+has Int         $.spaceafter            is rw   = 0;
+has Int         $.tabbefore             is rw   = 0;
+has Int         $.tabafter              is rw   = 0;
 has Str:D       $.text                  is required;
 has Str         $.TEXT;
 
