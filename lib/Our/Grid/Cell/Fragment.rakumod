@@ -2,30 +2,6 @@ unit class Our::Grid::Cell::Fragment:api<1>:auth<Mark Devine (mark@markdevine.co
 
 use Our::Utilities;
 
-#enum ANSI-Colors is export (
-#    black               => 16,
-#    blue                => 21,
-#    cyan                => 51,
-#    green               => 46,
-#    magenta             => 201,
-#    orange              => 202,
-#    red                 => 196,
-#    white               => 231,
-#    yellow              => 226,
-#);
-
-#enum ANSI-Effects is export (
-#    bold                => 1,
-#    faint               => 2,
-#    italic              => 3,
-#    underline           => 4,
-#    blink               => 5,
-#    reverse             => 7,
-#    hide                => 8,
-#    strikethrough       => 9,
-#    doubleunderline     => 21,
-#);
-
 has ANSI-Colors $.foreground;                           # \o33[38;5;<n>m    TEXT    \o33[39m
 has ANSI-Colors $.background;                           # \o33[48;5;<n>m    TEXT    \o33[49m
 has Bool        $.bold;                                 # \o33[1m           TEXT    \o33[22m

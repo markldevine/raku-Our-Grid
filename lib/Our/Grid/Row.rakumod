@@ -1,7 +1,6 @@
 unit class Our::Grid::Row:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 use Our::Grid::Cell;
-use Data::Dump::Tree;
 
 has                 @.cells;
 has                 $.left-row-header;
