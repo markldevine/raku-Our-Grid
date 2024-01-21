@@ -39,6 +39,6 @@ $r.add-cell(Our::Grid::Cell.new(:text('Here is number 6...'),   :foreground(whit
 put $r.ANSI-fmt;
 put $r.ANSI-fmt(:background(white));
 put $r.ANSI-fmt(:background(yellow));
-put $r.ANSI-fmt(:background(black));
+put $r.row-background = gray244;
 
 =finish
