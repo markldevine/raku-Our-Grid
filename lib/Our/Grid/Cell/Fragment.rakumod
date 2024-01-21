@@ -60,14 +60,14 @@ method TEXT-fmt {
 method ANSI-fmt (*%options) {
     my $foreground;
     $foreground         = $!foreground.value            if $!foreground;
-    $foreground         = %options<foreground>          if %options<foreground>:exists;
+    $foreground         = %options<foreground>.value    if %options<foreground>:exists;
     my $background;
     if $!row-background {
-        $background     = $!row-background;
+        $background     = $!row-background.value;
     }
     else {
         $background     = $!background.value            if $!background;
-        $background     = %options<background>          if %options<background>:exists;
+        $background     = %options<background>.value    if %options<background>:exists;
     }
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;
