@@ -16,6 +16,7 @@ has uint    $.row               is rw;
 has uint    $.col               is rw;
 has uint    $.visibility        is rw   = 100;      # % of mandatory visibility upon display
 has uint    $.width             is rw;
+has         $.row-background;
 has         %.options;
 
 submethod BUILD(:$text, :$fragments, :$width, :$row, :$col, *%options) {
@@ -37,33 +38,36 @@ submethod TWEAK {
     self.ANSI-fmt();
 }
 
-method ANSI-fmt (
-                    ANSI-Colors :$foreground,
-                    ANSI-Colors :$background,
-                                :$bold,
-                                :$faint,
-                                :$italic,
-                                :$underline,
-                                :$blink,
-                                :$reverse,
-                                :$hide,
-                                :$strikethrough,
-                                :$doubleunderline,
-                ) {
+#method ANSI-fmt (
+#                    ANSI-Colors :$foreground,
+#                    ANSI-Colors :$background,
+#                                :$bold,
+#                                :$faint,
+#                                :$italic,
+#                                :$underline,
+#                                :$blink,
+#                                :$reverse,
+#                                :$hide,
+#                                :$strikethrough,
+#                                :$doubleunderline,
+#                ) {
+method ANSI-fmt (*%options) {
     $!ANSI          = Nil;
     $!ANSI          = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;
     for $!fragments.list -> $fragment {
-        $fragment.foreground        = $foreground   if $foreground;
-        $fragment.background        = $background   if $background;
-        $fragment.bold              = True  if $bold;
-        $fragment.faint             = True  if $faint;
-        $fragment.italic            = True  if $italic;
-        $fragment.underline         = True  if $underline;
-        $fragment.blink             = True  if $blink;
-        $fragment.reverse           = True  if $reverse;
-        $fragment.hide              = True  if $hide;
-        $fragment.strikethrough     = True  if $strikethrough;
-        $fragment.doubleunderline   = True  if $doubleunderline;
+        $fragment.foreground        = %options<foreground>      if %options<foreground>:exists;
+        unless $!row-background {
+            $fragment.background    = %options<background>      if %options<background>:exists;
+        }
+        $fragment.bold              = %options<bold>            if %options<bold>:exists;
+        $fragment.faint             = %options<faint>           if %options<faint>:exists;
+        $fragment.italic            = %options<italic>          if %options<italic>:exists;
+        $fragment.underline         = %options<underline>       if %options<underline>:exists;
+        $fragment.blink             = %options<blink>           if %options<blink>:exists;
+        $fragment.reverse           = %options<reverse>         if %options<reverse>:exists;
+        $fragment.hide              = %options<hide>            if %options<hide>:exists;
+        $fragment.strikethrough     = %options<strikethrough>   if %options<strikethrough>:exists;
+        $fragment.doubleunderline   = %options<doubleunderline> if %options<doubleunderline>:exists;
         $!ANSI     ~= $fragment.ANSI-fmt;
     }
 }

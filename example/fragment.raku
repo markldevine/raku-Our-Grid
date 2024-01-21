@@ -9,8 +9,8 @@ my @fragments;
 for ('a' .. 'e').flat -> $char {
     @fragments.push:    Our::Grid::Cell::Fragment.new(
                             :text($char x 2),
-                            :foreground(white),
-#                           :background(yellow),
+                            :foreground(black),
+                            :background(gray254),
 #                           :bold,
 #                           :faint,
                             :italic,
@@ -27,9 +27,7 @@ for ('a' .. 'e').flat -> $char {
 #                           :titlecase,
 #                           :titlecaselowercase,
                             :1spacebefore,
-                            :0spaceafter,
-                            :0tabbefore,
-                            :0tabafter,
+                            :1spaceafter,
                         );
 }
 #for 10 .. 19 -> $char {
@@ -40,7 +38,7 @@ for ('a' .. 'e').flat -> $char {
 #                       );
 #}
 
-print '|'; .print for @fragments>>.TEXT; print "|\n";
+print '|'; .print for @fragments>>.TEXT-fmt; print "|\n";
 print '|'; .print for @fragments>>.ANSI-fmt; print "|\n";
 
 =finish

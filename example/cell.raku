@@ -32,6 +32,6 @@ $c .= new(:text('Here is number 3...'), :foreground(blue));                     
 $c .= new(:text('Here is number 4...'), :foreground(red));                      put $c.TEXT; put $c.ANSI;
 $c .= new(:text('Here is number 5...'), :foreground(yellow));                   put $c.TEXT; put $c.ANSI;
 $c .= new(:text('Here is number 6...'), :foreground(white));                    put $c.TEXT; put $c.ANSI;
-$c .= new(:text('ANSI twice.........'), :foreground(blue));                     put $c.ANSI; $c.ANSI-fmt(:foreground(yellow), :italic); put $c.ANSI;
+$c .= new(:text('ANSI twice.........'), :foreground(red));                      put $c.ANSI; $c.ANSI-fmt(:foreground(yellow), :background(red), :italic); put $c.ANSI;
 
 =finish
