@@ -4,6 +4,7 @@ use Our::Utilities;
 
 has ANSI-Colors $.foreground            is rw;
 has ANSI-Colors $.background            is rw;
+has ANSI-Colors $.row-background        is rw;
 has Bool        $.bold                  is rw;
 has Bool        $.faint                 is rw;
 has Bool        $.italic                is rw;
@@ -48,13 +49,26 @@ submethod TWEAK {
     }
 }
 
+method TEXT-fmt {
+    my $spacebefore     = '';
+    $spacebefore        = ' ' xx $!spacebefore  if $!spacebefore;
+    my $spaceafter      = '';
+    $spaceafter         = ' ' xx $!spaceafter   if $!spaceafter;
+    return sprintf("%s%s%s", $spacebefore, $!TEXT, $spaceafter,);
+}
+
 method ANSI-fmt (*%options) {
     my $foreground;
     $foreground         = $!foreground.value            if $!foreground;
     $foreground         = %options<foreground>          if %options<foreground>:exists;
     my $background;
-    $background         = $!background.value            if $!background;
-    $background         = %options<background>          if %options<background>:exists;
+    if $!row-background {
+        $background     = $!row-background;
+    }
+    else {
+        $background     = $!background.value            if $!background;
+        $background     = %options<background>          if %options<background>:exists;
+    }
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;
     my $faint           = $!faint;
@@ -137,14 +151,6 @@ method ANSI-fmt (*%options) {
         @post-effects.join,
         $spaceafter,
     );
-}
-
-method TEXT-fmt {
-    my $spacebefore     = '';
-    $spacebefore        = ' ' xx $!spacebefore  if $!spacebefore;
-    my $spaceafter      = '';
-    $spaceafter         = ' ' xx $!spaceafter   if $!spaceafter;
-    return sprintf("%s%s%s", $spacebefore, $!TEXT, $spaceafter,);
 }
 
 =finish
