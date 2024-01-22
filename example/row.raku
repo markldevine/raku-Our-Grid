@@ -35,10 +35,10 @@ $r.add-cell(Our::Grid::Cell.new(:text('Here is number 4...'),   :foreground(red)
 $r.add-cell(Our::Grid::Cell.new(:text('Here is number 5...'),   :foreground(yellow),    :1spacebefore, :1spaceafter));
 $r.add-cell(Our::Grid::Cell.new(:text('Here is number 6...'),   :foreground(white),     :1spacebefore, :1spaceafter));
 
-#put $r.TEXT-fmt;
+put $r.TEXT-fmt;
 put $r.ANSI-fmt;
-put $r.ANSI-fmt(:background(white));
-put $r.ANSI-fmt(:background(yellow));
-put $r.row-background = gray244;
+put "";
+put $r.ANSI-fmt(:background(gray244));
+put $r.ANSI-fmt(:background(gray248));
 
 =finish

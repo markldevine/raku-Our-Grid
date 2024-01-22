@@ -1,22 +1,19 @@
 unit class Our::Grid::Cell:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-#   *** take out $.row & $.col logic; set them after the full grid is calculated!
-
 use Our::Grid::Cell::Fragment;
 use Our::Utilities;
 
 has         $.fragments;
-has         $.ANSI              is built;
+has         $.ANSI              is built(False);
 has         $.text;
-has         $.TEXT              is built;
+has         $.TEXT              is built(False);
 has Bool    $.justify-left      is rw;
 has Bool    $.justify-center    is rw;
 has Bool    $.justify-right     is rw;
-has uint    $.row               is rw;
-has uint    $.col               is rw;
+has uint    $.row               is rw   = 0;
+has uint    $.col               is rw   = 0;
 has uint    $.visibility        is rw   = 100;      # % of mandatory visibility upon display
 has uint    $.width             is rw;
-has         $.row-background;
 has         %.options;
 
 submethod BUILD(:$text, :$fragments, :$width, :$row, :$col, *%options) {
@@ -41,7 +38,6 @@ submethod TWEAK {
 method ANSI-fmt (*%options) {
     my %opts;
     %opts                   = %options if %options.elems;
-    %opts<row-background>   = $!row-background  if $!row-background;
     $!ANSI                  = Nil;
     $!ANSI                  = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;
     for $!fragments.list -> $fragment {

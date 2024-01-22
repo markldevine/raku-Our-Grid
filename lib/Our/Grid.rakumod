@@ -20,17 +20,17 @@ method add-row (Our::Grid::Row:D $row!, *%options) {
     @!rows.push: self.row-fmt(:$row, |%options);
 }
 
-method rows-fmt (*%options) {
-    my $even-odd = 1;
-    for @rows -> $row {
-        if $even-odd %% 2 {
-            $row.background = grey244;
-        }
-        else {
-            $row.background = grey254;
-        }
-    }
-}
+#method rows-fmt (*%options) {
+#    my $even-odd = 1;
+#    for @rows -> $row {
+#        if $even-odd %% 2 {
+#            $row.background = grey244;
+#        }
+#        else {
+#            $row.background = grey254;
+#        }
+#    }
+#}
 
 #method row-fmt (:$row, *%options) {
 #    for $row.cells -> $cell {
@@ -61,9 +61,6 @@ method ANSI-out {
     for @!rows -> $row {
         put $row.ANSI-fmt;
     }
-}
-
-method alternate-row-background {
 }
 
 =finish

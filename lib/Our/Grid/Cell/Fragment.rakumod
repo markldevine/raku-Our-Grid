@@ -4,7 +4,6 @@ use Our::Utilities;
 
 has ANSI-Colors $.foreground            is rw;
 has ANSI-Colors $.background            is rw;
-has ANSI-Colors $.row-background        is rw;
 has Bool        $.bold                  is rw;
 has Bool        $.faint                 is rw;
 has Bool        $.italic                is rw;
@@ -49,26 +48,40 @@ submethod TWEAK {
     }
 }
 
-method TEXT-fmt {
-    my $spacebefore     = '';
-    $spacebefore        = ' ' xx $!spacebefore  if $!spacebefore;
-    my $spaceafter      = '';
-    $spaceafter         = ' ' xx $!spaceafter   if $!spaceafter;
-    return sprintf("%s%s%s", $spacebefore, $!TEXT, $spaceafter,);
+method TEXT-fmt (*%options) {
+
+    my $spacebefore-pad = '';
+    my $spacebefore     = $!spacebefore;
+    $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
+    $spacebefore-pad    = ' ' xx $spacebefore;
+
+    my $spaceafter-pad  = '';
+    my $spaceafter      = $!spaceafter;
+    $spaceafter         = %options<spaceafter>          with %options<spaceafter>;
+    $spaceafter-pad     = ' ' xx $spaceafter;
+
+    return sprintf("%s%s%s", $spacebefore-pad, $!TEXT, $spaceafter-pad);
 }
 
 method ANSI-fmt (*%options) {
+
+    my $spacebefore-pad = '';
+    my $spacebefore     = $!spacebefore;
+    $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
+    $spacebefore-pad    = ' ' xx $spacebefore;
+
+    my $spaceafter-pad  = '';
+    my $spaceafter      = $!spaceafter;
+    $spaceafter         = %options<spaceafter>          with %options<spaceafter>;
+    $spaceafter-pad     = ' ' xx $spaceafter;
+
     my $foreground;
     $foreground         = $!foreground.value            if $!foreground;
     $foreground         = %options<foreground>.value    if %options<foreground>:exists;
     my $background;
-    if $!row-background {
-        $background     = $!row-background.value;
-    }
-    else {
-        $background     = $!background.value            if $!background;
-        $background     = %options<background>.value    if %options<background>:exists;
-    }
+    $background         = $!background.value            if $!background;
+    $background         = %options<background>.value    if %options<background>:exists;
+
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;
     my $faint           = $!faint;
@@ -92,10 +105,7 @@ method ANSI-fmt (*%options) {
     my @post-effects    = ();
     my @pre-colors      = ();
     my @post-colors     = ();
-    my $spacebefore     = '';
-    $spacebefore        = ' ' xx $!spacebefore  if $!spacebefore;
-    my $spaceafter      = '';
-    $spaceafter         = ' ' xx $!spaceafter   if $!spaceafter;
+
     if $foreground {
         @pre-colors.push("\o33[38;5;" ~ $foreground ~ 'm');
         @post-colors.push("\o33[39m");
@@ -103,8 +113,8 @@ method ANSI-fmt (*%options) {
     if $background {
         @pre-colors.push("\o33[48;5;" ~ $background ~ 'm');
         @post-colors.push("\o33[49m");
-        $spacebefore    = "\o33[48;5;" ~ $background ~ 'm' ~ $spacebefore ~ "\o33[49m" if $!spacebefore;
-        $spaceafter     = "\o33[48;5;" ~ $background ~ 'm' ~ $spaceafter  ~ "\o33[49m" if $!spaceafter;
+        $spacebefore    = "\o33[48;5;" ~ $background ~ 'm' ~ $spacebefore ~ "\o33[49m" with $!spacebefore;
+        $spaceafter     = "\o33[48;5;" ~ $background ~ 'm' ~ $spaceafter  ~ "\o33[49m" with $!spaceafter;
     }
     if $bold {
         @pre-effects.push("\o33[1m");
@@ -143,13 +153,13 @@ method ANSI-fmt (*%options) {
         @post-effects.push("\o33[24m");
     }
     return sprintf("%s%s%s%s%s%s%s",
-        $spacebefore,
+        $spacebefore-pad,
         @pre-effects.join,
         @pre-colors.join,
         $!TEXT,
         @post-colors.join,
         @post-effects.join,
-        $spaceafter,
+        $spaceafter-pad,
     );
 }
 

@@ -40,5 +40,6 @@ for ('a' .. 'e').flat -> $char {
 
 print '|'; .print for @fragments>>.TEXT-fmt; print "|\n";
 print '|'; .print for @fragments>>.ANSI-fmt; print "|\n";
+print '|'; .print for @fragments>>.ANSI-fmt(:0spacebefore, :0spaceafter); print "|\n";
 
 =finish
