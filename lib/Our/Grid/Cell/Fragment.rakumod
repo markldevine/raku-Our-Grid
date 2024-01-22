@@ -25,6 +25,7 @@ has Str:D       $.text                  is required;
 has Str         $.TEXT;
 
 submethod TWEAK {
+
     $!TEXT          = $!text;
     if $!text ~~ / ^ \d+ $ / {
         if $!superscript {
@@ -113,8 +114,8 @@ method ANSI-fmt (*%options) {
     if $background {
         @pre-colors.push("\o33[48;5;" ~ $background ~ 'm');
         @post-colors.push("\o33[49m");
-        $spacebefore    = "\o33[48;5;" ~ $background ~ 'm' ~ $spacebefore ~ "\o33[49m" with $!spacebefore;
-        $spaceafter     = "\o33[48;5;" ~ $background ~ 'm' ~ $spaceafter  ~ "\o33[49m" with $!spaceafter;
+        $spacebefore-pad = "\o33[48;5;" ~ $background ~ 'm' ~ $spacebefore-pad ~ "\o33[49m" if $spacebefore;
+        $spaceafter-pad  = "\o33[48;5;" ~ $background ~ 'm' ~ $spaceafter-pad  ~ "\o33[49m" if $spaceafter;
     }
     if $bold {
         @pre-effects.push("\o33[1m");
