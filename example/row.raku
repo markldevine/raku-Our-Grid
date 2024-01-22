@@ -26,14 +26,14 @@ my @fragments;
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('12th allupper'),          :1spaceafter,   :allupper);
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('13TH ALLLOWER'),          :1spaceafter,   :alllower);
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('title case'),             :1spaceafter,   :titlecase,             :foreground(blue));
-@fragments.push: Our::Grid::Cell::Fragment.new(:text('tITLE cASE lOWER CASE'),  :1spaceafter,   :titlecaselowercase,    :foreground(red));
+@fragments.push: Our::Grid::Cell::Fragment.new(:text('tITLE cASE lOWER CASE'),  :0spaceafter,   :titlecaselowercase,    :foreground(red));
 
 $r.add-cell(Our::Grid::Cell.new(:@fragments));
-$r.add-cell(Our::Grid::Cell.new(:text('Here is another...'),    :foreground(orange),    :1spacebefore, :1spaceafter));
-$r.add-cell(Our::Grid::Cell.new(:text('Here is number 3...'),   :foreground(blue),      :1spacebefore, :1spaceafter));
-$r.add-cell(Our::Grid::Cell.new(:text('Here is number 4...'),   :foreground(red),       :1spacebefore, :1spaceafter));
-$r.add-cell(Our::Grid::Cell.new(:text('Here is number 5...'),   :foreground(yellow),    :1spacebefore, :1spaceafter));
-$r.add-cell(Our::Grid::Cell.new(:text('Here is number 6...'),   :foreground(white),     :1spacebefore, :1spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('Here is another...'),    :foreground(orange),    :0spacebefore, :1spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('Here is number 3...'),   :foreground(blue),      :0spacebefore, :1spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('Here is number 4...'),   :foreground(red),       :0spacebefore, :1spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('Here is number 5...'),   :foreground(yellow),    :0spacebefore, :1spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('Here is number 6...'),   :foreground(white),     :0spacebefore, :1spaceafter));
 
 put $r.TEXT-fmt;
 put $r.ANSI-fmt;
