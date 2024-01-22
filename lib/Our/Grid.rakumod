@@ -51,6 +51,13 @@ method add-row (Our::Grid::Row:D $row!, *%options) {
 method build-grid {
 }
 
+# when outputting
+#   - length of the widest cell in each column
+#       - foreach column, what is the justification scheme
+#           - left justified, pad to the end of the cell
+#           - center justified, pad the cell beginning & end equally
+#           - right justified, pad from the beginning of the cell
+
 method TEXT-out {
     for @!rows -> $row {
         put $row.TEXT-fmt;

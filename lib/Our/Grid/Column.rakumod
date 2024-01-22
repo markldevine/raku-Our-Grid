@@ -1,12 +1,11 @@
-unit class Our::Grid::Row:api<1>:auth<Mark Devine (mark@markdevine.com)>;
+unit class Our::Grid::Column:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 use Our::Grid::Cell;
-#use Our::Utilities;
 
-has             @.cells;
-has             $.left-row-header;
-has             $.right-row-header;
-has             $.column-borders;
+has             $.column-number;
+has             @.cell;
+has             $.heading;
+has             $.horizontal-borders;
 
 method add-cell (Our::Grid::Cell:D $cell) {
     @!cells.push: $cell;

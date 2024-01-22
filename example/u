@@ -1,0 +1,34 @@
+#!/usr/bin/env raku
+
+my %super   = (
+                A   => "\x1D2C",
+                B   => "\x1D2E",
+                C   => "\x1D9C",
+                D   => "\x1D30",
+                E   => "\x1D31",
+                F   => "\x1DAB",
+                G   => "\x1D33",
+                H   => "\x1D34",
+                I   => "\x1D35",
+                J   => "\x1D36",
+                K   => "\x1D37",
+                L   => "\x1D38",
+                M   => "\x1D39",
+                N   => "\x1D3A",
+                O   => "\x1D3C",
+                P   => "\x1D3E",
+                Q   => "\x1D3F",
+                R   => "\x1D40",
+                S   => "\x1D41",
+                T   => "\x1D40",            # "\x1D42",
+                U   => "\x1D43",
+                V   => "\x1D44",
+                W   => "\x1D42",            # "\x1D45",
+                X   => "\x1D46",
+                Y   => "\x1D47",
+                Z   => "\x1D48",
+              );
+
+for %super.keys.sort -> $k {
+    put $k ~ "\t" ~ %super{$k};
+}

@@ -27,6 +27,8 @@ has Str         $.TEXT;
 submethod TWEAK {
 
     $!TEXT          = $!text;
+
+#   <digit>+
     if $!text ~~ / ^ \d+ $ / {
         if $!superscript {
             $!TEXT  = integer-to-superscript(+$!text);
@@ -34,22 +36,50 @@ submethod TWEAK {
         elsif $!subscript {
             $!TEXT  = integer-to-subscript(+$!text);
         }
+        else {
+            if $!bytes-unit-to-comma-bytes {
+                $!TEXT  = bytes-unit-to-bytes($!text, :commas);
+            }
+            elsif $!bytes-unit-to-bytes {
+                $!TEXT  = bytes-unit-to-bytes($!text);
+            }
+            elsif $!bytes-to-byte-unit {
+                $!TEXT  = bytes-to-bytes-unit($!text);
+            }
+            elsif $!metric-unit-to-comma-number {
+                $!TEXT  = bytes-to-bytes-unit($!text, :commas);
+            }
+            elsif $!metric-unit-to-number {
+                $!TEXT  = bytes-to-bytes-unit($!text);
+            }
+            elsif $!number-to-metric-unit {
+                $!TEXT  = number-to-metric-unit($!text);
+            }
+            elsif $!add-commas-to-integer {
+                $!TEXT  = add-commas-to-integer($!text);
+            }
+        }
     }
-    if $!allupper {
-        $!TEXT      = $!text.uc;
-    }
-    elsif $!alllower {
-        $!TEXT      = $!text.lc;
-    }
-    elsif $!titlecase {
-        $!TEXT      = $!text.tc;
-    }
-    elsif $!titlecaselowercase {
-        $!TEXT      = $!text.tclc;
+#   <alnum>+
+    else {
+        if $!allupper {
+            $!TEXT      = $!text.uc;
+        }
+        elsif $!alllower {
+            $!TEXT      = $!text.lc;
+        }
+        elsif $!titlecase {
+            $!TEXT      = $!text.tc;
+        }
+        elsif $!titlecaselowercase {
+            $!TEXT      = $!text.tclc;
+        }
     }
 }
 
 method TEXT-fmt (*%options) {
+
+### more...  Maybe convert numbers to Bytes or embed commas...
 
     my $spacebefore-pad = '';
     my $spacebefore     = $!spacebefore;
