@@ -28,6 +28,7 @@ has Bool        $.metric-unit-to-comma-number                   = False;
 has Bool        $.metric-unit-to-number                         = False;
 has Bool        $.number-to-metric-unit                         = False;
 has Bool        $.add-commas-to-digits                          = False;
+has Bool        $.date-time;
 has Mu:D        $.text                          is required;
 has Mu          $.TEXT;
 
@@ -39,12 +40,15 @@ submethod TWEAK {
 #put '$!metric-unit-to-comma-number  = <' ~ $!metric-unit-to-comma-number    ~ '>';
 #put '$!metric-unit-to-number        = <' ~ $!metric-unit-to-number          ~ '>';
 #put '$!number-to-metric-unit        = <' ~ $!number-to-metric-unit          ~ '>';
-put '$!add-commas-to-digits         = <' ~ $!add-commas-to-digits           ~ '>';
+#put '$!add-commas-to-digits         = <' ~ $!add-commas-to-digits           ~ '>';
 
     my $text        = $!text.trim;
     $!TEXT          = $text;
 
-    if $text ~~ / ^ (<[-+]>*) \s* (\d+) $ / {
+    if $!date-time && my $dt = string-to-date-time($text) {
+        $!TEXT      = $dt;
+    }
+    elsif $text ~~ / ^ (<[-+]>*) \s* (\d+) $ / {
         if $0.Str {
             $text   = $1.Str;
             $text   = $0.Str ~ $1.Str if $0.Str eq '-';
@@ -57,7 +61,6 @@ put '$!add-commas-to-digits         = <' ~ $!add-commas-to-digits           ~ '>
             $!TEXT  = integer-to-subscript(+$text);
         }
         elsif $!add-commas-to-digits {
-put 'adding commas to <' ~ $text ~ '>';
             $!TEXT  = add-commas-to-digits($text);
         }
     }
@@ -74,8 +77,7 @@ put 'adding commas to <' ~ $text ~ '>';
             $!TEXT  = number-to-metric-unit($text);
         }
         elsif $!add-commas-to-digits {
-put 'adding commas to <' ~ $text ~ '>';
-            $!TEXT  = add-commas-to-digits($text);      # coerce to Num...
+            $!TEXT  = add-commas-to-digits($text.Real);
         }
     }
     else {
