@@ -19,19 +19,10 @@ has Bool        $.allupper                          is rw;
 has Bool        $.alllower                          is rw;
 has Bool        $.titlecase                         is rw;
 has Bool        $.titlecaselowercase                is rw;
-has Int         $.spacebefore                       is rw       = 0;
-has Int         $.spaceafter                        is rw       = 0;
-#has Bool        $.bytes-unit-to-comma-round-bytes               = False;
-#has Bool        $.bytes-unit-to-round-bytes                     = False;
-#has Bool        $.bytes-unit-to-comma-bytes                     = False;
-#has Bool        $.bytes-unit-to-bytes                           = False;
-#has Bool        $.bytes-to-bytes-unit                           = False;
-#has Bool        $.metric-unit-to-comma-round-number             = False;
-#has Bool        $.metric-unit-to-round-number                   = False;
-#has Bool        $.metric-unit-to-comma-number                   = False;
-#has Bool        $.metric-unit-to-number                         = False;
-#has Bool        $.number-to-metric-unit                         = False;
-#has Bool        $.add-commas-to-digits                          = False;
+has uint        $.spacebefore                       is rw       = 0;
+has uint        $.spaceafter                        is rw       = 0;
+has uint        $.cell-spacebefore                  is rw       = 0;
+has uint        $.cell-spaceafter                   is rw       = 0;
 has Bool        $.bytes-unit-to-comma-round-bytes;
 has Bool        $.bytes-unit-to-round-bytes;
 has Bool        $.bytes-unit-to-comma-bytes;
@@ -133,13 +124,29 @@ submethod TWEAK {
 method TEXT-fmt (*%options) {
     my $spacebefore-pad = '';
     my $spacebefore     = $!spacebefore;
-    $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
-    $spacebefore-pad    = ' ' x $spacebefore;
+    if %options<spacebefore>:exists && %options<spacebefore> {
+        $spacebefore    = %options<spacebefore>;
+        if %options<spacebefore> > $!spacebefore {
+            $!cell-spacebefore -= %options<spacebefore> - $!spacebefore;
+        }
+        elsif %options<spacebefore> < $!spacebefore {
+            $!cell-spacebefore += %options<spacebefore> - $!spacebefore;
+        }
+    }
+    $spacebefore-pad    = ' ' x ($spacebefore + $!cell-spacebefore);
 
     my $spaceafter-pad  = '';
     my $spaceafter      = $!spaceafter;
-    $spaceafter         = %options<spaceafter>          with %options<spaceafter>;
-    $spaceafter-pad     = ' ' x $spaceafter;
+    if %options<spaceafter>:exists && %options<spaceafter> {
+        $spaceafter    = %options<spaceafter>;
+        if %options<spaceafter> > $!spaceafter {
+            $!cell-spaceafter -= %options<spaceafter> - $!spaceafter;
+        }
+        elsif %options<spaceafter> < $!spaceafter {
+            $!cell-spaceafter += %options<spaceafter> - $!spaceafter;
+        }
+    }
+    $spaceafter-pad     = ' ' x ($spaceafter + $!cell-spaceafter);
 
     return sprintf("%s%s%s", $spacebefore-pad, $!TEXT, $spaceafter-pad);
 }
@@ -147,7 +154,7 @@ method TEXT-fmt (*%options) {
 method ANSI-fmt (*%options) {
 
     my $spacebefore-pad = '';
-    my $spacebefore     = $!spacebefore;
+    my $spacebefore     = $!spacebefore + $!cell-spacebefore;
     $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
     $spacebefore-pad    = ' ' x $spacebefore;
 

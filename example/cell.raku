@@ -36,7 +36,7 @@ my @fragments;
 #$c .= new(:text('ANSI twice.........'), :foreground(red));                      put $c.ANSI; $c.ANSI-fmt(:foreground(yellow), :background(red), :italic); put $c.ANSI;
 
 $c .= new(
-            :text('sample text'),
+            :text('12345 7890 2345'),
             :allupper,
             :foreground(white),
             :background(gray244),
@@ -45,6 +45,8 @@ $c .= new(
          );
 put '|' ~ $c.TEXT ~ '|';
 
+=finish
+
 $c.justification = justify-center;
 $c.TEXT-fmt;
 put '|' ~ $c.TEXT ~ '|';
@@ -52,10 +54,5 @@ put '|' ~ $c.TEXT ~ '|';
 $c.justification = justify-right;
 $c.TEXT-fmt;
 put '|' ~ $c.TEXT ~ '|';
-
-=finish
-
-ddt $c;
-put '|' ~ $c.ANSI ~ '|';
 
 =finish
