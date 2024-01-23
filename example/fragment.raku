@@ -78,30 +78,30 @@ my @fragments;
 #                        :1spaceafter,
 #                        :bytes-unit-to-comma-bytes,
 #                    );
+@fragments.push:    Our::Grid::Cell::Fragment.new(
+                        :text(22222.2),
+                        :foreground(black),
+                        :background(gray254),
+                        :1spacebefore,
+                        :1spaceafter,
+                        :number-to-metric-unit,
+                    );
 #@fragments.push:    Our::Grid::Cell::Fragment.new(
-#                        :1234567890text,
+#                        :text('22.2222 K'),
 #                        :foreground(black),
 #                        :background(gray254),
 #                        :1spacebefore,
 #                        :1spaceafter,
-#                        :number-to-metric-unit,
+#                        :metric-unit-to-number,
 #                    );
-@fragments.push:    Our::Grid::Cell::Fragment.new(
-                        :text('22.2222 K'),
-                        :foreground(black),
-                        :background(gray254),
-                        :1spacebefore,
-                        :1spaceafter,
-                        :metric-unit-to-number,
-                    );
-@fragments.push:    Our::Grid::Cell::Fragment.new(
-                        :text('22.2222 K'),
-                        :foreground(black),
-                        :background(gray254),
-                        :1spacebefore,
-                        :1spaceafter,
-                        :metric-unit-to-comma-number,
-                    );
+#@fragments.push:    Our::Grid::Cell::Fragment.new(
+#                        :text('22.2222 K'),
+#                        :foreground(black),
+#                        :background(gray254),
+#                        :1spacebefore,
+#                        :1spaceafter,
+#                        :metric-unit-to-comma-number,
+#                    );
 
 print '|'; .print for @fragments>>.TEXT-fmt; print "|\n";
 #print '|'; .print for @fragments>>.ANSI-fmt; print "|\n";

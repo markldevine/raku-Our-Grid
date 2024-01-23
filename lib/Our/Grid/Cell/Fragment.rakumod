@@ -67,7 +67,7 @@ put '$!metric-unit-to-comma-number  = <' ~ $!metric-unit-to-comma-number    ~ '>
             $!TEXT  = add-commas-to-digits($text);
         }
         elsif $!number-to-metric-unit {
-            $!TEXT  = number-to-metric-unit($text.Num);
+            $!TEXT  = number-to-metric-unit($text.Int);
         }
         elsif $!bytes-to-bytes-unit {
             $!TEXT  = bytes-to-bytes-unit($text.Int);
@@ -81,6 +81,9 @@ put '$!metric-unit-to-comma-number  = <' ~ $!metric-unit-to-comma-number    ~ '>
         }
         if $!add-commas-to-digits {
             $!TEXT  = add-commas-to-digits($text.Real);
+        }
+        elsif $!number-to-metric-unit {
+            $!TEXT  = number-to-metric-unit($text.Int);
         }
     }
     else {
