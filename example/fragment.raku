@@ -35,6 +35,7 @@ my @fragments;
 #                        :text('01/23/2024 7:50'),
 #                        :foreground(white),
 #                        :background(gray244),
+#                        :1spacebefore,
 #                        :1spaceafter,
 #                        :date-time,
 #                    );
@@ -49,16 +50,9 @@ my @fragments;
 #                        :text("-12345.67890"),
 #                        :foreground(white),
 #                        :background(gray244),
-#                        :0spaceafter,
-#                        :add-commas-to-digits,
-#                    );
-#@fragments.push:    Our::Grid::Cell::Fragment.new(
-#                        :1234567890text,
-#                        :foreground(black),
-#                        :background(gray254),
 #                        :1spacebefore,
 #                        :1spaceafter,
-#                        :number-to-metric-unit,
+#                        :add-commas-to-digits,
 #                    );
 #@fragments.push:    Our::Grid::Cell::Fragment.new(
 #                        :1234567890text,
@@ -69,14 +63,6 @@ my @fragments;
 #                        :bytes-to-bytes-unit,
 #                    );
 #@fragments.push:    Our::Grid::Cell::Fragment.new(
-#                        :1234567890text,
-#                        :foreground(white),
-#                        :background(gray244),
-#                        :1spacebefore,
-#                        :1spaceafter,
-#                        :number-to-metric-unit,
-#                    );
-#@fragments.push:    Our::Grid::Cell::Fragment.new(
 #                        :text('11.111 M'),
 #                        :foreground(white),
 #                        :background(gray244),
@@ -85,16 +71,40 @@ my @fragments;
 #                        :bytes-unit-to-bytes,
 #                    );
 #@fragments.push:    Our::Grid::Cell::Fragment.new(
-#                        :text('22.222 M'),
+#                        :text('11.111 M'),
 #                        :foreground(white),
 #                        :background(gray244),
 #                        :1spacebefore,
 #                        :1spaceafter,
 #                        :bytes-unit-to-comma-bytes,
 #                    );
+#@fragments.push:    Our::Grid::Cell::Fragment.new(
+#                        :1234567890text,
+#                        :foreground(black),
+#                        :background(gray254),
+#                        :1spacebefore,
+#                        :1spaceafter,
+#                        :number-to-metric-unit,
+#                    );
+@fragments.push:    Our::Grid::Cell::Fragment.new(
+                        :text('22.2222 K'),
+                        :foreground(black),
+                        :background(gray254),
+                        :1spacebefore,
+                        :1spaceafter,
+                        :metric-unit-to-number,
+                    );
+@fragments.push:    Our::Grid::Cell::Fragment.new(
+                        :text('22.2222 K'),
+                        :foreground(black),
+                        :background(gray254),
+                        :1spacebefore,
+                        :1spaceafter,
+                        :metric-unit-to-comma-number,
+                    );
 
 print '|'; .print for @fragments>>.TEXT-fmt; print "|\n";
-print '|'; .print for @fragments>>.ANSI-fmt; print "|\n";
+#print '|'; .print for @fragments>>.ANSI-fmt; print "|\n";
 #print '|'; .print for @fragments>>.ANSI-fmt(:0spacebefore, :0spaceafter); print "|\n";
 
 =finish
