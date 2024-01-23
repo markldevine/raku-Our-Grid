@@ -53,14 +53,14 @@ my @fragments;
 #                        :1spaceafter,
 #                        :add-commas-to-digits,
 #                    );
-@fragments.push:    Our::Grid::Cell::Fragment.new(
-                        :text(" -12345.67890"),
-                        :foreground(white),
-                        :background(gray244),
-                        :1spacebefore,
-                        :1spaceafter,
-                        :add-commas-to-digits,
-                    );
+#@fragments.push:    Our::Grid::Cell::Fragment.new(
+#                        :text(" + 12345.67890"),
+#                        :foreground(white),
+#                        :background(gray244),
+#                        :1spacebefore,
+#                        :1spaceafter,
+#                        :add-commas-to-digits,
+#                    );
 #@fragments.push:    Our::Grid::Cell::Fragment.new(
 #                        :1234567890text,
 #                        :foreground(white),
@@ -69,14 +69,14 @@ my @fragments;
 #                        :1spaceafter,
 #                        :bytes-to-bytes-unit,
 #                    );
-#@fragments.push:    Our::Grid::Cell::Fragment.new(
-#                        :text('11.111 M'),
-#                        :foreground(white),
-#                        :background(gray244),
-#                        :1spacebefore,
-#                        :1spaceafter,
-#                        :bytes-unit-to-bytes,
-#                    );
+@fragments.push:    Our::Grid::Cell::Fragment.new(
+                        :text('11.111 M'),
+                        :foreground(white),
+                        :background(gray244),
+                        :1spacebefore,
+                        :1spaceafter,
+                        :bytes-unit-to-bytes,
+                    );
 #@fragments.push:    Our::Grid::Cell::Fragment.new(
 #                        :text('11.111 M'),
 #                        :foreground(white),

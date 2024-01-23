@@ -2,48 +2,41 @@ unit class Our::Grid::Cell::Fragment:api<1>:auth<Mark Devine (mark@markdevine.co
 
 use Our::Utilities;
 
-has ANSI-Colors $.foreground                    is rw;
-has ANSI-Colors $.background                    is rw;
-has Bool        $.bold                          is rw;
-has Bool        $.faint                         is rw;
-has Bool        $.italic                        is rw;
-has Bool        $.underline                     is rw;
-has Bool        $.blink                         is rw;
-has Bool        $.reverse                       is rw;
-has Bool        $.hide                          is rw;
-has Bool        $.strikethrough                 is rw;
-has Bool        $.doubleunderline               is rw;
-has Bool        $.superscript                   is rw;
-has Bool        $.subscript                     is rw;
-has Bool        $.allupper                      is rw;
-has Bool        $.alllower                      is rw;
-has Bool        $.titlecase                     is rw;
-has Bool        $.titlecaselowercase            is rw;
-has Int         $.spacebefore                   is rw           = 0;
-has Int         $.spaceafter                    is rw           = 0;
+has ANSI-Colors $.foreground                        is rw;
+has ANSI-Colors $.background                        is rw;
+has Bool        $.bold                              is rw;
+has Bool        $.faint                             is rw;
+has Bool        $.italic                            is rw;
+has Bool        $.underline                         is rw;
+has Bool        $.blink                             is rw;
+has Bool        $.reverse                           is rw;
+has Bool        $.hide                              is rw;
+has Bool        $.strikethrough                     is rw;
+has Bool        $.doubleunderline                   is rw;
+has Bool        $.superscript                       is rw;
+has Bool        $.subscript                         is rw;
+has Bool        $.allupper                          is rw;
+has Bool        $.alllower                          is rw;
+has Bool        $.titlecase                         is rw;
+has Bool        $.titlecaselowercase                is rw;
+has Int         $.spacebefore                       is rw       = 0;
+has Int         $.spaceafter                        is rw       = 0;
+has Bool        $.bytes-unit-to-comma-round-bytes               = False;
+has Bool        $.bytes-unit-to-round-bytes                     = False;
 has Bool        $.bytes-unit-to-comma-bytes                     = False;
 has Bool        $.bytes-unit-to-bytes                           = False;
 has Bool        $.bytes-to-bytes-unit                           = False;
+has Bool        $.metric-unit-to-comma-round-number             = False;
+has Bool        $.metric-unit-to-round-number                   = False;
 has Bool        $.metric-unit-to-comma-number                   = False;
 has Bool        $.metric-unit-to-number                         = False;
 has Bool        $.number-to-metric-unit                         = False;
 has Bool        $.add-commas-to-digits                          = False;
 has Bool        $.date-time;
-has Mu:D        $.text                          is required;
+has Mu:D        $.text                              is required;
 has Mu          $.TEXT;
 
 submethod TWEAK {
-
-#put '$!date-time                    = <' ~ $!date-time                      ~ '>'   if $!date-time;
-#put '$!add-commas-to-digits         = <' ~ $!add-commas-to-digits           ~ '>'   if $!add-commas-to-digits;
-
-#put '$!bytes-to-bytes-unit          = <' ~ $!bytes-to-bytes-unit            ~ '>'   if $!bytes-to-bytes-unit;
-#put '$!bytes-unit-to-bytes          = <' ~ $!bytes-unit-to-bytes            ~ '>'   if $!bytes-unit-to-bytes;
-#put '$!bytes-unit-to-comma-bytes    = <' ~ $!bytes-unit-to-comma-bytes      ~ '>'   if $!bytes-unit-to-comma-bytes;
-
-#put '$!number-to-metric-unit        = <' ~ $!number-to-metric-unit          ~ '>'   if $!number-to-metric-unit;
-#put '$!metric-unit-to-number        = <' ~ $!metric-unit-to-number          ~ '>'   if $!metric-unit-to-number;
-#put '$!metric-unit-to-comma-number  = <' ~ $!metric-unit-to-comma-number    ~ '>'   if $!metric-unit-to-comma-number;
 
     my $text        = $!text.trim;
     $!TEXT          = $text;
@@ -99,14 +92,26 @@ submethod TWEAK {
         elsif $!titlecaselowercase {
             $!TEXT      = $text.tclc;
         }
-        if $!bytes-unit-to-comma-bytes {
+        if $!bytes-unit-to-round-comma-bytes {
+            $!TEXT  = bytes-unit-to-bytes($text, :commas, :round);
+        }
+        elsif $!bytes-unit-to-comma-bytes {
             $!TEXT  = bytes-unit-to-bytes($text, :commas);
+        }
+        elsif $!bytes-unit-to-round-bytes {
+            $!TEXT  = bytes-unit-to-bytes($text, :round);
         }
         elsif $!bytes-unit-to-bytes {
             $!TEXT  = bytes-unit-to-bytes($text);
         }
+        elsif $!metric-unit-to-comma-round-number {
+            $!TEXT  = number-metric-unit-to-number($text, :commas, :round);
+        }
         elsif $!metric-unit-to-comma-number {
             $!TEXT  = number-metric-unit-to-number($text, :commas);
+        }
+        elsif $!metric-unit-to-round-number {
+            $!TEXT  = number-metric-unit-to-number($text, :round);
         }
         elsif $!metric-unit-to-number {
             $!TEXT  = number-metric-unit-to-number($text);
