@@ -37,9 +37,7 @@ submethod BUILD(:$text,
     $!row           = $row              with $row;
     $!col           = $col              with $col;
     $!width         = $width            with $width;
-put $!width;
     $!justification = $justification    with $justification;
-put $!justification;
     die "Must send both 'row' & 'col' together" if any($!row.so, $!col.so) && ! all($!row.so, $!col.so);
     %!options       = %options;
     $!fragments     = $fragments with $fragments;
@@ -49,22 +47,6 @@ put $!justification;
 submethod TWEAK {
     self.TEXT-fmt();
     self.ANSI-fmt();
-}
-
-method !justify {
-    my $text-chars      = $!TEXT.chars + $!fragments[0].spacebefore + $!fragments[*-1].spaceafter;
-    die 'Unable to fit cell in ' ~ $!width ~ ' character wide cell!' if $!width < $text-chars;
-    return              if $!width == $text-chars;
-    if $!justification ~~ justify-left {
-        $!fragments[*-1].cell-spaceafter = $!width - $text-chars;
-    }
-    elsif $!justification ~~ justify-center {
-        $!fragments[0].cell-spacebefore = ($!width - $text-chars) div 2;
-        $!fragments[*-1].cell-spaceafter = $!width - $text-chars - $!fragments[0].cell-spacebefore;
-    }
-    elsif $!justification ~~ justify-right {
-        $!fragments[0].cell-spacebefore = $!width - $text-chars;
-    }
 }
 
 method TEXT-fmt (*%options) {
