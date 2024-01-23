@@ -3,6 +3,12 @@ unit class Our::Grid::Cell:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 use Our::Grid::Cell::Fragment;
 use Our::Utilities;
 
+enum Justification export ( 
+    left    => 1, 
+    center  => 2, 
+    right   => 3, 
+);
+
 has         $.fragments;
 has         $.ANSI              is built(False);
 has         $.text;
@@ -10,9 +16,11 @@ has         $.TEXT              is built(False);
 has Bool    $.justify-left      is rw;
 has Bool    $.justify-center    is rw;
 has Bool    $.justify-right     is rw;
-has uint    $.row               is rw   = 0;
-has uint    $.col               is rw   = 0;
-has uint    $.visibility        is rw   = 100;      # % of mandatory visibility upon display
+has uint    $.my-row            is rw               = 0;        # self-aware coordinates
+has uint    $.my-col            is rw               = 0;        # self-aware coordinates
+has uint    $.row               is rw               = 0;
+has uint    $.col               is rw               = 0;
+has uint    $.visibility        is rw               = 100;      # % of mandatory visibility upon display
 has uint    $.width             is rw;
 has         %.options;
 
@@ -39,7 +47,7 @@ method ANSI-fmt (*%options) {
     my %opts;
     %opts                   = %options if %options.elems;
     $!ANSI                  = Nil;
-    $!ANSI                  = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;
+#%%%$!ANSI                  = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;                   #%%% uncomment when implementing direct screen addressing
     for $!fragments.list -> $fragment {
         $!ANSI             ~= $fragment.ANSI-fmt(|%opts);
     }

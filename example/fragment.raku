@@ -127,7 +127,10 @@ my @fragments;
 #                    );
 
 print '|'; .print for @fragments>>.TEXT-fmt; print "|\n";
-#print '|'; .print for @fragments>>.ANSI-fmt; print "|\n";
-#print '|'; .print for @fragments>>.ANSI-fmt(:0spacebefore, :0spaceafter); print "|\n";
+print '|'; .print for @fragments>>.ANSI-fmt; print "|\n";
+for ^25 {
+    print '|'; .print for @fragments>>.ANSI-fmt(:foreground(black), :background(gray254)); print "|\n";
+    print '|'; .print for @fragments>>.ANSI-fmt(                    :background(gray244)); print "|\n";
+}
 
 =finish
