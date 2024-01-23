@@ -2,94 +2,120 @@ unit class Our::Grid::Cell::Fragment:api<1>:auth<Mark Devine (mark@markdevine.co
 
 use Our::Utilities;
 
-has ANSI-Colors $.foreground            is rw;
-has ANSI-Colors $.background            is rw;
-has Bool        $.bold                  is rw;
-has Bool        $.faint                 is rw;
-has Bool        $.italic                is rw;
-has Bool        $.underline             is rw;
-has Bool        $.blink                 is rw;
-has Bool        $.reverse               is rw;
-has Bool        $.hide                  is rw;
-has Bool        $.strikethrough         is rw;
-has Bool        $.doubleunderline       is rw;
-has Bool        $.superscript           is rw;
-has Bool        $.subscript             is rw;
-has Bool        $.allupper              is rw;
-has Bool        $.alllower              is rw;
-has Bool        $.titlecase             is rw;
-has Bool        $.titlecaselowercase    is rw;
-has Int         $.spacebefore           is rw   = 0;
-has Int         $.spaceafter            is rw   = 0;
-has Str:D       $.text                  is required;
-has Str         $.TEXT;
+has ANSI-Colors $.foreground                    is rw;
+has ANSI-Colors $.background                    is rw;
+has Bool        $.bold                          is rw;
+has Bool        $.faint                         is rw;
+has Bool        $.italic                        is rw;
+has Bool        $.underline                     is rw;
+has Bool        $.blink                         is rw;
+has Bool        $.reverse                       is rw;
+has Bool        $.hide                          is rw;
+has Bool        $.strikethrough                 is rw;
+has Bool        $.doubleunderline               is rw;
+has Bool        $.superscript                   is rw;
+has Bool        $.subscript                     is rw;
+has Bool        $.allupper                      is rw;
+has Bool        $.alllower                      is rw;
+has Bool        $.titlecase                     is rw;
+has Bool        $.titlecaselowercase            is rw;
+has Int         $.spacebefore                   is rw           = 0;
+has Int         $.spaceafter                    is rw           = 0;
+has Bool        $.bytes-unit-to-comma-bytes                     = False;
+has Bool        $.bytes-unit-to-bytes                           = False;
+has Bool        $.bytes-to-bytes-unit                           = False;
+has Bool        $.metric-unit-to-comma-number                   = False;
+has Bool        $.metric-unit-to-number                         = False;
+has Bool        $.number-to-metric-unit                         = False;
+has Bool        $.add-commas-to-digits                          = False;
+has Mu:D        $.text                          is required;
+has Mu          $.TEXT;
 
 submethod TWEAK {
 
-    $!TEXT          = $!text;
+#put '$!bytes-unit-to-comma-bytes    = <' ~ $!bytes-unit-to-comma-bytes      ~ '>';
+#put '$!bytes-unit-to-bytes          = <' ~ $!bytes-unit-to-bytes            ~ '>';
+#put '$!bytes-to-bytes-unit          = <' ~ $!bytes-to-bytes-unit            ~ '>';
+#put '$!metric-unit-to-comma-number  = <' ~ $!metric-unit-to-comma-number    ~ '>';
+#put '$!metric-unit-to-number        = <' ~ $!metric-unit-to-number          ~ '>';
+#put '$!number-to-metric-unit        = <' ~ $!number-to-metric-unit          ~ '>';
+put '$!add-commas-to-digits         = <' ~ $!add-commas-to-digits           ~ '>';
 
-#   <digit>+
-    if $!text ~~ / ^ \d+ $ / {
+    my $text        = $!text.trim;
+    $!TEXT          = $text;
+
+    if $text ~~ / ^ (<[-+]>*) \s* (\d+) $ / {
+        if $0.Str {
+            $text   = $1.Str;
+            $text   = $0.Str ~ $1.Str if $0.Str eq '-';
+            $!TEXT  = $text;
+        }
         if $!superscript {
-            $!TEXT  = integer-to-superscript(+$!text);
+            $!TEXT  = integer-to-superscript(+$text);
         }
         elsif $!subscript {
-            $!TEXT  = integer-to-subscript(+$!text);
+            $!TEXT  = integer-to-subscript(+$text);
         }
-        else {
-            if $!bytes-unit-to-comma-bytes {
-                $!TEXT  = bytes-unit-to-bytes($!text, :commas);
-            }
-            elsif $!bytes-unit-to-bytes {
-                $!TEXT  = bytes-unit-to-bytes($!text);
-            }
-            elsif $!bytes-to-byte-unit {
-                $!TEXT  = bytes-to-bytes-unit($!text);
-            }
-            elsif $!metric-unit-to-comma-number {
-                $!TEXT  = bytes-to-bytes-unit($!text, :commas);
-            }
-            elsif $!metric-unit-to-number {
-                $!TEXT  = bytes-to-bytes-unit($!text);
-            }
-            elsif $!number-to-metric-unit {
-                $!TEXT  = number-to-metric-unit($!text);
-            }
-            elsif $!add-commas-to-integer {
-                $!TEXT  = add-commas-to-integer($!text);
-            }
+        elsif $!add-commas-to-digits {
+put 'adding commas to <' ~ $text ~ '>';
+            $!TEXT  = add-commas-to-digits($text);
         }
     }
-#   <alnum>+
+    elsif $text ~~ / ^ (<[-+]>)* \s* (\d+ '.' \d+) $ / {
+        if $0.Str {
+            $text   = $1.Str;
+            $text   = $0.Str ~ $1.Str if $0.Str eq '-';
+            $!TEXT  = $text;
+        }
+        if $!bytes-to-bytes-unit {
+            $!TEXT  = bytes-to-bytes-unit($text);
+        }
+        elsif $!number-to-metric-unit {
+            $!TEXT  = number-to-metric-unit($text);
+        }
+        elsif $!add-commas-to-digits {
+put 'adding commas to <' ~ $text ~ '>';
+            $!TEXT  = add-commas-to-digits($text);      # coerce to Num...
+        }
+    }
     else {
         if $!allupper {
-            $!TEXT      = $!text.uc;
+            $!TEXT      = $text.uc;
         }
         elsif $!alllower {
-            $!TEXT      = $!text.lc;
+            $!TEXT      = $text.lc;
         }
         elsif $!titlecase {
-            $!TEXT      = $!text.tc;
+            $!TEXT      = $text.tc;
         }
         elsif $!titlecaselowercase {
-            $!TEXT      = $!text.tclc;
+            $!TEXT      = $text.tclc;
+        }
+        if $!bytes-unit-to-comma-bytes {
+            $!TEXT  = bytes-unit-to-bytes($text, :commas);
+        }
+        elsif $!bytes-unit-to-bytes {
+            $!TEXT  = bytes-unit-to-bytes($text);
+        }
+        elsif $!metric-unit-to-comma-number {
+            $!TEXT  = bytes-to-bytes-unit($text, :commas);
+        }
+        elsif $!metric-unit-to-number {
+            $!TEXT  = bytes-to-bytes-unit($text);
         }
     }
 }
 
 method TEXT-fmt (*%options) {
-
-### more...  Maybe convert numbers to Bytes or embed commas...
-
     my $spacebefore-pad = '';
     my $spacebefore     = $!spacebefore;
     $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
-    $spacebefore-pad    = ' ' xx $spacebefore;
+    $spacebefore-pad    = ' ' x $spacebefore;
 
     my $spaceafter-pad  = '';
     my $spaceafter      = $!spaceafter;
     $spaceafter         = %options<spaceafter>          with %options<spaceafter>;
-    $spaceafter-pad     = ' ' xx $spaceafter;
+    $spaceafter-pad     = ' ' x $spaceafter;
 
     return sprintf("%s%s%s", $spacebefore-pad, $!TEXT, $spaceafter-pad);
 }
@@ -99,12 +125,12 @@ method ANSI-fmt (*%options) {
     my $spacebefore-pad = '';
     my $spacebefore     = $!spacebefore;
     $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
-    $spacebefore-pad    = ' ' xx $spacebefore;
+    $spacebefore-pad    = ' ' x $spacebefore;
 
     my $spaceafter-pad  = '';
     my $spaceafter      = $!spaceafter;
     $spaceafter         = %options<spaceafter>          with %options<spaceafter>;
-    $spaceafter-pad     = ' ' xx $spaceafter;
+    $spaceafter-pad     = ' ' x $spaceafter;
 
     my $foreground;
     $foreground         = $!foreground.value            if $!foreground;
