@@ -64,7 +64,7 @@ submethod TWEAK {
             $!TEXT  = integer-to-subscript(+$text);
         }
         elsif $!add-commas-to-digits {
-            $!TEXT  = add-commas-to-digits($text);
+            $!TEXT  = add-commas-to-digits($text.Int);
         }
         elsif $!number-to-metric-unit {
             $!TEXT  = number-to-metric-unit($text.Int);
@@ -80,7 +80,7 @@ submethod TWEAK {
             $!TEXT  = $text;
         }
         if $!add-commas-to-digits {
-            $!TEXT  = add-commas-to-digits($text.Real);
+            $!TEXT  = add-commas-to-digits($text);
         }
         elsif $!number-to-metric-unit {
             $!TEXT  = number-to-metric-unit($text.Int);
