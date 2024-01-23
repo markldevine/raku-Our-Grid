@@ -92,7 +92,7 @@ submethod TWEAK {
         elsif $!titlecaselowercase {
             $!TEXT      = $text.tclc;
         }
-        if $!bytes-unit-to-round-comma-bytes {
+        if $!bytes-unit-to-comma-round-bytes {
             $!TEXT  = bytes-unit-to-bytes($text, :commas, :round);
         }
         elsif $!bytes-unit-to-comma-bytes {

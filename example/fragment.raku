@@ -77,14 +77,30 @@ my @fragments;
                         :1spaceafter,
                         :bytes-unit-to-bytes,
                     );
-#@fragments.push:    Our::Grid::Cell::Fragment.new(
-#                        :text('11.111 M'),
-#                        :foreground(white),
-#                        :background(gray244),
-#                        :1spacebefore,
-#                        :1spaceafter,
-#                        :bytes-unit-to-comma-bytes,
-#                    );
+@fragments.push:    Our::Grid::Cell::Fragment.new(
+                        :text('11.111 M'),
+                        :foreground(white),
+                        :background(gray244),
+                        :1spacebefore,
+                        :1spaceafter,
+                        :bytes-unit-to-comma-bytes,
+                    );
+@fragments.push:    Our::Grid::Cell::Fragment.new(
+                        :text('11.111 M'),
+                        :foreground(white),
+                        :background(gray244),
+                        :1spacebefore,
+                        :1spaceafter,
+                        :bytes-unit-to-round-bytes,
+                    );
+@fragments.push:    Our::Grid::Cell::Fragment.new(
+                        :text('11.111 M'),
+                        :foreground(white),
+                        :background(gray244),
+                        :1spacebefore,
+                        :1spaceafter,
+                        :bytes-unit-to-comma-round-bytes,
+                    );
 #@fragments.push:    Our::Grid::Cell::Fragment.new(
 #                        :text(22222.2),
 #                        :foreground(black),
