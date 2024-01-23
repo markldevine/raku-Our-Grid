@@ -5,6 +5,7 @@ use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 use Our::Grid::Cell::Fragment;
 use Our::Grid::Cell;
 use Our::Utilities;
+use Data::Dump::Tree;
 
 my Our::Grid::Cell $c;
 
@@ -26,12 +27,35 @@ my @fragments;
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('13TH ALLLOWER'),          :0spaceafter,   :alllower);
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('title case'),             :0spaceafter,   :titlecase,             :foreground(blue));
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('tITLE cASE lOWER CASE'),  :0spaceafter,   :titlecaselowercase,    :foreground(red));
-$c .= new(:@fragments);                                                         put $c.TEXT; put $c.ANSI;
-$c .= new(:text('Here is another...'), :foreground(orange));                    put $c.TEXT; put $c.ANSI;
-$c .= new(:text('Here is number 3...'), :foreground(blue));                     put $c.TEXT; put $c.ANSI;
-$c .= new(:text('Here is number 4...'), :foreground(red));                      put $c.TEXT; put $c.ANSI;
-$c .= new(:text('Here is number 5...'), :foreground(yellow));                   put $c.TEXT; put $c.ANSI;
-$c .= new(:text('Here is number 6...'), :foreground(white));                    put $c.TEXT; put $c.ANSI;
-$c .= new(:text('ANSI twice.........'), :foreground(red));                      put $c.ANSI; $c.ANSI-fmt(:foreground(yellow), :background(red), :italic); put $c.ANSI;
+#$c .= new(:@fragments);                                                         put $c.TEXT; #put $c.ANSI;
+#$c .= new(:text('Here is number 1...'), :foreground(orange));                   put '|' ~ $c.TEXT ~ '|'; #put $c.ANSI;
+#$c .= new(:text('Here is number 2...'), :foreground(blue));                     put '|' ~ $c.TEXT ~ '|'; #put $c.ANSI;
+#$c .= new(:text('Here is number 3...'), :foreground(red));                      put '|' ~ $c.TEXT ~ '|'; #put $c.ANSI;
+#$c .= new(:text('Here is number 4...'), :foreground(yellow));                   put '|' ~ $c.TEXT ~ '|'; #put $c.ANSI;
+#$c .= new(:text('Here is number 5...'), :foreground(white));                    put '|' ~ $c.TEXT ~ '|'; #put $c.ANSI;
+#$c .= new(:text('ANSI twice.........'), :foreground(red));                      put $c.ANSI; $c.ANSI-fmt(:foreground(yellow), :background(red), :italic); put $c.ANSI;
+
+$c .= new(
+            :text('sample text'),
+            :allupper,
+            :foreground(white),
+            :background(gray244),
+            :18width,
+            :justification(justify-left),
+         );
+put '|' ~ $c.TEXT ~ '|';
+
+$c.justification = justify-center;
+$c.TEXT-fmt;
+put '|' ~ $c.TEXT ~ '|';
+
+$c.justification = justify-right;
+$c.TEXT-fmt;
+put '|' ~ $c.TEXT ~ '|';
+
+=finish
+
+ddt $c;
+put '|' ~ $c.ANSI ~ '|';
 
 =finish

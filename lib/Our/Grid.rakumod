@@ -1,6 +1,7 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 use Our::Grid::Row;
+use Our::Grid::Cell;
 use Our::Utilities;
 
 has         $.header;

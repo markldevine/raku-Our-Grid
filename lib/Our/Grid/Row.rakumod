@@ -7,35 +7,30 @@ has         @.cells;
 has uint    $.my-row            is rw;      # self-aware position
 has         $.left-row-header;
 has         $.right-row-header;
-has         $.column-borders;
+has         $.column-borders    is rw;
 
 method add-cell (Our::Grid::Cell:D $cell) {
     @!cells.push: $cell;
 }
 
-method TEXT-fmt {
+method TEXT-fmt (*%options) {
     my $row;
-    for self.cells -> $cell {
-        $row ~= $cell.TEXT;
-    }
-    return $row;
-}
-
-multi method ANSI-fmt {
-    my $row;
-    for @!cells -> $cell {
-        $row ~= $cell.ANSI;
-    }
-    return $row;
-}
-
-multi method ANSI-fmt (*%options where $_.elems) {
     my %opts;
-    %opts                   = %options if %options.elems;
+    %opts       = %options if %options.elems;
+    for self.cells -> $cell {
+        $cell.TEXT-fmt(|%opts);
+        $row   ~= $cell.TEXT;
+    }
+    return $row;
+}
+
+method ANSI-fmt (*%options) {
+    my %opts;
+    %opts       = %options if %options.elems;
     my $row;
     for @!cells -> $cell {
         $cell.ANSI-fmt(|%opts);
-        $row ~= $cell.ANSI;
+        $row   ~= $cell.ANSI;
     }
     return $row;
 }
