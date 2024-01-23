@@ -34,16 +34,16 @@ has Mu          $.TEXT;
 
 submethod TWEAK {
 
-put '$!date-time                    = <' ~ $!date-time                      ~ '>'   if $!date-time;
-put '$!add-commas-to-digits         = <' ~ $!add-commas-to-digits           ~ '>'   if $!add-commas-to-digits;
+#put '$!date-time                    = <' ~ $!date-time                      ~ '>'   if $!date-time;
+#put '$!add-commas-to-digits         = <' ~ $!add-commas-to-digits           ~ '>'   if $!add-commas-to-digits;
 
-put '$!bytes-to-bytes-unit          = <' ~ $!bytes-to-bytes-unit            ~ '>'   if $!bytes-to-bytes-unit;
-put '$!bytes-unit-to-bytes          = <' ~ $!bytes-unit-to-bytes            ~ '>'   if $!bytes-unit-to-bytes;
-put '$!bytes-unit-to-comma-bytes    = <' ~ $!bytes-unit-to-comma-bytes      ~ '>'   if $!bytes-unit-to-comma-bytes;
+#put '$!bytes-to-bytes-unit          = <' ~ $!bytes-to-bytes-unit            ~ '>'   if $!bytes-to-bytes-unit;
+#put '$!bytes-unit-to-bytes          = <' ~ $!bytes-unit-to-bytes            ~ '>'   if $!bytes-unit-to-bytes;
+#put '$!bytes-unit-to-comma-bytes    = <' ~ $!bytes-unit-to-comma-bytes      ~ '>'   if $!bytes-unit-to-comma-bytes;
 
-put '$!number-to-metric-unit        = <' ~ $!number-to-metric-unit          ~ '>'   if $!number-to-metric-unit;
-put '$!metric-unit-to-number        = <' ~ $!metric-unit-to-number          ~ '>'   if $!metric-unit-to-number;
-put '$!metric-unit-to-comma-number  = <' ~ $!metric-unit-to-comma-number    ~ '>'   if $!metric-unit-to-comma-number;
+#put '$!number-to-metric-unit        = <' ~ $!number-to-metric-unit          ~ '>'   if $!number-to-metric-unit;
+#put '$!metric-unit-to-number        = <' ~ $!metric-unit-to-number          ~ '>'   if $!metric-unit-to-number;
+#put '$!metric-unit-to-comma-number  = <' ~ $!metric-unit-to-comma-number    ~ '>'   if $!metric-unit-to-comma-number;
 
     my $text        = $!text.trim;
     $!TEXT          = $text;
