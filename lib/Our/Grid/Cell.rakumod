@@ -59,7 +59,7 @@ method TEXT-fmt (*%options) {
     }
     $text-chars            -= ($!fragments[0].spacebefore + $!fragments[*-1].spaceafter);
 
-    die 'Unable to fit cell in ' ~ $!width ~ ' character wide cell!' if $!width && $!width < $text-chars;
+    die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width && $!width < $text-chars;
     return                  if $!width == $text-chars;
     if $!justification ~~ justify-left {
         $!fragments[*-1].cell-spaceafter = ($!width - $text-chars);

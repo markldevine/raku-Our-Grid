@@ -35,9 +35,9 @@ my @fragments;
 #$c .= new(:text('Here is number 5...'), :foreground(white));                    put '|' ~ $c.TEXT ~ '|'; #put $c.ANSI;
 #$c .= new(:text('ANSI twice.........'), :foreground(red));                      put $c.ANSI; $c.ANSI-fmt(:foreground(yellow), :background(red), :italic); put $c.ANSI;
 
-$c .= new(:text('12345 7890 2345'), :allupper, :foreground(white), :background(gray244), :18width, :justification(justify-right),); put '|' ~ $c.TEXT ~ '|';
-$c .= new(:text('12345 7890'), :allupper, :foreground(black), :background(gray254), :18width, :justification(justify-right),); put '|' ~ $c.TEXT ~ '|';
-$c .= new(:text('12345'), :allupper, :foreground(white), :background(gray244), :18width, :justification(justify-right),); put '|' ~ $c.TEXT ~ '|';
+$c .= new(:text('12345 7890 2345    '), :trim-input(True), :allupper, :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-left),); put '|' ~ $c.ANSI ~ '|';
+$c .= new(:text('12345 7890'), :allupper, :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-center),); put '|' ~ $c.ANSI ~ '|';
+$c .= new(:text('12345'), :allupper, :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-right),); put '|' ~ $c.ANSI ~ '|';
 
 
 =finish

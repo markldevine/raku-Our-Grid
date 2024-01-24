@@ -4,6 +4,7 @@ use Our::Utilities;
 
 has ANSI-Colors $.foreground                        is rw;
 has ANSI-Colors $.background                        is rw;
+has ANSI-Colors $.highlight                         is rw;
 has Bool        $.bold                              is rw;
 has Bool        $.faint                             is rw;
 has Bool        $.italic                            is rw;
@@ -19,10 +20,12 @@ has Bool        $.allupper                          is rw;
 has Bool        $.alllower                          is rw;
 has Bool        $.titlecase                         is rw;
 has Bool        $.titlecaselowercase                is rw;
-has Int         $.spacebefore                       is rw       = 0;
-has Int         $.spaceafter                        is rw       = 0;
-has Int         $.cell-spacebefore                  is rw       = 0;
-has Int         $.cell-spaceafter                   is rw       = 0;
+has Int         $.spacebefore                       is rw           = 0;
+has Str         $!spacebefore-pad                                   = '';
+has Int         $.spaceafter                        is rw           = 0;
+has Str         $!spaceafter-pad                                    = '';
+has Int         $.cell-spacebefore                  is rw           = 0;
+has Int         $.cell-spaceafter                   is rw           = 0;
 has Bool        $.bytes-unit-to-comma-round-bytes;
 has Bool        $.bytes-unit-to-round-bytes;
 has Bool        $.bytes-unit-to-comma-bytes;
@@ -35,13 +38,14 @@ has Bool        $.metric-unit-to-number;
 has Bool        $.number-to-metric-unit;
 has Bool        $.add-commas-to-digits;
 has Bool        $.date-time;
+has Bool        $.trim-input                                        = True;
 has Mu:D        $.text                              is required;
 has Mu          $.TEXT;
 
 submethod TWEAK {
 
     my $text        = $!text.trim;
-    $!text          = $text;
+    $!text          = $text if $!trim-input;
     $!TEXT          = $text;
 
     if $!date-time && my $dt = string-to-date-time($text) {
@@ -122,8 +126,8 @@ submethod TWEAK {
     }
 }
 
-method TEXT-fmt (*%options) {
-    my $spacebefore-pad = '';
+method !set-space-pads (*%options) {
+    $!spacebefore-pad   = '';
     my $spacebefore     = $!spacebefore;
     if $!cell-spacebefore {
         $spacebefore    = $!cell-spacebefore;
@@ -131,38 +135,67 @@ method TEXT-fmt (*%options) {
     elsif %options<spacebefore>:exists && %options<spacebefore> {
         $spacebefore    = %options<spacebefore>;
     }
-    $spacebefore-pad    = ' ' x $spacebefore;
+    $!spacebefore-pad   = ' ' x $spacebefore;
 
-    my $spaceafter-pad  = '';
+    $!spaceafter-pad    = '';
     my $spaceafter      = $!spaceafter;
     if $!cell-spaceafter {
         $spaceafter     = $!cell-spaceafter;
     }
     elsif %options<spaceafter>:exists && %options<spaceafter> {
-        $spaceafter    = %options<spaceafter>;
+        $spaceafter     = %options<spaceafter>;
     }
-    $spaceafter-pad     = ' ' x $spaceafter;
-    return sprintf("%s%s%s", $spacebefore-pad, $!TEXT, $spaceafter-pad);
+    $!spaceafter-pad    = ' ' x $spaceafter;
+}
+
+method TEXT-fmt (*%options) {
+#   my $spacebefore-pad = '';
+#   my $spacebefore     = $!spacebefore;
+#   if $!cell-spacebefore {
+#       $spacebefore    = $!cell-spacebefore;
+#   }
+#   elsif %options<spacebefore>:exists && %options<spacebefore> {
+#       $spacebefore    = %options<spacebefore>;
+#   }
+#   $spacebefore-pad    = ' ' x $spacebefore;
+#
+#   my $spaceafter-pad  = '';
+#   my $spaceafter      = $!spaceafter;
+#   if $!cell-spaceafter {
+#       $spaceafter     = $!cell-spaceafter;
+#   }
+#   elsif %options<spaceafter>:exists && %options<spaceafter> {
+#       $spaceafter    = %options<spaceafter>;
+#   }
+#   $spaceafter-pad     = ' ' x $spaceafter;
+
+    self!set-space-pads(|%options);
+    return sprintf("%s%s%s", $!spacebefore-pad, $!TEXT, $!spaceafter-pad);
 }
 
 method ANSI-fmt (*%options) {
 
-    my $spacebefore-pad = '';
-    my $spacebefore     = $!spacebefore + $!cell-spacebefore;
-    $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
-    $spacebefore-pad    = ' ' x $spacebefore;
+    self!set-space-pads(|%options);
+#   my $spacebefore-pad = '';
+#   my $spacebefore     = $!spacebefore + $!cell-spacebefore;
+#   $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
+#   $spacebefore-pad    = ' ' x $spacebefore;
 
-    my $spaceafter-pad  = '';
-    my $spaceafter      = $!spaceafter;
-    $spaceafter         = %options<spaceafter>          with %options<spaceafter>;
-    $spaceafter-pad     = ' ' x $spaceafter;
+#   my $spaceafter-pad  = '';
+#   my $spaceafter      = $!spaceafter;
+#   $spaceafter         = %options<spaceafter>          with %options<spaceafter>;
+#   $spaceafter-pad     = ' ' x $spaceafter;
 
     my $foreground;
     $foreground         = $!foreground.value            if $!foreground;
     $foreground         = %options<foreground>.value    if %options<foreground>:exists;
+
     my $background;
     $background         = $!background.value            if $!background;
     $background         = %options<background>.value    if %options<background>:exists;
+    unless $background {
+        $background     = $!highlight                   if $!highlight;
+    }
 
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;
@@ -183,10 +216,12 @@ method ANSI-fmt (*%options) {
     my $doubleunderline = $!doubleunderline;
     $doubleunderline    = %options<doubleunderline>     if %options<doubleunderline>:exists;
 
+    my $spacebefore-pad = $!spacebefore-pad;
     my @pre-effects     = ();
     my @post-effects    = ();
     my @pre-colors      = ();
     my @post-colors     = ();
+    my $spaceafter-pad  = $!spaceafter-pad;
 
     if $foreground {
         @pre-colors.push("\o33[38;5;" ~ $foreground ~ 'm');
@@ -195,8 +230,10 @@ method ANSI-fmt (*%options) {
     if $background {
         @pre-colors.push("\o33[48;5;" ~ $background ~ 'm');
         @post-colors.push("\o33[49m");
-        $spacebefore-pad = "\o33[48;5;" ~ $background ~ 'm' ~ $spacebefore-pad ~ "\o33[49m" if $spacebefore;
-        $spaceafter-pad  = "\o33[48;5;" ~ $background ~ 'm' ~ $spaceafter-pad  ~ "\o33[49m" if $spaceafter;
+    }
+    if $!highlight {
+        $spacebefore-pad = "\o33[48;5;" ~ $!highlight.value ~ 'm' ~ $!spacebefore-pad ~ "\o33[49m" if $!spacebefore-pad;
+        $spaceafter-pad  = "\o33[48;5;" ~ $!highlight.value ~ 'm' ~ $!spaceafter-pad  ~ "\o33[49m" if $!spaceafter-pad;
     }
     if $bold {
         @pre-effects.push("\o33[1m");
