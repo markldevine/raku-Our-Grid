@@ -41,9 +41,11 @@ $c .= new(
             :foreground(white),
             :background(gray244),
             :18width,
-            :justification(justify-left),
+            :justification(justify-center),
          );
 put '|' ~ $c.TEXT ~ '|';
+
+$c.TEXT-fmt;
 
 =finish
 

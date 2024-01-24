@@ -53,24 +53,42 @@ method TEXT-fmt (*%options) {
     my %opts;
     %opts                   = %options if %options.elems;
     $!TEXT                  = Nil;
+    my $text-chars;
     for $!fragments.list -> $fragment {
-        $!TEXT             ~= $fragment.TEXT-fmt(|%opts);
+        $text-chars         = $fragment.text.chars + $fragment.spacebefore + $fragment.spaceafter;
     }
-    my $text-chars          = $!TEXT.chars + $!fragments[0].spacebefore + $!fragments[*-1].spaceafter;
+    $text-chars            -= ($!fragments[0].spacebefore + $!fragments[*-1].spaceafter);
+
     die 'Unable to fit cell in ' ~ $!width ~ ' character wide cell!' if $!width < $text-chars;
     return                  if $!width == $text-chars;
     if $!justification ~~ justify-left {
-        $!fragments[*-1].cell-spaceafter = $!width - $text-chars;
+        $!fragments[*-1].cell-spaceafter = ($!width - $text-chars);
     }
     elsif $!justification ~~ justify-center {
         $!fragments[0].cell-spacebefore = ($!width - $text-chars) div 2;
         $!fragments[*-1].cell-spaceafter = $!width - $text-chars - $!fragments[0].cell-spacebefore;
     }
     elsif $!justification ~~ justify-right {
-        $!fragments[0].cell-spacebefore = $!width - $text-chars;
+        $!fragments[0].cell-spacebefore = ($!width - $text-chars);
+    }
+    $!TEXT                  = Nil;
+#   Don't let any options alter the first fragment's :spacebefore or the last fragment's :spaceafter
+    my %opts_first          = %opts;
+    %opts_first<spacebefore>:delete;
+    my %opts_last           = %opts;
+    %opts_last<spaceafter>:delete;
+    loop (my $i = 0; $i < $!fragments.elems; $i++ ) {
+        if $i == 0 {
+            $!TEXT         ~= $!fragments[$i].TEXT-fmt(|%opts_first);
+        }
+        elsif $i == ($!fragments.elem - 1) {
+            $!TEXT         ~= $!fragments[$i].TEXT-fmt(|%opts_last);
+        }
+        else {
+            $!TEXT         ~= $!fragments[$i].TEXT-fmt(|%opts);
+        }
     }
 }
-
 
 method ANSI-fmt (*%options) {
     my %opts;

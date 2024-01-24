@@ -41,6 +41,7 @@ has Mu          $.TEXT;
 submethod TWEAK {
 
     my $text        = $!text.trim;
+    $!text          = $text;
     $!TEXT          = $text;
 
     if $!date-time && my $dt = string-to-date-time($text) {
@@ -124,30 +125,23 @@ submethod TWEAK {
 method TEXT-fmt (*%options) {
     my $spacebefore-pad = '';
     my $spacebefore     = $!spacebefore;
-    if %options<spacebefore>:exists && %options<spacebefore> {
-        $spacebefore    = %options<spacebefore>;
-        if %options<spacebefore> > $!spacebefore {
-            $!cell-spacebefore -= %options<spacebefore> - $!spacebefore;
-        }
-        elsif %options<spacebefore> < $!spacebefore {
-            $!cell-spacebefore += %options<spacebefore> - $!spacebefore;
-        }
+    if $!cell-spacebefore {
+        $spacebefore    = $!cell-spacebefore;
     }
-    $spacebefore-pad    = ' ' x ($spacebefore + $!cell-spacebefore);
+    elsif %options<spacebefore>:exists && %options<spacebefore> {
+        $spacebefore    = %options<spacebefore>;
+    }
+    $spacebefore-pad    = ' ' x $spacebefore;
 
     my $spaceafter-pad  = '';
     my $spaceafter      = $!spaceafter;
-    if %options<spaceafter>:exists && %options<spaceafter> {
-        $spaceafter    = %options<spaceafter>;
-        if %options<spaceafter> > $!spaceafter {
-            $!cell-spaceafter -= %options<spaceafter> - $!spaceafter;
-        }
-        elsif %options<spaceafter> < $!spaceafter {
-            $!cell-spaceafter += %options<spaceafter> - $!spaceafter;
-        }
+    if $!cell-spaceafter {
+        $spaceafter     = $!cell-spaceafter;
     }
-    $spaceafter-pad     = ' ' x ($spaceafter + $!cell-spaceafter);
-
+    elsif %options<spaceafter>:exists && %options<spaceafter> {
+        $spaceafter    = %options<spaceafter>;
+    }
+    $spaceafter-pad     = ' ' x $spaceafter;
     return sprintf("%s%s%s", $spacebefore-pad, $!TEXT, $spaceafter-pad);
 }
 
