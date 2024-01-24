@@ -8,7 +8,7 @@ use Our::Utilities;
 
 my Our::Grid    $grid  .= new;
 
-my $background          = grey244;
+my $background          = gray244;
 for 'A' .. 'J' -> $data {
     my Our::Grid::Row $row .= new;
     for 1 .. 10 -> $i {
@@ -19,13 +19,13 @@ for 'A' .. 'J' -> $data {
             $row.add-cell: Our::Grid::Cell.new(:text($data x 10), :1spaceafter, :foreground(green));
         }
     }
-    if $background = grey244 {
+    if $background = gray244 {
         $grid.add-row: $row, :$background;
-        $background = grey254;
+        $background = gray254;
     }
     else {
         $grid.add-row: $row, :$background;
-        $background = grey244;
+        $background = gray244;
     }
 }
 
