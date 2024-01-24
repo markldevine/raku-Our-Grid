@@ -81,7 +81,7 @@ method TEXT-fmt (*%options) {
         if $i == 0 {
             $!TEXT         ~= $!fragments[$i].TEXT-fmt(|%opts_first);
         }
-        elsif $i == ($!fragments.elem - 1) {
+        elsif $i == ($!fragments.elems - 1) {
             $!TEXT         ~= $!fragments[$i].TEXT-fmt(|%opts_last);
         }
         else {
