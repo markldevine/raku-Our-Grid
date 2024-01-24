@@ -35,17 +35,10 @@ my @fragments;
 #$c .= new(:text('Here is number 5...'), :foreground(white));                    put '|' ~ $c.TEXT ~ '|'; #put $c.ANSI;
 #$c .= new(:text('ANSI twice.........'), :foreground(red));                      put $c.ANSI; $c.ANSI-fmt(:foreground(yellow), :background(red), :italic); put $c.ANSI;
 
-$c .= new(
-            :text('12345 7890 2345'),
-            :allupper,
-            :foreground(white),
-            :background(gray244),
-            :18width,
-            :justification(justify-center),
-         );
-put '|' ~ $c.TEXT ~ '|';
+$c .= new(:text('12345 7890 2345'), :allupper, :foreground(white), :background(gray244), :18width, :justification(justify-right),); put '|' ~ $c.TEXT ~ '|';
+$c .= new(:text('12345 7890'), :allupper, :foreground(black), :background(gray254), :18width, :justification(justify-right),); put '|' ~ $c.TEXT ~ '|';
+$c .= new(:text('12345'), :allupper, :foreground(white), :background(gray244), :18width, :justification(justify-right),); put '|' ~ $c.TEXT ~ '|';
 
-$c.TEXT-fmt;
 
 =finish
 

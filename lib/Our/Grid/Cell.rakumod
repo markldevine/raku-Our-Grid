@@ -14,14 +14,14 @@ has                 $.text;
 has                 $.ANSI              is built(False);
 has                 $.TEXT              is built(False);
 has Justification   $.justification     is rw               = justify-left;
-has uint            $.my-row            is rw               = 0;                # self-aware coordinates
-has uint            $.my-col            is rw               = 0;                # self-aware coordinates
-has uint            $.row               is rw               = 0;
-has uint            $.col               is rw               = 0;
-has uint            $.visibility        is rw               = 100;              # % of mandatory visibility upon display
-has uint            $.width             is rw               = 0;
-has uint            $!spacebefore                           = 0;
-has uint            $!spaceafter                            = 0;
+has Int             $.my-row            is rw               = 0;                # self-aware coordinates
+has Int             $.my-col            is rw               = 0;                # self-aware coordinates
+has Int             $.row               is rw               = 0;
+has Int             $.col               is rw               = 0;
+has Int             $.visibility        is rw               = 100;              # % of mandatory visibility upon display
+has Int             $.width             is rw               = 0;
+has Int             $!spacebefore                           = 0;
+has Int             $!spaceafter                            = 0;
 has                 %.options;
 
 submethod BUILD(:$text,
@@ -59,7 +59,7 @@ method TEXT-fmt (*%options) {
     }
     $text-chars            -= ($!fragments[0].spacebefore + $!fragments[*-1].spaceafter);
 
-    die 'Unable to fit cell in ' ~ $!width ~ ' character wide cell!' if $!width < $text-chars;
+    die 'Unable to fit cell in ' ~ $!width ~ ' character wide cell!' if $!width && $!width < $text-chars;
     return                  if $!width == $text-chars;
     if $!justification ~~ justify-left {
         $!fragments[*-1].cell-spaceafter = ($!width - $text-chars);
