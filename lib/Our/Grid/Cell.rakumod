@@ -72,7 +72,7 @@ method TEXT-fmt (*%options) {
         $!fragments[0].cell-spacebefore = ($!width - $text-chars);
     }
     $!TEXT                  = Nil;
-#   Don't let any options alter the first fragment's :spacebefore or the last fragment's :spaceafter
+#   Don't let any %options alter the first fragment's :spacebefore or the last fragment's :spaceafter
     my %opts_first          = %opts;
     %opts_first<spacebefore>:delete;
     my %opts_last           = %opts;
