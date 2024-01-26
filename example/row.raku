@@ -9,6 +9,24 @@ use Our::Utilities;
 
 my Our::Grid::Row $r .= new;
 
+#$r.add-cell(Our::Grid::Cell.new(:text('AAAAAAAAAAAAAAAAAAAAAAAAAA'),    :1spacebefore,  :1spaceafter));
+#$r.add-cell(Our::Grid::Cell.new(:text('BBBBBBBBBBBBBBBBBBBBBBBBB'),     :1spacebefore,  :1spaceafter));
+#$r.add-cell(Our::Grid::Cell.new(:text('CCCCCCCCCCCCCCCCCCCCCCCC'),      :1spacebefore,  :1spaceafter));
+#$r.add-cell(Our::Grid::Cell.new(:text('DDDDDDDDDDDDDDDDDDDDDDD'),       :1spacebefore,  :1spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('EEEE'),                          :1spacebefore,  :1spaceafter, :justification(justify-center), ));
+#$r.add-cell(Our::Grid::Cell.new(:text('FFFFFFFFFFFFFFFFFFFFFFFFFF'),    :1spacebefore,  :1spaceafter));
+
+put '|' ~ $r.TEXT-fmt ~ '|';
+#put '|' ~ $r.ANSI-fmt ~ '|';
+
+=finish
+
+put "";
+put $r.ANSI-fmt(:background(gray244));
+put $r.ANSI-fmt(:background(gray248));
+
+=finish
+
 my @fragments;
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('1st'),                    :1spaceafter,   :bold);
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('2nd'),                    :1spaceafter,   :faint);
@@ -40,5 +58,3 @@ put $r.ANSI-fmt;
 put "";
 put $r.ANSI-fmt(:background(gray244));
 put $r.ANSI-fmt(:background(gray248));
-
-=finish

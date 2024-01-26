@@ -60,16 +60,19 @@ method TEXT-fmt (*%options) {
     $text-chars            -= ($!fragments[0].spacebefore + $!fragments[*-1].spaceafter);
 
     die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width && $!width < $text-chars;
-    return                  if $!width == $text-chars;
-    if $!justification ~~ justify-left {
-        $!fragments[*-1].cell-spaceafter = ($!width - $text-chars);
-    }
-    elsif $!justification ~~ justify-center {
-        $!fragments[0].cell-spacebefore = ($!width - $text-chars) div 2;
-        $!fragments[*-1].cell-spaceafter = $!width - $text-chars - $!fragments[0].cell-spacebefore;
-    }
-    elsif $!justification ~~ justify-right {
-        $!fragments[0].cell-spacebefore = ($!width - $text-chars);
+    if $!width {
+        if $!width != $text-chars {
+            if $!justification ~~ justify-left {
+                $!fragments[*-1].cell-spaceafter = ($!width - $text-chars);
+            }
+            elsif $!justification ~~ justify-center {
+                $!fragments[0].cell-spacebefore = ($!width - $text-chars) div 2;
+                $!fragments[*-1].cell-spaceafter = $!width - $text-chars - $!fragments[0].cell-spacebefore;
+            }
+            elsif $!justification ~~ justify-right {
+                $!fragments[0].cell-spacebefore = ($!width - $text-chars);
+            }
+        }
     }
     $!TEXT                  = Nil;
 #   Don't let any %options alter the first fragment's :spacebefore or the last fragment's :spaceafter
