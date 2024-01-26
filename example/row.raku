@@ -9,15 +9,15 @@ use Our::Utilities;
 
 my Our::Grid::Row $r .= new;
 
-#$r.add-cell(Our::Grid::Cell.new(:text('AAAAAAAAAAAAAAAAAAAAAAAAAA'),    :1spacebefore,  :1spaceafter));
-#$r.add-cell(Our::Grid::Cell.new(:text('BBBBBBBBBBBBBBBBBBBBBBBBB'),     :1spacebefore,  :1spaceafter));
-#$r.add-cell(Our::Grid::Cell.new(:text('CCCCCCCCCCCCCCCCCCCCCCCC'),      :1spacebefore,  :1spaceafter));
-#$r.add-cell(Our::Grid::Cell.new(:text('DDDDDDDDDDDDDDDDDDDDDDD'),       :1spacebefore,  :1spaceafter));
-$r.add-cell(Our::Grid::Cell.new(:text('EEEE'),                          :1spacebefore,  :1spaceafter, :justification(justify-center), ));
-#$r.add-cell(Our::Grid::Cell.new(:text('FFFFFFFFFFFFFFFFFFFFFFFFFF'),    :1spacebefore,  :1spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('AAAAAAAAAAAAAAAAAAAAAAAAAA'),    :foreground(black), :background(gray254), :1spacebefore,  :0spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('BBBBBBBBBBBBBBBBBBBBBBBBB'),     :foreground(black), :background(gray254), :1spacebefore,  :0spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('CCCCCCCCCCCCCCCCCCCCCCCC'),      :foreground(black), :background(gray254), :1spacebefore,  :0spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('DDDDDDDDDDDDDDDDDDDDDDD'),       :foreground(black), :background(gray254), :1spacebefore,  :0spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('EEEE'),                          :foreground(black), :background(gray254), :1spacebefore,  :0spaceafter));
+$r.add-cell(Our::Grid::Cell.new(:text('FFFFFFFFFFFFFFFFFFFFFFFFFF'),    :foreground(black), :background(gray254), :1spacebefore,  :1spaceafter));
 
 put '|' ~ $r.TEXT-fmt ~ '|';
-#put '|' ~ $r.ANSI-fmt ~ '|';
+put '|' ~ $r.ANSI-fmt ~ '|';
 
 =finish
 

@@ -1,39 +1,32 @@
-unit class Our::Grid::Column:api<1>:auth<Mark Devine (mark@markdevine.com)>;
+unit role Our::Grid::Column:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 use Our::Grid::Cell;
+#use Our::Utilities;
 
-has             $.column-number;
-has             @.cell;
-has             $.heading;
-has             $.horizontal-borders;
+has         $.column-heading;
 
-method add-cell (Our::Grid::Cell:D $cell) {
+method append-cell-to-column (Our::Grid::Cell:D $cell) {
     @!cells.push: $cell;
 }
 
-method TEXT-fmt {
+method TEXT-fmt (*%options) {
     my $row;
-    for self.cells -> $cell {
-        $row ~= $cell.TEXT;
-    }
-    return $row;
-}
-
-multi method ANSI-fmt {
-    my $row;
-    for @!cells -> $cell {
-        $row ~= $cell.ANSI;
-    }
-    return $row;
-}
-
-multi method ANSI-fmt (*%options where $_.elems) {
     my %opts;
-    %opts                   = %options if %options.elems;
+    %opts       = %options if %options.elems;
+    for self.cells -> $cell {
+        $cell.TEXT-fmt(|%opts);
+        $row   ~= $cell.TEXT;
+    }
+    return $row;
+}
+
+method ANSI-fmt (*%options) {
+    my %opts;
+    %opts       = %options if %options.elems;
     my $row;
     for @!cells -> $cell {
         $cell.ANSI-fmt(|%opts);
-        $row ~= $cell.ANSI;
+        $row   ~= $cell.ANSI;
     }
     return $row;
 }

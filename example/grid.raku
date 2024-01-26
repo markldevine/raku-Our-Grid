@@ -1,5 +1,21 @@
 #!/usr/bin/env raku
 
+use Data::Dump::Tree;
+
+my $grid        = Array.new();
+$grid.push: Array.new for ^10;
+
+$grid[0;0]      = '0;0';
+$grid[0;1]      = '0;1';
+$grid[0;9]      = '0;9';
+$grid[7;9]      = '7;9';
+
+put $grid[7;9];
+
+ddt $grid;
+
+=finish
+
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Our::Grid;
