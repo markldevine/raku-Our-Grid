@@ -3,6 +3,12 @@ unit role Our::Grid::Row:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 use Our::Grid::Cell;
 #use Our::Utilities;
 
+=finish
+
+
+
+
+
 has Int     $.my-row            is rw;      # self-aware position
 has         $.left-row-header;
 has         $.right-row-header;
@@ -11,6 +17,25 @@ has         $.column-borders    is rw;
 method append-cell-to-row (Our::Grid::Cell:D $cell) {
     @!cells.push: $cell;
 }
+
+=finish
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 method TEXT-fmt (*%options) {
     my $row;

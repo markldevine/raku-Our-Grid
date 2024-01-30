@@ -1,49 +1,27 @@
 #!/usr/bin/env raku
 
-use Data::Dump::Tree;
-
-my $grid        = Array.new();
-$grid.push: Array.new for ^10;
-
-$grid[0;0]      = '0;0';
-$grid[0;1]      = '0;1';
-$grid[0;9]      = '0;9';
-$grid[7;9]      = '7;9';
-
-put $grid[7;9];
-
-ddt $grid;
-
-=finish
-
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Our::Grid;
 use Our::Grid::Cell;
 use Our::Utilities;
+use Data::Dump::Tree;
 
 my Our::Grid    $grid  .= new;
 
-my $background          = gray244;
-for 'A' .. 'J' -> $data {
-    my Our::Grid::Row $row .= new;
-    for 1 .. 10 -> $i {
-        if $i %% 2 {
-            $row.add-cell: Our::Grid::Cell.new(:text($data x 10), :1spaceafter);
-        }
-        else {
-            $row.add-cell: Our::Grid::Cell.new(:text($data x 10), :1spaceafter, :foreground(green));
-        }
-    }
-    if $background = gray244 {
-        $grid.add-row: $row, :$background;
-        $background = gray254;
-    }
-    else {
-        $grid.add-row: $row, :$background;
-        $background = gray244;
+my $max-rows    = 1001;
+my $max-cols    = 5;
+loop (my $row = 0; $row < $max-rows; $row++) {
+    loop (my $col = 0; $col < $max-cols; $col++) {
+#       $grid.add-cell(:cell(Our::Grid::Cell.new(:text(DateTime.new(now)), :foreground(blue))), :$row, :$col);
+        $grid.add-cell(:cell(Our::Grid::Cell.new(:text($row ~ ';' ~ $col), :foreground(white), )), :$row, :$col);
     }
 }
 
-#$grid.TEXT-out;
-$grid.ANSI-out for 1 .. 1;
+#$grid.TEXT-print;
+$grid.ANSI-print;
+
+
+#ddt $grid;
+
+=finish

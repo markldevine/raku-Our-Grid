@@ -5,6 +5,14 @@ unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)> does Our::Gr
 use Our::Grid::Cell;
 use Our::Utilities;
 
+my constant CORNERS = %(
+    ascii  => < + + + + >,
+    double => < ╔ ╗ ╚ ╝ >,
+    light  => < ┌ ┐ └ ┘ >,
+    heavy  => < ┏ ┓ ┗ ┛ >,
+    round  => < ╭ ╮ ╰ ╯ >,
+);
+
 #   ???????????????????????????????????????????????????????????????????
 #   ?TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT?
 #   ???????????????????????????????????????????????????????????????????
@@ -16,42 +24,54 @@ use Our::Utilities;
 #   ???????????????????????????????????????????????????????????????????
 #   fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 
-has                 $.header;
-has                 $.footer;
-has                 @.rows;
-has                 $.term-size;
-has                 $.anchor-row;
-has                 $.anchor-col;
+has $.header;
+has $.footer;
+has $.term-size;
 
-has                 $.cells         = Array.new();
+has $.grid          = Array.new();
+has $.next-row      = 0;
+has $.next-col      = 0;
+has @.col-width;
+
+has $.borders;
 
 submethod TWEAK {
-    $!term-size = term-size;                                            # $term-size.rows $term-size.cols
+    $!term-size     = term-size;                                            # $term-size.rows $term-size.cols
 }
 
-method add-row (Our::Grid::Row:D $row!, *%options) {
-    @!rows.push: self.row-fmt(:$row, |%options);
-}
-
-method build-grid {
-}
-
-# when outputting
-#   - length of the widest cell in each column
-#       - foreach column, what is the justification scheme
-#           - left justified, pad to the end of the cell
-#           - center justified, pad the cell beginning & end equally
-#           - right justified, pad from the beginning of the cell
-
-method TEXT-out {
-    for @!rows -> $row {
-        put $row.TEXT-fmt;
+method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
+    $row                = $!next-row++ without $row;
+    $col                = $!next-col++ without $col;
+    $!grid[$row]        = Array.new()   unless $!grid[$row];
+    @!col-width[$col]   = 0 unless @!col-width[$col];
+    @!col-width[$col]   = $cell.text-length if $cell.text-length > @!col-width[$col];
+    if $col {
+        $!grid[$row][$col] = $cell;
+    }
+    else {
+        $!grid[$row].push: $cell;
     }
 }
 
-method ANSI-out {
-    for @!rows -> $row {
-        put $row.ANSI-fmt;
+method TEXT-print {
+    loop (my $row = 0; $row < $!grid.elems; $row++) {
+        loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
+            print '| ';
+            print $!grid[$row][$col].TEXT-fmt(:width(@!col-width[$col]));
+            print ' ' unless $col == ($!grid[$row].elems - 1);
+        }
+        print " |\n";
+    }
+}
+
+method ANSI-print {
+    loop (my $row = 0; $row < $!grid.elems; $row++) {
+        loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
+            print '| ';
+            print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col]));
+            print ' ' unless $col == ($!grid[$row].elems - 1);
+        }
+        print " |\n";
     }
 }
 

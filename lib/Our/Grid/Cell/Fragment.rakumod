@@ -21,11 +21,9 @@ has Bool        $.alllower                          is rw;
 has Bool        $.titlecase                         is rw;
 has Bool        $.titlecaselowercase                is rw;
 has Int         $.spacebefore                       is rw           = 0;
-has Str         $!spacebefore-pad                                   = '';
 has Int         $.spaceafter                        is rw           = 0;
-has Str         $!spaceafter-pad                                    = '';
-has Int         $.cell-spacebefore                  is rw           = 0;
-has Int         $.cell-spaceafter                   is rw           = 0;
+has Str         $!ANSI-spacebefore-pad                              = '';
+has Str         $!ANSI-spaceafter-pad                               = '';
 has Bool        $.bytes-unit-to-comma-round-bytes;
 has Bool        $.bytes-unit-to-round-bytes;
 has Bool        $.bytes-unit-to-comma-bytes;
@@ -41,11 +39,11 @@ has Bool        $.date-time;
 has Bool        $.trim-input                                        = True;
 has Mu:D        $.text                              is required;
 has Mu          $.TEXT;
+has Mu          $.ANSI;
 
 submethod TWEAK {
-
-    my $text        = $!text.trim;
-    $!text          = $text if $!trim-input;
+    my $text        = $!text;
+    $!text          = $text.trim if $!trim-input && $text ~~ Str;
     $!TEXT          = $text;
 
     if $!date-time && my $dt = string-to-date-time($text) {
@@ -124,67 +122,11 @@ submethod TWEAK {
             $!TEXT  = number-metric-unit-to-number($text);
         }
     }
-}
-
-method !set-space-pads (*%options) {
-    $!spacebefore-pad   = '';
-    my $spacebefore     = $!spacebefore;
-    if $!cell-spacebefore {
-        $spacebefore    = $!cell-spacebefore;
-    }
-    elsif %options<spacebefore>:exists && %options<spacebefore> {
-        $spacebefore    = %options<spacebefore>;
-    }
-    $!spacebefore-pad   = ' ' x $spacebefore;
-
-    $!spaceafter-pad    = '';
-    my $spaceafter      = $!spaceafter;
-    if $!cell-spaceafter {
-        $spaceafter     = $!cell-spaceafter;
-    }
-    elsif %options<spaceafter>:exists && %options<spaceafter> {
-        $spaceafter     = %options<spaceafter>;
-    }
-    $!spaceafter-pad    = ' ' x $spaceafter;
-}
-
-method TEXT-fmt (*%options) {
-#   my $spacebefore-pad = '';
-#   my $spacebefore     = $!spacebefore;
-#   if $!cell-spacebefore {
-#       $spacebefore    = $!cell-spacebefore;
-#   }
-#   elsif %options<spacebefore>:exists && %options<spacebefore> {
-#       $spacebefore    = %options<spacebefore>;
-#   }
-#   $spacebefore-pad    = ' ' x $spacebefore;
-#
-#   my $spaceafter-pad  = '';
-#   my $spaceafter      = $!spaceafter;
-#   if $!cell-spaceafter {
-#       $spaceafter     = $!cell-spaceafter;
-#   }
-#   elsif %options<spaceafter>:exists && %options<spaceafter> {
-#       $spaceafter    = %options<spaceafter>;
-#   }
-#   $spaceafter-pad     = ' ' x $spaceafter;
-
-    self!set-space-pads(|%options);
-    return sprintf("%s%s%s", $!spacebefore-pad, $!TEXT, $!spaceafter-pad);
+    self.ANSI-fmt;
+    self;
 }
 
 method ANSI-fmt (*%options) {
-
-    self!set-space-pads(|%options);
-#   my $spacebefore-pad = '';
-#   my $spacebefore     = $!spacebefore + $!cell-spacebefore;
-#   $spacebefore        = %options<spacebefore>         with %options<spacebefore>;
-#   $spacebefore-pad    = ' ' x $spacebefore;
-
-#   my $spaceafter-pad  = '';
-#   my $spaceafter      = $!spaceafter;
-#   $spaceafter         = %options<spaceafter>          with %options<spaceafter>;
-#   $spaceafter-pad     = ' ' x $spaceafter;
 
     my $foreground;
     $foreground         = $!foreground.value            if $!foreground;
@@ -193,10 +135,12 @@ method ANSI-fmt (*%options) {
     my $background;
     $background         = $!background.value            if $!background;
     $background         = %options<background>.value    if %options<background>:exists;
-    unless $background {
-        $background     = $!highlight                   if $!highlight;
-    }
 
+    my $highlight       = $!highlight;
+    $highlight          = %options<highlight>.value     if %options<highlight>:exists;
+    unless $background {
+        $background     = $highlight                    if $highlight;
+    }
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;
     my $faint           = $!faint;
@@ -216,12 +160,12 @@ method ANSI-fmt (*%options) {
     my $doubleunderline = $!doubleunderline;
     $doubleunderline    = %options<doubleunderline>     if %options<doubleunderline>:exists;
 
-    my $spacebefore-pad = $!spacebefore-pad;
+    $!ANSI-spacebefore-pad  = ' ' x $!spacebefore       if $!spacebefore;
     my @pre-effects     = ();
     my @post-effects    = ();
     my @pre-colors      = ();
     my @post-colors     = ();
-    my $spaceafter-pad  = $!spaceafter-pad;
+    $!ANSI-spaceafter-pad   = ' ' x $!spaceafter        if $!spaceafter;
 
     if $foreground {
         @pre-colors.push("\o33[38;5;" ~ $foreground ~ 'm');
@@ -231,9 +175,9 @@ method ANSI-fmt (*%options) {
         @pre-colors.push("\o33[48;5;" ~ $background ~ 'm');
         @post-colors.push("\o33[49m");
     }
-    if $!highlight {
-        $spacebefore-pad = "\o33[48;5;" ~ $!highlight.value ~ 'm' ~ $!spacebefore-pad ~ "\o33[49m" if $!spacebefore-pad;
-        $spaceafter-pad  = "\o33[48;5;" ~ $!highlight.value ~ 'm' ~ $!spaceafter-pad  ~ "\o33[49m" if $!spaceafter-pad;
+    if $highlight {
+        $!ANSI-spacebefore-pad  = "\o33[48;5;" ~ $highlight ~ 'm' ~ $!ANSI-spacebefore-pad ~ "\o33[49m" if $!spacebefore;
+        $!ANSI-spaceafter-pad   = "\o33[48;5;" ~ $highlight ~ 'm' ~ $!ANSI-spaceafter-pad  ~ "\o33[49m" if $!spaceafter;
     }
     if $bold {
         @pre-effects.push("\o33[1m");
@@ -271,15 +215,18 @@ method ANSI-fmt (*%options) {
         @pre-effects.push("\o33[21m");
         @post-effects.push("\o33[24m");
     }
-    return sprintf("%s%s%s%s%s%s%s",
-        $spacebefore-pad,
-        @pre-effects.join,
-        @pre-colors.join,
-        $!TEXT,
-        @post-colors.join,
-        @post-effects.join,
-        $spaceafter-pad,
-    );
+    $!ANSI  = sprintf "%s%s%s%s%s", @pre-effects.join, @pre-colors.join, $!TEXT, @post-colors.join, @post-effects.join;
+    return $!ANSI;
+}
+
+method TEXT-padded {
+    return $!TEXT unless any($!spacebefore.so, $!spaceafter.so);
+    return sprintf "%s%s%s", ' ' x $!spacebefore, $!TEXT, ' ' x $!spaceafter;
+}
+
+method ANSI-padded {
+    return $!ANSI unless any($!spacebefore.so, $!spaceafter.so);
+    return sprintf "%s%s%s", $!ANSI-spacebefore-pad, $!ANSI, $!ANSI-spaceafter-pad;
 }
 
 =finish

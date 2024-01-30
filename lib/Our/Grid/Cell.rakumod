@@ -3,6 +3,8 @@ unit class Our::Grid::Cell:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 use Our::Grid::Cell::Fragment;
 use Our::Utilities;
 
+use Data::Dump::Tree;
+
 enum Justification is export ( 
     justify-left    => 1, 
     justify-center  => 2, 
@@ -19,10 +21,11 @@ has Int             $.my-col            is rw               = 0;                
 has Int             $.row               is rw               = 0;
 has Int             $.col               is rw               = 0;
 has Int             $.visibility        is rw               = 100;              # % of mandatory visibility upon display
-has Int             $.width             is rw               = 0;
+has Int             $.width                                 = 0;
 has Int             $!spacebefore                           = 0;
 has Int             $!spaceafter                            = 0;
 has                 %.options;
+has Int             $.text-length                           = 0;
 
 submethod BUILD(:$text,
                 :$fragments,
@@ -49,13 +52,12 @@ submethod TWEAK {
     self.ANSI-fmt();
 }
 
-method TEXT-fmt (*%options) {
-    my %opts;
-    %opts                   = %options if %options.elems;
+method TEXT-fmt (*%opts) {
+    $!width                 = %opts<width> if %opts<width>:exists;
     $!TEXT                  = Nil;
     my $text-chars;
     for $!fragments.list -> $fragment {
-        $text-chars         = $fragment.text.chars + $fragment.spacebefore + $fragment.spaceafter;
+        $text-chars         = $fragment.text.Str.chars + $fragment.spacebefore + $fragment.spaceafter;
     }
     $text-chars            -= ($!fragments[0].spacebefore + $!fragments[*-1].spaceafter);
 
@@ -91,13 +93,13 @@ method TEXT-fmt (*%options) {
             $!TEXT         ~= $!fragments[$i].TEXT-fmt(|%opts);
         }
     }
+    $!text-length          = $!TEXT.Str.chars + $!spacebefore + $!spaceafter;
+    $!TEXT;
 }
 
-method ANSI-fmt (*%options) {
-    my %opts;
-    %opts                   = %options if %options.elems;
+method ANSI-fmt (*%opts) {
+    $!width                 = %opts<width> if %opts<width>:exists;
     $!ANSI                  = Nil;
-#%%%$!ANSI                  = sprintf("\o33[%d;%dH", $!row, $!col) if $!row || $!col;                   #%%% uncomment when implementing direct screen addressing
     for $!fragments.list -> $fragment {
         $!ANSI             ~= $fragment.ANSI-fmt(|%opts);
     }

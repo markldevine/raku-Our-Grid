@@ -5,6 +5,31 @@ use Our::Grid::Cell;
 
 has         $.column-heading;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=finish
+
 method append-cell-to-column (Our::Grid::Cell:D $cell) {
     @!cells.push: $cell;
 }
