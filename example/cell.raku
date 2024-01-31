@@ -27,17 +27,17 @@ my @fragments;
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('13TH ALLLOWER'),          :1spaceafter,   :alllower);
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('title case'),             :1spaceafter,   :titlecase,             :foreground(blue));
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('tITLE cASE lOWER CASE'),  :1spaceafter,   :titlecaselowercase,    :foreground(red));
-$c .= new(:@fragments);                                                         put $c.TEXT; put $c.ANSI;
-$c .= new(:text('Here is number 1...'), :foreground(orange));                   put '|' ~ $c.TEXT ~ '|'; put $c.ANSI;
-$c .= new(:text('Here is number 2...'), :foreground(blue));                     put '|' ~ $c.TEXT ~ '|'; put $c.ANSI;
-$c .= new(:text('Here is number 3...'), :foreground(red));                      put '|' ~ $c.TEXT ~ '|'; put $c.ANSI;
-$c .= new(:text('Here is number 4...'), :foreground(yellow));                   put '|' ~ $c.TEXT ~ '|'; put $c.ANSI;
-$c .= new(:text('Here is number 5...'), :foreground(white));                    put '|' ~ $c.TEXT ~ '|'; put $c.ANSI;
-$c .= new(:text('ANSI twice.........'), :foreground(red));                      put $c.ANSI; $c.ANSI-fmt(:foreground(yellow), :background(red), :italic);  put $c.ANSI;
+$c .= new(:@fragments);                                                         put $c.TEXT; put $c.ANSI-padded;
+$c .= new(:text('Here is number 1...'), :foreground(orange));                   put '|' ~ $c.TEXT ~ '|'; put $c.ANSI-padded;
+$c .= new(:text('Here is number 2...'), :foreground(blue));                     put '|' ~ $c.TEXT ~ '|'; put $c.ANSI-padded;
+$c .= new(:text('Here is number 3...'), :foreground(red));                      put '|' ~ $c.TEXT ~ '|'; put $c.ANSI-padded;
+$c .= new(:text('Here is number 4...'), :foreground(yellow));                   put '|' ~ $c.TEXT ~ '|'; put $c.ANSI-padded;
+$c .= new(:text('Here is number 5...'), :foreground(white));                    put '|' ~ $c.TEXT ~ '|'; put $c.ANSI-padded;
+$c .= new(:text('ANSI twice.........'), :foreground(red));                      put $c.ANSI-padded; $c.ANSI-fmt(:foreground(yellow), :background(red), :italic);  put $c.ANSI-padded;
 
-$c .= new(:text(' 12345     '), :trim-input(True), :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-left),); put '|' ~ $c.ANSI ~ '|';
-$c .= new(:text('12345 '), :allupper, :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-center),); put '|' ~ $c.ANSI ~ '|';
-$c .= new(:text('12345'), :allupper, :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-right),); put '|' ~ $c.ANSI ~ '|';
+$c .= new(:text(' 12345     '), :trim-input(True), :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-left),); put '|' ~ $c.ANSI-padded ~ '|';
+$c .= new(:text('12345 '), :allupper, :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-center),); put '|' ~ $c.ANSI-padded ~ '|';
+$c .= new(:text('12345'), :allupper, :foreground(yellow), :background(black) :highlight(gray244), :18width, :justification(justify-right),); put '|' ~ $c.ANSI-padded ~ '|';
 
 
 =finish

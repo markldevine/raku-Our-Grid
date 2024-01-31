@@ -126,18 +126,20 @@ my @fragments;
 #                        :metric-unit-to-comma-number,
 #                    );
 
+print '|'; .print for @fragments>>.TEXT; print "|\n";
 print '|'; .print for @fragments>>.TEXT-padded; print "|\n";
+print '|'; .print for @fragments>>.ANSI; print "|\n";
 print '|'; .print for @fragments>>.ANSI-padded; print "|\n";
 
-for ^5 {
-    for @fragments -> $fragment {
-        print '|';
-        $fragment.ANSI-fmt(:foreground(black), :background(gray254), :highlight(blue));
-        print $fragment.ANSI-padded;
-        $fragment.ANSI-fmt(:foreground(white), :background(gray244), :highlight(red));
-        print $fragment.ANSI-padded;
-        print "|\n";
-    }
-}
+#for ^5 {
+#    for @fragments -> $fragment {
+#        print '|';
+#        $fragment.ANSI-fmt(:foreground(black), :background(gray254), :highlight(blue));
+#        print $fragment.ANSI-padded;
+#        $fragment.ANSI-fmt(:foreground(white), :background(gray244), :highlight(red));
+#        print $fragment.ANSI-padded;
+#        print "|\n";
+#    }
+#}
 
 =finish
