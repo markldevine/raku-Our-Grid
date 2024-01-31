@@ -55,17 +55,17 @@ submethod TWEAK {
     self.ANSI-fmt();
 }
 
-method TEXT-fmt {
+method TEXT-fmt (*%opts) {
     $!width                 = %opts<width> if %opts<width>:exists;
     $!TEXT                  = Nil;
     my $text-chars;
     for $!fragments.list -> $fragment {
         $text-chars         = $fragment.text.Str.chars + $fragment.spacebefore + $fragment.spaceafter;
     }
-    $text-chars            -= ($!fragments[0].spacebefore + $!fragments[*-1].spaceafter);
+    $text-chars            -= ($!fragments[0].spacebefore + $!fragments[*-1].spaceafter);                       # .trim for now; preserving intended spacing with justification is do'able, but I'll address it later
 
     if $!width {
-        die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width < $text-chars;
+        die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width < $text-chars;      # someday implement $!.visibility (%) here...
         if $!width != $text-chars {
             if $!justification ~~ justify-left {
                 $!spaceafter = ($!width - $text-chars);
@@ -84,7 +84,7 @@ method TEXT-fmt {
         if $i == 0 {
             $!TEXT         ~= $!fragments[$i].TEXT-fmt(|%opts_first);
         }
-        elsif $i == ($!fragments.elems - 1) {
+        if $i == ($!fragments.elems - 1) {
             $!TEXT         ~= $!fragments[$i].TEXT-fmt(|%opts_last);
         }
         else {

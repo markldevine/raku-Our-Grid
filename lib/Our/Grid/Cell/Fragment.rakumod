@@ -44,7 +44,7 @@ has Mu          $.ANSI;
 submethod TWEAK {
     my $text        = $!text;
     $!text          = $text.trim if $!trim-input && $text ~~ Str;
-    $!TEXT          = $text;
+    $!TEXT          = $!text;
 
     if $!date-time && my $dt = string-to-date-time($text) {
         $!TEXT      = $dt;
