@@ -226,7 +226,7 @@ method TEXT-padded {
 
 method ANSI-padded {
     return $!ANSI unless any($!spacebefore.so, $!spaceafter.so);
-    return sprintf "%s%s%s", $!ANSI-spacebefore-pad, $!ANSI, $!ANSI-spaceafter-pad;
+    return $!ANSI-spacebefore-pad ~ $!ANSI ~ $!ANSI-spaceafter-pad;
 }
 
 =finish

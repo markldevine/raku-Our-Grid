@@ -1,6 +1,7 @@
-use Our::Grid::Row;
-use Our::Grid::Column;
-unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)> does Our::Grid::Row does Our::Grid::Column;
+#use Our::Grid::Row;
+#use Our::Grid::Column;
+#unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)> does Our::Grid::Row does Our::Grid::Column;
+unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 use Our::Grid::Cell;
 use Our::Utilities;
@@ -29,8 +30,8 @@ has $.footer;
 has $.term-size;
 
 has $.grid          = Array.new();
-has $.next-row      = 0;
-has $.next-col      = 0;
+has $.current-row   = 0;
+has $.current-col   = 0;
 has @.col-width;
 
 has $.borders;
@@ -40,8 +41,16 @@ submethod TWEAK {
 }
 
 method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
-    $row                = $!next-row++ without $row;
-    $col                = $!next-col++ without $col;
+    given $row {
+        when Bool   { ++$!current-row;  $row = $!current-row;                                   }
+        when Int    { $!current-row     = $row;                                                 }
+    }
+    given $col {
+        when Bool   { ++$!current-col;  $col = $!current-col                                    }
+        when Int    { $!current-col     = $col;                                                 }
+        default     { $!current-col     = $!grid[$!current-row].elems; $col = $!current-col;    }
+    }
+put $row ~ ';' ~ $col;
     $!grid[$row]        = Array.new()   unless $!grid[$row];
     @!col-width[$col]   = 0 unless @!col-width[$col];
     @!col-width[$col]   = $cell.text-length if $cell.text-length > @!col-width[$col];
