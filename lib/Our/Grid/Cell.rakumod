@@ -3,8 +3,6 @@ unit class Our::Grid::Cell:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 use Our::Grid::Cell::Fragment;
 use Our::Utilities;
 
-use Data::Dump::Tree;
-
 enum Justification is export ( 
     justify-left    => 1, 
     justify-center  => 2, 
@@ -60,49 +58,36 @@ submethod TWEAK {
         $!TEXT             ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
     }
     self.ANSI-fmt;
-#   $!ANSI                  = Nil;
-#   %!fragment-options<highlight> = $!highlight if $!highlight;
-#   loop ($i = 0; $i < $!fragments.elems; $i++ ) {
-#       $!ANSI             ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
-#       $!ANSI             ~= $!fragments[$i].ANSI-fmt(|%!fragment-options);
-#       $!ANSI             ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
-#   }
+    return self;
 }
 
-method !calculate-pads (Int:D $width!) {
-    my $text-chars      = $!TEXT.Str.chars;
-    die 'Unable to fit all data into a ' ~ $width ~ ' character-wide cell!' if $width < $text-chars;
-    if $width != $text-chars {
+method !calculate-pads {
+    my $text-chars          = $!TEXT.Str.chars;
+    die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width < $text-chars;
+    if $!width != $text-chars {
         if $!justification ~~ justify-left {
-            $!spaceafter = ($width - $text-chars);
+            $!spacebefore   = 0;
+            $!spaceafter    = ($!width - $text-chars);
         }
         elsif $!justification ~~ justify-center {
-            $!spacebefore = ($width - $text-chars) div 2;
-            $!spaceafter = $width - $text-chars - $!spacebefore;
+            $!spacebefore   = ($!width - $text-chars) div 2;
+            $!spaceafter    = $!width - $text-chars - $!spacebefore;
         }
         elsif $!justification ~~ justify-right {
-            $!spacebefore = ($width - $text-chars);
+            $!spacebefore   = ($!width - $text-chars);
+            $!spaceafter    = 0;
         }
     }
 }
 
 method TEXT-padded (*%opts) {
-    $!width                 = %opts<width> if %opts<width>:exists;
-    self!calculate-pads($!width) if $!width;
-    return sprintf "%s%s%s", ' ' x $!spacebefore ~ $!TEXT ~ ' ' x $!spaceafter;
+    $!width                 = %opts<width>          if %opts<width>:exists;
+    $!justification         = %opts<justification>  if %opts<justification>:exists;
+    self!calculate-pads     if $!width;
+    return ' ' x $!spacebefore ~ $!TEXT ~ ' ' x $!spaceafter;
 }
 
 method ANSI-fmt (*%opts) {
-    $!ANSI                  = Nil;
-    loop (my $i = 0; $i < $!fragments.elems; $i++ ) {
-        $!ANSI             ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
-        $!ANSI             ~= $!fragments[$i].ANSI-fmt(|%opts);
-        $!ANSI             ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
-    }
-    $!ANSI;
-}
-
-method ANSI-padded (*%opts) {
     if %opts<width>:exists {
         $!width             = %opts<width>;
         %opts<width>:delete;
@@ -111,14 +96,30 @@ method ANSI-padded (*%opts) {
         $!justification     = %opts<justification>;
         %opts<justification>:delete;
     }
-    self.ANSI-fmt(|%opts)   if %opts.elems;
-    self!calculate-pads($!width) if $!width;
+    self!calculate-pads     if $!width;
+    $!ANSI-spacebefore-pad  = '';
     $!ANSI-spacebefore-pad  = ' ' x $!spacebefore       if $!spacebefore;
+    $!ANSI-spaceafter-pad   = '';
     $!ANSI-spaceafter-pad   = ' ' x $!spaceafter        if $!spaceafter;
     if $!highlight {
         $!ANSI-spacebefore-pad  = "\o33[48;5;" ~ $!highlight.value ~ 'm' ~ $!ANSI-spacebefore-pad ~ "\o33[49m" if $!spacebefore;
         $!ANSI-spaceafter-pad   = "\o33[48;5;" ~ $!highlight.value ~ 'm' ~ $!ANSI-spaceafter-pad  ~ "\o33[49m" if $!spaceafter;
     }
+    $!ANSI                  = Nil;
+    loop (my $i = 0; $i < $!fragments.elems; $i++ ) {
+        $!ANSI             ~= $!fragments[$i].ANSI-spacebefore-pad unless $i == 0;
+        if %opts.elems {
+            $!ANSI         ~= $!fragments[$i].ANSI-fmt(|%opts);
+        }
+        else {
+            $!ANSI         ~= $!fragments[$i].ANSI;
+        }
+        $!ANSI             ~= $!fragments[$i].ANSI-spaceafter-pad  unless $i == ($!fragments.elems - 1);
+    }
+    return self;
+}
+
+method ANSI-padded {
     return $!ANSI-spacebefore-pad ~ $!ANSI ~ $!ANSI-spaceafter-pad;
 }
 

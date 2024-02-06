@@ -22,8 +22,8 @@ has Bool        $.titlecase                         is rw;
 has Bool        $.titlecaselowercase                is rw;
 has Int         $.spacebefore                       is rw           = 0;
 has Int         $.spaceafter                        is rw           = 0;
-has Str         $!ANSI-spacebefore-pad                              = '';
-has Str         $!ANSI-spaceafter-pad                               = '';
+has Str         $.ANSI-spacebefore-pad                              = '';
+has Str         $.ANSI-spaceafter-pad                               = '';
 has Bool        $.bytes-unit-to-comma-round-bytes;
 has Bool        $.bytes-unit-to-round-bytes;
 has Bool        $.bytes-unit-to-comma-bytes;
@@ -127,7 +127,6 @@ submethod TWEAK {
 }
 
 method ANSI-fmt (*%options) {
-
     my $foreground;
     $foreground         = $!foreground.value            if $!foreground;
     $foreground         = %options<foreground>.value    if %options<foreground>:exists;
