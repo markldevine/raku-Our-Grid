@@ -12,16 +12,18 @@ enum Justification is export (
 has                 $.fragments;
 has                 %!fragment-options;
 has                 $.text;
-has                 $.ANSI                  is built(False);
-has                 $.TEXT                  is built(False);
-has Justification   $.justification         is rw               = justify-left;
-has Int             $.visibility            is rw               = 100;              # % of mandatory visibility upon display
-has ANSI-Colors     $.highlight             is rw; 
-has Int             $.width                                     = 0;
-has Int             $!spacebefore                               = 0;
-has Int             $!spaceafter                                = 0;
-has Str             $!ANSI-spacebefore-pad                      = '';
-has Str             $!ANSI-spaceafter-pad                       = '';
+has                 $.ANSI                      is built(False);
+has                 $.TEXT                      is built(False);
+has Justification   $.justification             is rw               = justify-left;
+has Justification   $!previous-justification                        = justify-left;
+has Int             $.visibility                is rw               = 100;              # % of mandatory visibility upon display
+has ANSI-Colors     $.highlight                 is rw; 
+has Int             $.width                                         = 0;
+has Int             $!previous-width                                = 0;
+has Int             $!spacebefore                                   = 0;
+has Int             $!spaceafter                                    = 0;
+has Str             $!ANSI-spacebefore-pad                          = '';
+has Str             $!ANSI-spaceafter-pad                           = '';
 
 submethod BUILD(:$text,
                 :$fragments,
@@ -62,20 +64,23 @@ submethod TWEAK {
 }
 
 method !calculate-pads {
-    my $text-chars          = $!TEXT.Str.chars;
+    return 1                    if $!width == $!previous-width && $!justification.value == $!previous-justification.value;
+    $!previous-width            = $!width;
+    $!previous-justification    = $!justification;
+    my $text-chars              = $!TEXT.Str.chars;
     die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width < $text-chars;
     if $!width != $text-chars {
         if $!justification ~~ justify-left {
-            $!spacebefore   = 0;
-            $!spaceafter    = ($!width - $text-chars);
+            $!spacebefore       = 0;
+            $!spaceafter        = ($!width - $text-chars);
         }
         elsif $!justification ~~ justify-center {
-            $!spacebefore   = ($!width - $text-chars) div 2;
-            $!spaceafter    = $!width - $text-chars - $!spacebefore;
+            $!spacebefore       = ($!width - $text-chars) div 2;
+            $!spaceafter        = $!width - $text-chars - $!spacebefore;
         }
         elsif $!justification ~~ justify-right {
-            $!spacebefore   = ($!width - $text-chars);
-            $!spaceafter    = 0;
+            $!spacebefore       = ($!width - $text-chars);
+            $!spaceafter        = 0;
         }
     }
 }
@@ -83,7 +88,7 @@ method !calculate-pads {
 method TEXT-padded (*%opts) {
     $!width                 = %opts<width>          if %opts<width>:exists;
     $!justification         = %opts<justification>  if %opts<justification>:exists;
-    self!calculate-pads     if $!width;
+    self!calculate-pads;
     return ' ' x $!spacebefore ~ $!TEXT ~ ' ' x $!spaceafter;
 }
 

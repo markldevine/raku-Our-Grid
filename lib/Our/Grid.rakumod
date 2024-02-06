@@ -1,18 +1,7 @@
-#use Our::Grid::Row;
-#use Our::Grid::Column;
-#unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)> does Our::Grid::Row does Our::Grid::Column;
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 use Our::Grid::Cell;
 use Our::Utilities;
-
-my constant CORNERS = %(
-    ascii  => < + + + + >,
-    double => < ╔ ╗ ╚ ╝ >,
-    light  => < ┌ ┐ └ ┘ >,
-    heavy  => < ┏ ┓ ┗ ┛ >,
-    round  => < ╭ ╮ ╰ ╯ >,
-);
 
 #   ???????????????????????????????????????????????????????????????????
 #   ?TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT?
@@ -25,6 +14,7 @@ my constant CORNERS = %(
 #   ???????????????????????????????????????????????????????????????????
 #   fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 
+has $.title;
 has $.header;
 has $.footer;
 has $.term-size;
@@ -50,10 +40,9 @@ method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         when Int    { $!current-col     = $col;                                                 }
         default     { $!current-col     = $!grid[$!current-row].elems; $col = $!current-col;    }
     }
-put $row ~ ';' ~ $col;
     $!grid[$row]        = Array.new()   unless $!grid[$row];
     @!col-width[$col]   = 0 unless @!col-width[$col];
-    @!col-width[$col]   = $cell.text-length if $cell.text-length > @!col-width[$col];
+    @!col-width[$col]   = $cell.TEXT.Str.chars if $cell.TEXT.Str.chars > @!col-width[$col];
     if $col {
         $!grid[$row][$col] = $cell;
     }
@@ -65,22 +54,49 @@ put $row ~ ';' ~ $col;
 method TEXT-print {
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
-            print '| ';
-            print $!grid[$row][$col].TEXT-fmt(:width(@!col-width[$col]));
+            print ' ';
+            print $!grid[$row][$col].TEXT-padded(:width(@!col-width[$col]));
             print ' ' unless $col == ($!grid[$row].elems - 1);
         }
-        print " |\n";
+        print " \n";
     }
 }
 
+#| Character Cell Graphics Set
+has %box-char = {
+    side                => '│',
+    horizontal          => '─',
+    down-and-horizontal => '┬', 
+    top-left-corner     => '┌',
+    top-right-corner    => '┐',
+    bottom-left-corner  => '└',
+    bottom-right-corner => '┘',
+    side-row-left-sep   => '├',
+    side-row-right-sep  => '┤',
+ };
+
+
 method ANSI-print {
+    my $col-width-total = 0;
+    for @!col-width -> $colw {
+        $col-width-total += $colw;
+    }
+    $col-width-total += (@!col-width.elems * 3) - 1;
+    put %box-char<top-left-corner> ~ %box-char<horizontal> x $col-width-total ~ %box-char<top-right-corner>;
+    put %box-char<side> ~ ' ' x $col-width-total ~ %box-char<side>;
+
+    print %box-char<side-row-left-sep>;
+    for @!col-width -> $colw {
+        print %box-char<horizontal> x ($colw - 1) ~ %box-char<down-and-horizontal>;
+    }
+
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
-            print '| ';
-            print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col]));
+            print %box-char<side> ~ ' ';
+            print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
             print ' ' unless $col == ($!grid[$row].elems - 1);
         }
-        print " |\n";
+        print ' ' ~ %box-char<side> ~ "\n";
     }
 }
 

@@ -9,12 +9,12 @@ use Data::Dump::Tree;
 
 my Our::Grid    $grid  .= new;
 
-my $max-rows    = 1001;
+my $max-rows    = 11;
 my $max-cols    = 5;
 loop (my $row = 0; $row < $max-rows; $row++) {
     loop (my $col = 0; $col < $max-cols; $col++) {
 #       $grid.add-cell(:cell(Our::Grid::Cell.new(:text(DateTime.new(now)), :foreground(blue))), :$row, :$col);
-        $grid.add-cell(:cell(Our::Grid::Cell.new(:text($row ~ ';' ~ $col), :foreground(white), )), :$row, :$col);
+        $grid.add-cell(:cell(Our::Grid::Cell.new(:text($row ~ ';' ~ $col), :foreground(white), :justification(justify-right))), :$row, :$col);
     }
 }
 
