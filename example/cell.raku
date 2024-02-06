@@ -33,13 +33,15 @@ my @fragments;
 #@fragments.push: Our::Grid::Cell::Fragment.new(:text('title case'),             :1spaceafter,   :titlecase,             :foreground(blue));
 #@fragments.push: Our::Grid::Cell::Fragment.new(:text('tITLE cASE lOWER CASE'),  :1spaceafter,   :titlecaselowercase,    :foreground(red));
 $c .= new(:@fragments);
-put $c.TEXT;
-put '|' ~ $c.TEXT-padded(:20width, :justification(justify-center)) ~ '|';
-#put $c.ANSI;
+#put $c.TEXT;
+#put '|' ~ $c.TEXT-padded(:20width, :justification(justify-center)) ~ '|';
+put $c.ANSI;
+#put '|' ~ $c.ANSI-fmt(:highlight(green)).ANSI ~ '|';
 #put '|' ~ $c.ANSI-fmt(:highlight(green)).ANSI-padded ~ '|';
-#put '|' ~ $c.ANSI-fmt(:highlight(yellow), :13width, :justification(justify-center)).ANSI-padded ~ '|';
-#put '|' ~ $c.ANSI-fmt(:highlight(white), :foreground(black), :18width, :justification(justify-left)).ANSI-padded ~ '|';
-#put '|' ~ $c.ANSI-padded ~ '|';
+put '|' ~ $c.ANSI-fmt(:highlight(yellow), :13width, :justification(justify-center)).ANSI-padded ~ '|';
+put '|' ~ $c.ANSI-fmt(:highlight(white), :foreground(black), :18width, :justification(justify-right)).ANSI-padded ~ '|';
+put '|' ~ $c.ANSI-padded ~ '|';
+put $c.ANSI;
 
 =finish
 
