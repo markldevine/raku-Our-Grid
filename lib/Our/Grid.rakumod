@@ -27,7 +27,7 @@ has @.col-width;
 has $.borders;
 
 submethod TWEAK {
-    $!term-size     = term-size;                                            # $term-size.rows $term-size.cols
+    $!term-size     = term-size;                                            # $!term-size.rows $!term-size.cols
 }
 
 method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
@@ -67,6 +67,7 @@ has %box-char = {
     side                => '│',
     horizontal          => '─',
     down-and-horizontal => '┬', 
+    up-and-horizontal   => '┴',
     top-left-corner     => '┌',
     top-right-corner    => '┐',
     bottom-left-corner  => '└',
@@ -75,29 +76,46 @@ has %box-char = {
     side-row-right-sep  => '┤',
  };
 
-
 method ANSI-print {
     my $col-width-total = 0;
     for @!col-width -> $colw {
         $col-width-total += $colw;
     }
-    $col-width-total += (@!col-width.elems * 3) - 1;
-    put %box-char<top-left-corner> ~ %box-char<horizontal> x $col-width-total ~ %box-char<top-right-corner>;
-    put %box-char<side> ~ ' ' x $col-width-total ~ %box-char<side>;
+    $col-width-total   += (@!col-width.elems * 3) - 1;
+    my $margin          = ($!term-size.cols - ($col-width-total + 2)) div 2;
+    if $!title {
+        my $left-pad    = ($col-width-total - $!title.chars) div 2;
+        my $right-pad   = $col-width-total - $!title.chars - $left-pad;
+        put ' ' x $margin ~ %box-char<top-left-corner> ~ %box-char<horizontal> x $col-width-total ~ %box-char<top-right-corner>;
+        put ' ' x $margin ~ %box-char<side> ~ ' ' x $left-pad ~ $!title ~ ' ' x $right-pad ~ %box-char<side>;
 
-    print %box-char<side-row-left-sep>;
-    for @!col-width -> $colw {
-        print %box-char<horizontal> x ($colw - 1) ~ %box-char<down-and-horizontal>;
+        print ' ' x $margin ~ %box-char<side-row-left-sep>;
+        loop (my $i = 0; $i < (@!col-width.elems - 1); $i++) {
+            print %box-char<horizontal> x (@!col-width[$i] + 2) ~ %box-char<down-and-horizontal>;
+        }
+        put %box-char<horizontal> x (@!col-width[*-1] + 2) ~ %box-char<side-row-right-sep>;
     }
-
+    else {
+        print ' ' x $margin ~ %box-char<top-left-corner>;
+        loop (my $i = 0; $i < (@!col-width.elems - 1); $i++) {
+            print %box-char<horizontal> x (@!col-width[$i] + 2) ~ %box-char<down-and-horizontal>;
+        }
+        put %box-char<horizontal> x (@!col-width[*-1] + 2) ~ %box-char<top-right-corner>;
+    }
     loop (my $row = 0; $row < $!grid.elems; $row++) {
+        print ' ' x $margin;
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print %box-char<side> ~ ' ';
             print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
             print ' ' unless $col == ($!grid[$row].elems - 1);
         }
-        print ' ' ~ %box-char<side> ~ "\n";
+        put ' ' ~ %box-char<side>;
     }
+    print ' ' x $margin ~ %box-char<bottom-left-corner>;
+    loop (my $i = 0; $i < (@!col-width.elems - 1); $i++) {
+        print %box-char<horizontal> x (@!col-width[$i] + 2) ~ %box-char<up-and-horizontal>;
+    }
+    put %box-char<horizontal> x (@!col-width[*-1] + 2) ~ %box-char<bottom-right-corner>;
 }
 
 =finish

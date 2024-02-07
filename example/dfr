@@ -1,0 +1,62 @@
+#!/usr/bin/env raku
+
+use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+
+use Async::Command::Multi;
+use Our::Grid;
+use Our::Grid::Cell;
+use Our::Utilities;
+
+use Data::Dump::Tree;
+
+my @aix-filesystems         = </ /usr /var /tmp /home /opt /var/adm/ras/livedump /nmon /wmata /audit /admin>;
+my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
+
+
+sub MAIN (
+    Str :$aix,              #= AIX server name(s) (comma separated list)
+    Str :$linux,            #= Linux server name(s) (comma separated list)
+) {
+    my @aix-servers;
+    @aix-servers            = $aix.split(',')   if $aix;
+    my @linux-servers;
+    @linux-servers          = $linux.split(',') if $linux;
+
+    my Our::Grid    $grid  .= new: :title('df Report');
+
+    my %command;
+    if @aix-servers {
+        for @aix-servers -> $aix {
+            %command{$aix}      = ['ssh', $aix, '/usr/bin/df', '-Pk'];
+            %command{$aix}.append: @aix-filesystems;
+        }
+    }
+    elsif @linux-servers {
+        for @linux-servers -> $linux {
+            %command{$linux}    = ['ssh', $linux, '/usr/bin/df', '-Pk'];
+            %command{$linux}.append: @linux-filesystems;
+        }
+    }
+    else {
+        $*ERR.put: $*USAGE;
+        exit 1;
+    }
+
+    my $command-manager = Async::Command::Multi.new(:%command, :2time-out, :4batch);
+    $command-manager.sow;
+    my %result = $command-manager.reap;
+
+ddt %result;
+
+#   $grid.TEXT-print;
+#   $grid.ANSI-print;
+}
+
+=finish
+
+#loop (my $row = 0; $row < $max-rows; $row++) {
+#    loop (my $col = 0; $col < $max-cols; $col++) {
+#        $grid.add-cell(:cell(Our::Grid::Cell.new(:text($row ~ ';' ~ $col), :foreground(white), :justification(justify-right))), :$row, :$col);
+#    }
+#}
+
