@@ -6,12 +6,56 @@ use Async::Command::Multi;
 use Our::Grid;
 use Our::Grid::Cell;
 use Our::Utilities;
+#use Grammar::Debugger;
 
 use Data::Dump::Tree;
 
+my %server-results;
 my @aix-filesystems         = </ /usr /var /tmp /home /opt /var/adm/ras/livedump /nmon /wmata /audit /admin>;
 my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
 
+class df-Pk {
+    has $.filesystem;
+    has $.total-KBS;
+    has $.used-KBs;
+    has $.available-KBs;
+    has $.capacity-percent-used;
+    has $.mount-point;
+}
+
+grammar df-Pk-grammar {
+    token TOP {
+        ^
+        Filesystem \s+ 1024 '-' blocks \s+ Used \s+ Available \s+ Capacity \s+ Mounted \s+ on $$
+        <df-data-record>+
+        $
+    }
+    token df-data-record {
+        \n ^^ <filesystem> \s+ <total-KBS> \s+ <used-KBs> \s+ <available-KBs> \s+ <capacity-percent-used> \s+ <mount-point> $$
+    }
+    token filesystem            { <[/\w]>+  }
+    token total-KBS             { \d+       }
+    token used-KBs              { \d+       }
+    token available-KBs         { \d+       }
+    token capacity-percent-used { \d+ '%'   }
+    token mount-point           { <[/\w]>+  }
+}
+
+class df-Pk-actions {
+    has $.server        is required;
+
+    method df-data-record ($/) {
+        %server-results{$!server}.push: 
+            df-Pk.new:
+                        :filesystem(~$/<filesystem>),
+                        :total-KBS(~$/<total-KBS>),
+                        :used-KBs(~$/<used-KBs>),
+                        :available-KBs(~$/<available-KBs>),
+                        :capacity-percent-used(~$/<capacity-percent-used>),
+                        :mount-point(~$/<mount-point>),
+            ;
+    }
+}
 
 sub MAIN (
     Str :$aix,              #= AIX server name(s) (comma separated list)
@@ -44,15 +88,42 @@ sub MAIN (
 
     my $command-manager = Async::Command::Multi.new(:%command, :2time-out, :4batch);
     $command-manager.sow;
-    my %result = $command-manager.reap;
+    my %results = $command-manager.reap;
+    for %results.keys -> $server {
+        df-Pk-grammar.parse(%results{$server}.stdout-results, :actions(df-Pk-actions.new(:$server)));
+    }
 
-ddt %result;
+#ddt %server-results;
 
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'),   :bold)), :1col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'),        :bold)), :2col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Used'),         :bold)), :3col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Available'),    :bold)), :4col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('% Used'),       :bold)), :5col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Mount Point'),  :bold)), :6col);
+    for %server-results.keys -> $server {
+        for %server-results{$server}.list -> $df-record {
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-KBS))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-KBs))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-KBs))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point))));
+        }
+    }
 #   $grid.TEXT-print;
-#   $grid.ANSI-print;
+    $grid.ANSI-print;
 }
 
 =finish
+
+    has $.filesystem;
+    has $.total-KBS;
+    has $.used-KBs;
+    has $.available-KBs;
+    has $.capacity-percent-used;
+    has $.mount-point;
 
 #loop (my $row = 0; $row < $max-rows; $row++) {
 #    loop (my $col = 0; $col < $max-cols; $col++) {

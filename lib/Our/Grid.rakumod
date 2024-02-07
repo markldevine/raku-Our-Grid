@@ -30,7 +30,7 @@ submethod TWEAK {
     $!term-size     = term-size;                                            # $!term-size.rows $!term-size.cols
 }
 
-method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
+method add-cell (Our::Grid::Cell:D :$cell, :$row is copy = 0, :$col is copy = 0) {
     given $row {
         when Bool   { ++$!current-row;  $row = $!current-row;                                   }
         when Int    { $!current-row     = $row;                                                 }
@@ -52,6 +52,10 @@ method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
 }
 
 method TEXT-print {
+
+#   probably should default all Any things in the grid at this point...
+#   make it only as required; do it once, flag if anything updates, only run it again if an update occurred
+
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print ' ';
@@ -63,20 +67,24 @@ method TEXT-print {
 }
 
 #| Character Cell Graphics Set
-has %box-char = {
-    side                => '│',
-    horizontal          => '─',
-    down-and-horizontal => '┬', 
-    up-and-horizontal   => '┴',
-    top-left-corner     => '┌',
-    top-right-corner    => '┐',
-    bottom-left-corner  => '└',
-    bottom-right-corner => '┘',
-    side-row-left-sep   => '├',
-    side-row-right-sep  => '┤',
- };
+my  %box-char = (
+        side                => '│',
+        horizontal          => '─',
+        down-and-horizontal => '┬', 
+        up-and-horizontal   => '┴',
+        top-left-corner     => '┌',
+        top-right-corner    => '┐',
+        bottom-left-corner  => '└',
+        bottom-right-corner => '┘',
+        side-row-left-sep   => '├',
+        side-row-right-sep  => '┤',
+    );
 
 method ANSI-print {
+
+#   probably should default all Any things in the grid at this point...
+
+
     my $col-width-total = 0;
     for @!col-width -> $colw {
         $col-width-total += $colw;
@@ -106,7 +114,7 @@ method ANSI-print {
         print ' ' x $margin;
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print %box-char<side> ~ ' ';
-            print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
+            print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded with $!grid[$row][$col];
             print ' ' unless $col == ($!grid[$row].elems - 1);
         }
         put ' ' ~ %box-char<side>;

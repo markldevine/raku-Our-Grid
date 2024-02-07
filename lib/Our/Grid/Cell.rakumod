@@ -94,9 +94,10 @@ method TEXT-padded (*%opts) {
 
 method ANSI-fmt (*%opts) {
     if %opts<width>:exists {
-        $!width             = %opts<width>;
+        $!width             = %opts<width> // 0;
         %opts<width>:delete;
     }
+    $!width               //= 0;
     if %opts<justification>:exists {
         $!justification     = %opts<justification>;
         %opts<justification>:delete;
