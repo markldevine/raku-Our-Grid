@@ -3,6 +3,8 @@ unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 use Our::Grid::Cell;
 use Our::Utilities;
 
+use Data::Dump::Tree;
+
 #   ???????????????????????????????????????????????????????????????????
 #   ?TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT?
 #   ???????????????????????????????????????????????????????????????????
@@ -30,36 +32,42 @@ submethod TWEAK {
     $!term-size     = term-size;                                            # $!term-size.rows $!term-size.cols
 }
 
-method add-cell (Our::Grid::Cell:D :$cell, :$row is copy = 0, :$col is copy = 0) {
-    given $row {
-        when Bool   { ++$!current-row;  $row = $!current-row;                                   }
-        when Int    { $!current-row     = $row;                                                 }
+method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
+    with $row {
+        given $row {
+            when Bool   { ++$!current-row;                                  }
+            when Int    { $!current-row = $row;                             }
+        }
     }
-    given $col {
-        when Bool   { ++$!current-col;  $col = $!current-col                                    }
-        when Int    { $!current-col     = $col;                                                 }
-        default     { $!current-col     = $!grid[$!current-row].elems; $col = $!current-col;    }
+    if $!grid[$!current-row]:!exists {
+        $!grid[$!current-row]   = Array.new();
+        $!current-col               = 0;
     }
-    $!grid[$row]        = Array.new()   unless $!grid[$row];
-    @!col-width[$col]   = 0 unless @!col-width[$col];
-    @!col-width[$col]   = $cell.TEXT.Str.chars if $cell.TEXT.Str.chars > @!col-width[$col];
-    if $col {
-        $!grid[$row][$col] = $cell;
+    with $col {
+        given $col {
+            when Bool   { ++$!current-col                               }
+            when Int    { $!current-col = $col;                         }
+            default     { $!current-col = $!grid[$!current-row].elems;  }
+        }
     }
-    else {
-        $!grid[$row].push: $cell;
+    @!col-width[$!current-col]      = 0                     without @!col-width[$!current-col];
+    @!col-width[$!current-col]      = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$!current-col];
+    if $!current-col > $!grid[$!current-row].elems {
+        loop (my $i = $col; $i >= 0; $i--) {
+            @!col-width[$i] = 0                 without @!col-width[$i];
+        }
     }
+    $!grid[$!current-row][$!current-col++] = $cell;
 }
 
 method TEXT-print {
-
-#   probably should default all Any things in the grid at this point...
-#   make it only as required; do it once, flag if anything updates, only run it again if an update occurred
-
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print ' ';
-            print $!grid[$row][$col].TEXT-padded(:width(@!col-width[$col]));
+            given $!grid[$row][$col] {
+                when Our::Grid::Cell:D  { print $!grid[$row][$col].TEXT-padded(:width(@!col-width[$col]));  }
+                default                 { print ' ' x @!col-width[$col];                                    }
+            }
             print ' ' unless $col == ($!grid[$row].elems - 1);
         }
         print " \n";
@@ -81,10 +89,6 @@ my  %box-char = (
     );
 
 method ANSI-print {
-
-#   probably should default all Any things in the grid at this point...
-
-
     my $col-width-total = 0;
     for @!col-width -> $colw {
         $col-width-total += $colw;
@@ -114,7 +118,12 @@ method ANSI-print {
         print ' ' x $margin;
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print %box-char<side> ~ ' ';
-            print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded with $!grid[$row][$col];
+            given $!grid[$row][$col] {
+                when Our::Grid::Cell:D  {
+                    print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
+                }
+                default                 { print ' ' x @!col-width[$col];                                    }
+            }
             print ' ' unless $col == ($!grid[$row].elems - 1);
         }
         put ' ' ~ %box-char<side>;

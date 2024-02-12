@@ -52,12 +52,14 @@ submethod BUILD(:$text,
 }
 
 submethod TWEAK {
-    $!TEXT                  = Nil;
+    $!TEXT                      = Nil;
+    $!fragments[0].spacebefore  = 0;
+    $!fragments[*-1].spaceafter = 0;
     my $i;
     loop ($i = 0; $i < $!fragments.elems; $i++ ) {
-        $!TEXT             ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
-        $!TEXT             ~= $!fragments[$i].TEXT;
-        $!TEXT             ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
+        $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
+        $!TEXT                 ~= $!fragments[$i].TEXT;
+        $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
     }
     self.ANSI-fmt;
     return self;

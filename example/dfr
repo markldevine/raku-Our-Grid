@@ -95,6 +95,7 @@ sub MAIN (
 
 #ddt %server-results;
 
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'),       :bold)), :0col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'),   :bold)), :1col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'),        :bold)), :2col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Used'),         :bold)), :3col);
