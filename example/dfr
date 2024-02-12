@@ -63,7 +63,7 @@ class df-Pk-actions {
 sub MAIN (
     Str     :$aix,              #= AIX server name(s) (comma separated list)
     Str     :$linux,            #= Linux server name(s) (comma separated list)
-    Bool    :$ansi,             #= ANSI print
+    Bool    :$text,             #= TEXT print
 ) {
     my @aix-servers;
     @aix-servers            = $aix.split(',')   if $aix;
@@ -96,20 +96,20 @@ sub MAIN (
     for %results.keys.sort -> $server {
         df-Pk-grammar.parse(%results{$server}.stdout-results, :actions(df-Pk-actions.new(:$server)));
     }
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'),       :bold)), :0col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'),   :bold)), :1col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'),        :bold)), :2col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Used'),         :bold)), :3col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Available'),    :bold)), :4col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('% Used'),       :bold)), :5col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Mount Point'),  :bold)), :6col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'),       :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :0col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'),   :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :1col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'),        :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :2col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Used'),         :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :3col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Available'),    :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :4col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('% Used'),       :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :5col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Mount Point'),  :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :6col);
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-KBS),                   :justification(justify-right))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-KBs),                    :justification(justify-right))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-KBs),               :justification(justify-right))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-KBS * 1024),            :justification(justify-right),  :bytes-to-bytes-unit)));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-KBs * 1024),             :justification(justify-right),  :bytes-to-bytes-unit)));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-KBs * 1024),        :justification(justify-right),  :bytes-to-bytes-unit)));
             if 80 <= $df-record.cap-per-used-num < 90 {
                 $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right), :foreground(orange))));
             }
@@ -125,11 +125,11 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point))));
         }
     }
-    if $ansi {
-        $grid.ANSI-print;
+    if $text {
+        $grid.TEXT-print;
     }
     else {
-        $grid.TEXT-print;
+        $grid.ANSI-print;
     }
 }
 
