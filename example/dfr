@@ -15,12 +15,13 @@ my @aix-filesystems         = </ /usr /var /tmp /home /opt /var/adm/ras/livedump
 my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
 
 class df-Pk {
-    has $.filesystem;
-    has $.total-KBS;
-    has $.used-KBs;
-    has $.available-KBs;
-    has $.capacity-percent-used;
-    has $.mount-point;
+    has Str $.filesystem;
+    has Int $.total-KBS;
+    has Int $.used-KBs;
+    has Int $.available-KBs;
+    has Str $.capacity-percent-used;
+    has Int $.cap-per-used-num;
+    has Str $.mount-point;
 }
 
 grammar df-Pk-grammar {
@@ -33,12 +34,13 @@ grammar df-Pk-grammar {
     token df-data-record {
         \n ^^ <filesystem> \s+ <total-KBS> \s+ <used-KBs> \s+ <available-KBs> \s+ <capacity-percent-used> \s+ <mount-point> $$
     }
-    token filesystem            { <[/\w]>+  }
-    token total-KBS             { \d+       }
-    token used-KBs              { \d+       }
-    token available-KBs         { \d+       }
-    token capacity-percent-used { \d+ '%'   }
-    token mount-point           { <[/\w]>+  }
+    token filesystem            { <[/\w]>+                  }
+    token total-KBS             { \d+                       }
+    token used-KBs              { \d+                       }
+    token available-KBs         { \d+                       }
+    token capacity-percent-used { <cap-per-used-num> '%'    }
+    token cap-per-used-num      { \d+                       }
+    token mount-point           { <[/\w]>+                  }
 }
 
 class df-Pk-actions {
@@ -48,18 +50,20 @@ class df-Pk-actions {
         %server-results{$!server}.push: 
             df-Pk.new:
                         :filesystem(~$/<filesystem>),
-                        :total-KBS(~$/<total-KBS>),
-                        :used-KBs(~$/<used-KBs>),
-                        :available-KBs(~$/<available-KBs>),
+                        :total-KBS(+$/<total-KBS>),
+                        :used-KBs(+$/<used-KBs>),
+                        :available-KBs(+$/<available-KBs>),
                         :capacity-percent-used(~$/<capacity-percent-used>),
+                        :cap-per-used-num(+$/<capacity-percent-used><cap-per-used-num>),
                         :mount-point(~$/<mount-point>),
             ;
     }
 }
 
 sub MAIN (
-    Str :$aix,              #= AIX server name(s) (comma separated list)
-    Str :$linux,            #= Linux server name(s) (comma separated list)
+    Str     :$aix,              #= AIX server name(s) (comma separated list)
+    Str     :$linux,            #= Linux server name(s) (comma separated list)
+    Bool    :$ansi,             #= ANSI print
 ) {
     my @aix-servers;
     @aix-servers            = $aix.split(',')   if $aix;
@@ -89,12 +93,9 @@ sub MAIN (
     my $command-manager = Async::Command::Multi.new(:%command, :2time-out, :4batch);
     $command-manager.sow;
     my %results = $command-manager.reap;
-    for %results.keys -> $server {
+    for %results.keys.sort -> $server {
         df-Pk-grammar.parse(%results{$server}.stdout-results, :actions(df-Pk-actions.new(:$server)));
     }
-
-#ddt %server-results;
-
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'),       :bold)), :0col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'),   :bold)), :1col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'),        :bold)), :2col);
@@ -102,33 +103,34 @@ sub MAIN (
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Available'),    :bold)), :4col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('% Used'),       :bold)), :5col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Mount Point'),  :bold)), :6col);
-    for %server-results.keys -> $server {
+    for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-KBS))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-KBs))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-KBs))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-KBS),                   :justification(justify-right))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-KBs),                    :justification(justify-right))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-KBs),               :justification(justify-right))));
+            if 80 <= $df-record.cap-per-used-num < 90 {
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right), :foreground(orange))));
+            }
+            elsif 90 <= $df-record.cap-per-used-num < 100 {
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right), :foreground(red))));
+            }
+            elsif $df-record.cap-per-used-num == 100 {
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right), :foreground(red), :blink)));
+            }
+            else {
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right))));
+            }
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point))));
         }
     }
-#   $grid.TEXT-print;
-    $grid.ANSI-print;
+    if $ansi {
+        $grid.ANSI-print;
+    }
+    else {
+        $grid.TEXT-print;
+    }
 }
 
 =finish
-
-    has $.filesystem;
-    has $.total-KBS;
-    has $.used-KBs;
-    has $.available-KBs;
-    has $.capacity-percent-used;
-    has $.mount-point;
-
-#loop (my $row = 0; $row < $max-rows; $row++) {
-#    loop (my $col = 0; $col < $max-cols; $col++) {
-#        $grid.add-cell(:cell(Our::Grid::Cell.new(:text($row ~ ';' ~ $col), :foreground(white), :justification(justify-right))), :$row, :$col);
-#    }
-#}
-
