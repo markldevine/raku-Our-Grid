@@ -29,7 +29,18 @@ my @aix-servers             = <
                                 cadbcgndev01.wmata.com
                                 caapfaredev01.wmata.com
                                 cadbfaredev01.wmata.com
+                                p595b30.wmata.com
+                                p595b33.wmata.com
+                                p595b34.wmata.com
+                                p595b13.wmata.com
                                 p595b32.wmata.com
+                                p595b29.wmata.com
+                                p595b23.wmata.com
+                                p595b22.wmata.com
+                                p590b6.wmata.com
+                                p590b3.wmata.com
+                                p590b10.wmata.com
+                                p590b1.wmata.com
                                 cadbiamdev01.wmata.com
                                 cadbtrpdr01.wmata.com
                                 cadbbusdr10.wmata.com
@@ -40,6 +51,10 @@ my @aix-servers             = <
                                 caappsprd03.wmata.com
                                 cadbpsdr01.wmata.com
                                 cadbpsdr02.wmata.com
+                                p590a1.wmata.com
+                                p590a10.wmata.com
+                                p590a6.wmata.com
+                                p595a13.wmata.com
                                 p595a27.wmata.com
                                 caappsdev11.wmata.com
                                 p595a14.wmata.com
@@ -48,8 +63,15 @@ my @aix-servers             = <
                                 caappsprd05.wmata.com
                                 caappsprd06.wmata.com
                                 p770a11.wmata.com
+                                p770a22.wmata.com
+                                p770a23.wmata.com
+                                jadbelmprd01.wmata.com
+                                jaappsprd02.wmata.com
+                                jadbcgnprd01.wmata.com
+                                p595a29.wmata.com
                                 jaapfareprd12.wmata.com
                                 aixtest.wmata.com
+                                p770c23.wmata.com
                                 p650nimjgb.wmata.com
                                 jaappsprd03.wmata.com
                                 jaappsprd04.wmata.com
@@ -60,7 +82,10 @@ my @aix-servers             = <
                                 p770a21.wmata.com
                                 p770a12.wmata.com
                                 p770c11.wmata.com
+                                caapfareprd11.wmata.com
+                                caappsprd07.wmata.com
                                 jaappsprd07.wmata.com
+                                jaapfareprd03.wmata.com
                                 p595b14.wmata.com
                             >;
 
@@ -118,12 +143,13 @@ sub MAIN (
     Str     :$aix,              #= AIX server name(s) (comma separated list)
     Str     :$linux,            #= Linux server name(s) (comma separated list)
     Bool    :$text,             #= TEXT print
-    Int     :$above,            #= only display file systesm above the percentage 
-    Bool    :$light-mode,       #= reverse header highlight for light-mode
 ) {
-    @aix-servers            = $aix.split(',')   if $aix;
+#   my @aix-servers;
+#   @aix-servers            = $aix.split(',')   if $aix;
     my @linux-servers;
     @linux-servers          = $linux.split(',') if $linux;
+
+    my Our::Grid    $grid  .= new: :title('df Report');
 
     my %command;
     if @aix-servers {
@@ -134,7 +160,7 @@ sub MAIN (
     }
     elsif @linux-servers {
         for @linux-servers -> $linux {
-            %command{$linux}    = ['ssh', '-o', 'StrictHostKeyChecking=accept-new', $linux, '/usr/bin/df', '-Pk'];
+            %command{$linux}    = ['ssh', $linux, '/usr/bin/df', '-Pk'];
             %command{$linux}.append: @linux-filesystems;
         }
     }
@@ -149,18 +175,15 @@ sub MAIN (
     for %results.keys.sort -> $server {
         df-Pk-grammar.parse(%results{$server}.stdout-results, :actions(df-Pk-actions.new(:$server)));
     }
-
-    my Our::Grid    $grid  .= new: :title('df Report'), :reverse-highlight($light-mode);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'))),     :0col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'))), :1col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'))),      :2col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Used'))),       :3col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Available'))),  :4col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('% Used'))),     :5col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Mount Point'))),:6col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'),       :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :0col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'),   :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :1col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'),        :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :2col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Used'),         :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :3col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Available'),    :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :4col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('% Used'),       :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :5col);
+    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Mount Point'),  :bold, :justification(justify-center), :foreground(black), :highlight(gray254))), :6col);
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
-            next if $above && $df-record.cap-per-used-num <= $above;
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem))));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-KBS * 1024),            :justification(justify-right),  :bytes-to-bytes-unit)));

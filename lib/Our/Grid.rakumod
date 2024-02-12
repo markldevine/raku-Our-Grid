@@ -3,7 +3,11 @@ unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 use Our::Grid::Cell;
 use Our::Utilities;
 
-use Data::Dump::Tree;
+enum OUTPUTS is export (
+    json            => 'JSON::Fast',
+    tui             => 'Terminal::UI',
+    xlsl            => 'Spreadsheet::XLSX',
+);
 
 #   ???????????????????????????????????????????????????????????????????
 #   ?TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT?
@@ -21,10 +25,13 @@ has $.header;
 has $.footer;
 has $.term-size;
 
-has $.grid          = Array.new();
-has $.current-row   = 0;
-has $.current-col   = 0;
-has @.col-width;
+has         $.grid              = Array.new();
+has Int     $.current-row       = 0;
+has Int     $.current-col       = 0;
+has Int     @.col-width;
+has Bool    $.row-zero-headings = True;
+
+has Bool    $.reverse-highlight;
 
 has $.borders;
 
@@ -71,6 +78,13 @@ method TEXT-print {
             print ' ' unless $col == ($!grid[$row].elems - 1);
         }
         print " \n";
+        if $row == 0 && $!row-zero-headings {
+            loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
+                print ' ' ~ '-' x @!col-width[$col];
+                print ' ' unless $col == ($!grid[$row].elems - 1);
+            }
+            print "\n";
+        }
     }
 }
 
@@ -120,7 +134,12 @@ method ANSI-print {
             print %box-char<side> ~ ' ';
             given $!grid[$row][$col] {
                 when Our::Grid::Cell:D  {
-                    print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
+                    if $row == 0 && $!row-zero-headings {
+                        print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col]), :bold, :reverse($!reverse-highlight), :highlight(gray254), :foreground(black), :justification(justify-center)).ANSI-padded;
+                    }
+                    else {
+                        print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
+                    }
                 }
                 default                 { print ' ' x @!col-width[$col];                                    }
             }

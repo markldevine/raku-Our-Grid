@@ -138,7 +138,7 @@ method ANSI-fmt (*%options) {
     my $highlight       = $!highlight;
     $highlight          = %options<highlight>.value     if %options<highlight>:exists;
     unless $background {
-        $background     = $highlight.value              if $highlight;
+        $background     = $highlight                    if $highlight;
     }
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;
