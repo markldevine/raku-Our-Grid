@@ -120,6 +120,8 @@ sub MAIN (
     Bool    :$text,             #= TEXT print
     Int     :$above,            #= only display file systesm above the percentage 
     Bool    :$light-mode,       #= reverse header highlight for light-mode
+    Bool    :$output-csv,       #= dump CSV to STDOUT
+    Bool    :$output-json,      #= dump JSON to STDOUT
 ) {
     @aix-servers            = $aix.split(',')   if $aix;
     my @linux-servers;
@@ -183,6 +185,12 @@ sub MAIN (
     }
     if $text {
         $grid.TEXT-print;
+    }
+    elsif $output-csv {
+        $grid.output-csv;
+    }
+    elsif $output-json {
+        $grid.output-json;
     }
     else {
         $grid.ANSI-print;

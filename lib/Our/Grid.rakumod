@@ -2,11 +2,18 @@ unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 use Our::Grid::Cell;
 use Our::Utilities;
+use Text::CSV;
+use JSON::Fast;
 
-enum OUTPUTS is export (
+#use Data::Dump::Tree;
+
+enum OUTPUTS (
+    csv             => 'Text::CSV',
+    html            => '???',
     json            => 'JSON::Fast',
     tui             => 'Terminal::UI',
     xlsl            => 'Spreadsheet::XLSX',
+    xml             => 'LibXML',
 );
 
 #   ???????????????????????????????????????????????????????????????????
@@ -30,13 +37,32 @@ has Int     $.current-row       = 0;
 has Int     $.current-col       = 0;
 has Int     @.col-width;
 has Bool    $.row-zero-headings = True;
-
 has Bool    $.reverse-highlight;
 
-has $.borders;
 
 submethod TWEAK {
-    $!term-size     = term-size;                                            # $!term-size.rows $!term-size.cols
+    $!term-size                 = term-size;                                            # $!term-size.rows $!term-size.cols
+}
+
+method output-json {
+    put to-json(self!datafy);
+}
+
+method !datafy {
+    my @data                    = Array.new();
+    loop (my $row = 0; $row < $!grid.elems; $row++) {
+        loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
+            given $!grid[$row][$col] {
+                when Our::Grid::Cell:D  { @data[$row].push: $!grid[$row][$col].TEXT;    }
+                default                 { @data[$row].push: '';                         }
+            }
+        }
+    }
+    @data;
+}
+
+method output-csv {
+    csv(in => csv(in => self!datafy), out => $*OUT);
 }
 
 method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
