@@ -56,25 +56,76 @@ method !datafy {
     @data;
 }
 
-method output-csv {
+method CSV-print {
     csv(in => csv(in => self!datafy), out => $*OUT);
 }
 
-method output-json {
+method JSON-print {
     put to-json(self!datafy);
 }
 
-method !subst-xml-text (Str:D $s) {
+method HTML-print {
+    put '<!DOCTYPE html>';
+    put '<html>';
+    put ' ' x 4     ~ '<head>';
+    put ' ' x 8     ~ '<style>';
+    put ' ' x 12    ~ 'table,';
+    put ' ' x 12    ~ 'table td {';
+    put ' ' x 16    ~ 'border: 1px solid #cccccc;';
+    put ' ' x 12    ~ '}';
+    put ' ' x 12    ~ 'td {';
+    put ' ' x 16    ~ 'height: 40px;';
+    put ' ' x 16    ~ 'width: 80px;';
+    put ' ' x 16    ~ 'padding: 5px;';
+    put ' ' x 16    ~ 'text-align: center;';
+    put ' ' x 16    ~ 'vertical-align: middle;';
+    put ' ' x 12    ~ '}';
+    put ' ' x 8     ~ '</style>';
+    put ' ' x 4     ~ '</head>';
+    put ' ' x 4     ~ '<body>';
+    my $index   = 0;
+    put ' ' x 8     ~ '<table>';
+    if $!row-zero-headings {
+        $index++;
+        put ' ' x 12 ~ '<tr>';
+        loop (my $i = 0; $i < $!grid[0].elems; $i++) {
+            put ' ' x 16 ~ '<th>' ~ self!subst-ml-text($!grid[0][$i].TEXT) ~ '</th>';
+        }
+        put ' ' x 12 ~ '</tr>';
+    }
+    loop (my $row = $index; $row < $!grid.elems; $row++) {
+        put ' ' x 12 ~ '<tr>';
+        loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
+            if $!grid[$row][$col] ~~ Our::Grid::Cell:D {
+                given $!grid[$row][$col] {
+                    when .justification ~~ justify-left     { print ' ' x 16 ~ '<td style="text-align: left">';     }
+                    when .justification ~~ justify-center   { print ' ' x 16 ~ '<td style="text-align: center">';   }
+                    when .justification ~~ justify-right    { print ' ' x 16 ~ '<td style="text-align: right">';    }
+                }
+                put self!subst-ml-text($!grid[$row][$col].TEXT) ~ '</td>';
+            }
+            else {
+                put ' ' x 16 ~ '<td></td>';
+            }
+        }
+        put ' ' x 12 ~ '</tr>';
+    }
+    put ' ' x 8 ~ '</table>';
+    put ' ' x 4 ~ '</body>';
+    put '</html>';
+}
+
+method !subst-ml-text (Str:D $s) {
     my $result  = $s;
-    $result     = $result.subst('<', '&lt;');
-    $result     = $result.subst('>', '&gt;');
-    $result     = $result.subst('&', '&amp;');
-    $result     = $result.subst("'", '&apos;');
-    $result     = $result.subst('"', '&quot;');
+    $result     = $result.subst('<', '&lt;',    :g);
+    $result     = $result.subst('>', '&gt;',    :g);
+    $result     = $result.subst('&', '&amp;',   :g);
+    $result     = $result.subst("'", '&apos;',  :g);
+    $result     = $result.subst('"', '&quot;',  :g);
     return $result;
 }
 
-method output-xml {
+method XML-print {
     die 'Cannot generate XML if $!row-zero-headings == False' unless $!row-zero-headings;
     put '<?xml version="1.0" encoding="UTF-8"?>';
     put '<root>';
@@ -89,7 +140,7 @@ method output-xml {
         put ' ' x 4 ~ '<row' ~ $row ~ '>';
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             if $!grid[$row][$col] ~~ Our::Grid::Cell:D {
-                put ' ' x 8 ~ '<' ~ @headers[$col] ~ '>' ~ self!subst-xml-text($!grid[$row][$col].TEXT) ~ '</' ~ @headers[$col] ~ '>';
+                put ' ' x 8 ~ '<' ~ @headers[$col] ~ '>' ~ self!subst-ml-text($!grid[$row][$col].TEXT) ~ '</' ~ @headers[$col] ~ '>';
             }
         }
         put ' ' x 4 ~ '</row' ~ $row ~ '>';
@@ -145,20 +196,6 @@ method TEXT-print {
         }
     }
 }
-
-#| Character Cell Graphics Set
-my  %box-char = (
-        side                => '│',
-        horizontal          => '─',
-        down-and-horizontal => '┬', 
-        up-and-horizontal   => '┴',
-        top-left-corner     => '┌',
-        top-right-corner    => '┐',
-        bottom-left-corner  => '└',
-        bottom-right-corner => '┘',
-        side-row-left-sep   => '├',
-        side-row-right-sep  => '┤',
-    );
 
 method ANSI-print {
     my $col-width-total = 0;

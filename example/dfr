@@ -6,11 +6,12 @@ use Async::Command::Multi;
 use Our::Grid;
 use Our::Grid::Cell;
 use Our::Utilities;
-#use Grammar::Debugger;
 
+#use Grammar::Debugger;
 use Data::Dump::Tree;
 
-my @aix-servers             = <
+my @aix-servers             = ();
+my @aix-serversX            = <
                                 isplc02.wmata.com
                                 isplc01.wmata.com
                                 p595nimctf.wmata.com
@@ -65,8 +66,8 @@ my @aix-servers             = <
                             >;
 
 my %server-results;
-my @aix-filesystems         = </ /usr /var /tmp /home /opt /var/adm/ras/livedump /nmon /wmata /audit /admin>;
-my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
+#my @aix-filesystems         = </ /usr /var /tmp /home /opt /var/adm/ras/livedump /nmon /wmata /audit /admin>;
+#my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
 
 class df-Pk {
     has Str $.filesystem;
@@ -88,13 +89,13 @@ grammar df-Pk-grammar {
     token df-data-record {
         \n ^^ <filesystem> \s+ <total-KBS> \s+ <used-KBs> \s+ <available-KBs> \s+ <capacity-percent-used> \s+ <mount-point> $$
     }
-    token filesystem            { <[/\w]>+                  }
+    token filesystem            { <[-\.:/_\w]>+             }
     token total-KBS             { \d+                       }
     token used-KBs              { \d+                       }
     token available-KBs         { \d+                       }
     token capacity-percent-used { <cap-per-used-num> '%'    }
     token cap-per-used-num      { \d+                       }
-    token mount-point           { <[/\w]>+                  }
+    token mount-point           { <[-\.:/_\w]>+             }
 }
 
 class df-Pk-actions {
@@ -121,6 +122,7 @@ sub MAIN (
     Int     :$above,            #= only display file systesm above the percentage 
     Bool    :$light-mode,       #= reverse header highlight for light-mode
     Bool    :$output-csv,       #= dump CSV to STDOUT
+    Bool    :$output-html,      #= dump HTML to STDOUT
     Bool    :$output-json,      #= dump JSON to STDOUT
     Bool    :$output-xml,       #= dump XML to STDOUT
 ) {
@@ -132,13 +134,13 @@ sub MAIN (
     if @aix-servers {
         for @aix-servers -> $aix {
             %command{$aix}      = ['ssh', $aix, '/usr/bin/df', '-Pk'];
-            %command{$aix}.append: @aix-filesystems;
+#           %command{$aix}.append: @aix-filesystems;
         }
     }
     elsif @linux-servers {
         for @linux-servers -> $linux {
             %command{$linux}    = ['ssh', '-o', 'StrictHostKeyChecking=accept-new', $linux, '/usr/bin/df', '-Pk'];
-            %command{$linux}.append: @linux-filesystems;
+#           %command{$linux}.append: @linux-filesystems;
         }
     }
     else {
@@ -152,6 +154,9 @@ sub MAIN (
     for %results.keys.sort -> $server {
         df-Pk-grammar.parse(%results{$server}.stdout-results, :actions(df-Pk-actions.new(:$server)));
     }
+
+#ddt %server-results;
+#die;
 
     my Our::Grid    $grid  .= new: :title('df Report'), :reverse-highlight($light-mode);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'))),     :0col);
@@ -170,25 +175,42 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-KBs * 1024),             :justification(justify-right),  :bytes-to-bytes-unit)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-KBs * 1024),        :justification(justify-right),  :bytes-to-bytes-unit)));
             if 80 <= $df-record.cap-per-used-num < 90 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right), :foreground(orange))));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right),  :foreground(orange))));
             }
             elsif 90 <= $df-record.cap-per-used-num < 100 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right), :foreground(red))));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right),  :foreground(red))));
             }
             elsif $df-record.cap-per-used-num == 100 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right), :foreground(red), :blink)));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right),  :foreground(red), :blink)));
             }
             else {
                 $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right))));
             }
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),                 :justification(justify-left))));
         }
     }
+    if any($text.so, $output-csv.so, $output-html.so, $output-json.so, $output-xml) {
+        when $text          { $grid.TEXT-print; proceed; }
+        when $output-csv    { $grid.CSV-print;  proceed; }
+        when $output-html   { $grid.HTML-print; proceed; }
+        when $output-json   { $grid.JSON-print; proceed; }
+        when $output-xml    { $grid.XML-print;  proceed; }
+    }
+    else {
+        $grid.ANSI-print;
+    }
+}
+
+=finish
+
     if $text {
         $grid.TEXT-print;
     }
     elsif $output-csv {
         $grid.output-csv;
+    }
+    elsif $output-html {
+        $grid.output-html;
     }
     elsif $output-json {
         $grid.output-json;
@@ -199,6 +221,3 @@ sub MAIN (
     else {
         $grid.ANSI-print;
     }
-}
-
-=finish

@@ -3,11 +3,11 @@ unit class Our::Grid::Cell:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 use Our::Grid::Cell::Fragment;
 use Our::Utilities;
 
-enum Justification is export ( 
-    justify-left    => 1, 
-    justify-center  => 2, 
-    justify-right   => 3, 
-);
+#enum Justification is export ( 
+#    justify-left    => 1, 
+#    justify-center  => 2, 
+#    justify-right   => 3, 
+#);
 
 has                 $.fragments;
 has                 %!fragment-options;
@@ -34,7 +34,7 @@ submethod BUILD(:$text,
                 :$width,
                 *%fragment-options,
                ) {
-    die "Must initialize with either ':text' or ':fragments'" unless any($text.so, $fragments.so) && !all($text.so, $fragments.so);
+#   die "Must initialize with either ':text' or ':fragments'" unless any($text.so, $fragments.so) && !all($text.so, $fragments.so);
     $!text              = $text;
     $!width             = $width                with $width;
     %!fragment-options  = %fragment-options     with %fragment-options;
