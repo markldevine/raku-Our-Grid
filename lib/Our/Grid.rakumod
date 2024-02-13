@@ -5,7 +5,7 @@ use Our::Utilities;
 use Text::CSV;
 use JSON::Fast;
 
-#use Data::Dump::Tree;
+use Data::Dump::Tree;
 
 enum OUTPUTS (
     csv             => 'Text::CSV',
@@ -39,13 +39,8 @@ has Int     @.col-width;
 has Bool    $.row-zero-headings = True;
 has Bool    $.reverse-highlight;
 
-
 submethod TWEAK {
     $!term-size                 = term-size;                                            # $!term-size.rows $!term-size.cols
-}
-
-method output-json {
-    put to-json(self!datafy);
 }
 
 method !datafy {
@@ -63,6 +58,43 @@ method !datafy {
 
 method output-csv {
     csv(in => csv(in => self!datafy), out => $*OUT);
+}
+
+method output-json {
+    put to-json(self!datafy);
+}
+
+method !subst-xml-text (Str:D $s) {
+    my $result  = $s;
+    $result     = $result.subst('<', '&lt;');
+    $result     = $result.subst('>', '&gt;');
+    $result     = $result.subst('&', '&amp;');
+    $result     = $result.subst("'", '&apos;');
+    $result     = $result.subst('"', '&quot;');
+    return $result;
+}
+
+method output-xml {
+    die 'Cannot generate XML if $!row-zero-headings == False' unless $!row-zero-headings;
+    put '<?xml version="1.0" encoding="UTF-8"?>';
+    put '<root>';
+    my $headers = $!grid[0];
+    my @headers;
+    loop (my $i = 0; $i < $headers.elems; $i++) {
+        @headers[$i] = $headers[$i].TEXT;
+        @headers[$i] = @headers[$i].subst: ' ', '';
+        @headers[$i] = @headers[$i].subst: '%', 'PCT';
+    }
+    loop (my $row = 1; $row < $!grid.elems; $row++) {
+        put ' ' x 4 ~ '<row' ~ $row ~ '>';
+        loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
+            if $!grid[$row][$col] ~~ Our::Grid::Cell:D {
+                put ' ' x 8 ~ '<' ~ @headers[$col] ~ '>' ~ self!subst-xml-text($!grid[$row][$col].TEXT) ~ '</' ~ @headers[$col] ~ '>';
+            }
+        }
+        put ' ' x 4 ~ '</row' ~ $row ~ '>';
+    }
+    put '</root>';
 }
 
 method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {

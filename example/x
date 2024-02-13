@@ -1,0 +1,18 @@
+#!/usr/bin/env raku
+
+use LibXML::Reader;
+
+sub dump-node($reader) {
+    printf "%d %d %s %d\n", $reader.depth,
+                            $reader.nodeType,
+                            $reader.name,
+                            $reader.isEmptyElement;
+}
+
+my LibXML::Reader $reader .= new(file => "/home/mdevine/github.com/raku-Our-Grid/example/x.xml");
+while $reader.read {
+    dump-node($reader);
+}
+
+=finish
+

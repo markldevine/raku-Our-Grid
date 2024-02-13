@@ -122,6 +122,7 @@ sub MAIN (
     Bool    :$light-mode,       #= reverse header highlight for light-mode
     Bool    :$output-csv,       #= dump CSV to STDOUT
     Bool    :$output-json,      #= dump JSON to STDOUT
+    Bool    :$output-xml,       #= dump XML to STDOUT
 ) {
     @aix-servers            = $aix.split(',')   if $aix;
     my @linux-servers;
@@ -191,6 +192,9 @@ sub MAIN (
     }
     elsif $output-json {
         $grid.output-json;
+    }
+    elsif $output-xml {
+        $grid.output-xml;
     }
     else {
         $grid.ANSI-print;
