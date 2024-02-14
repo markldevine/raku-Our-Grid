@@ -7,11 +7,10 @@ use Our::Grid;
 use Our::Grid::Cell;
 use Our::Utilities;
 
-use Grammar::Debugger;
+#use Grammar::Debugger;
 use Data::Dump::Tree;
 
-my @aix-servers             = ();
-my @aix-serversX            = <
+my @aix-servers             = <
                                 isplc02.wmata.com
                                 isplc01.wmata.com
                                 p595nimctf.wmata.com
@@ -42,13 +41,9 @@ my @aix-serversX            = <
                                 cadbpsdr01.wmata.com
                                 cadbpsdr02.wmata.com
                                 p595a27.wmata.com
-                                caappsdev11.wmata.com
-                                p595a14.wmata.com
-                                cadbfaredr21.wmata.com
                                 caappsprd04.wmata.com
                                 caappsprd05.wmata.com
                                 caappsprd06.wmata.com
-                                p770a11.wmata.com
                                 jaapfareprd12.wmata.com
                                 aixtest.wmata.com
                                 p650nimjgb.wmata.com
@@ -58,11 +53,7 @@ my @aix-serversX            = <
                                 jaappsprd06.wmata.com
                                 jaappsprd01.wmata.com
                                 p770adoc3.wmata.com
-                                p770a21.wmata.com
-                                p770a12.wmata.com
-                                p770c11.wmata.com
                                 jaappsprd07.wmata.com
-                                p595b14.wmata.com
                             >;
 
 my %server-results;
@@ -71,9 +62,9 @@ my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
 
 class df-Pk {
     has Str $.filesystem;
-    has Str $.total-KBS;
-    has Str $.used-KBs;
-    has Str $.available-KBs;
+    has     $.total-bytes;
+    has     $.used-bytes;
+    has     $.available-bytes;
     has Str $.capacity;
     has Int $.cap-percent-num;
     has Str $.mount-point;
@@ -87,34 +78,49 @@ grammar df-Pk-grammar {
         $
     }
     token df-data-record {
-        \n ^^ <filesystem> \s+ <total-KBS> \s+ <used-KBs> \s+ <available-KBs> \s+ <capacity> \s+ <mount-point> $$
+        \n ^^ <filesystem> \s+ <total-KBs> \s+ <used-KBs> \s+ <available-KBs> \s+ <capacity> \s+ <mount-point> $$
     }
-    token filesystem        { <[-\.:/_\w]>+             }
-    token total-KBS         { '-' || \d+                }
-    token used-KBs          { '-' || \d+                }
-    token available-KBs     { '-' || \d+                }
-    token capacity          { '-' || <capacity-percent> }
-    token capacity-percent  { <cap-percent-num> '%'     }
-    token cap-percent-num   { \d+                       }
-    token mount-point       { <[-\.:/_\w]>+             }
+    token filesystem        { <[-\.:/_\w]>+                 }
+    token total-KBs         { '-' || <total-KBs-num>        }
+    token total-KBs-num     { \d+                           }
+    token used-KBs          { '-' || <used-KBs-num>         }
+    token used-KBs-num      { \d+                           }
+    token available-KBs     { '-' || <available-KBs-num>    }
+    token available-KBs-num { \d+                           }
+    token capacity          { '-' || <capacity-percent>     }
+    token capacity-percent  { <cap-percent-num> '%'         }
+    token cap-percent-num   { \d+                           }
+    token mount-point       { <[-\.:/_\w]>+                 }
 }
 
 class df-Pk-actions {
     has $.server        is required;
 
     method df-data-record ($/) {
+        my $total-bytes         = '-';
+        if $/<total-KBs><total-KBs-num>:exists {
+            $total-bytes        = +$/<total-KBs><total-KBs-num> * 1024;
+        }
+        my $used-bytes          = '-';
+        if $/<used-KBs><used-KBs-num>:exists {
+            $used-bytes         = +$/<used-KBs><used-KBs-num> * 1024;
+        }
+        my $available-bytes     = '-';
+        if $/<available-KBs><available-KBs-num>:exists {
+            $available-bytes    = +$/<available-KBs><available-KBs-num> * 1024;
+        }
+        my $cap-percent-num     = 0;
+        if $/<capacity><capacity-percent><cap-percent-num>:exists {
+            $cap-percent-num    = +$/<capacity><capacity-percent><cap-percent-num>;
+        }
         %server-results{$!server}.push: 
-            my $cap-percent-num     = 0;
-            if $/<capacity><capacity-percent><capacity-percent-num>:exists {
-                $cap-percent-num    = +$/<capacity><capacity-percent><cap-percent-num>;
-            }
             df-Pk.new:
                         :filesystem(~$/<filesystem>),
-                        :total-KBS(~$/<total-KBS>),
-                        :used-KBs(~$/<used-KBs>),
-                        :available-KBs(~$/<available-KBs>),
+                        :$total-bytes,
+                        :$used-bytes,
+                        :$available-bytes,
                         :capacity(~$/<capacity>),
-                        :cap-percent-num($cap-percent-num),
+                        :$cap-percent-num,
                         :mount-point(~$/<mount-point>),
             ;
     }
@@ -131,6 +137,7 @@ sub MAIN (
     Bool    :$json-print,   #= dump JSON to STDOUT
     Bool    :$xml-print,    #= dump XML to STDOUT
 ) {
+@aix-servers = ();
     @aix-servers            = $aix.split(',')   if $aix;
     my @linux-servers;
     @linux-servers          = $linux.split(',') if $linux;
@@ -153,11 +160,11 @@ sub MAIN (
         $*ERR.put: $*USAGE;
         exit 1;
     }
-    my $command-manager = Async::Command::Multi.new(:%command, :2time-out, :4batch);
+    my $command-manager = Async::Command::Multi.new(:%command, :20time-out, :8batch);
     $command-manager.sow;
     my %results = $command-manager.reap;
     for %results.keys.sort -> $server {
-        df-Pk-grammar.parse(%results{$server}.stdout-results, :actions(df-Pk-actions.new(:$server))) || die "Failed parsing of: \n\n" ~ %results{$server}.stdout-results.head;
+        df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || die "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
     my Our::Grid    $grid  .= new: :title('df Report'), :reverse-highlight($light-mode);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'))),     :0col);
@@ -172,22 +179,22 @@ sub MAIN (
             next if $above && $df-record.cap-per-used-num <= $above;
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-KBS * 1024),            :justification(justify-right),  :bytes-to-bytes-unit)));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-KBs * 1024),             :justification(justify-right),  :bytes-to-bytes-unit)));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-KBs * 1024),        :justification(justify-right),  :bytes-to-bytes-unit)));
-            if 80 <= $df-record.cap-per-used-num < 90 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right),  :foreground(orange))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification(justify-right),  :bytes-to-bytes-unit)));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-bytes),      :justification(justify-right),  :bytes-to-bytes-unit)));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-bytes), :justification(justify-right),  :bytes-to-bytes-unit)));
+            if 80 <= $df-record.cap-percent-num < 90 {
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground(orange))));
             }
-            elsif 90 <= $df-record.cap-per-used-num < 100 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right),  :foreground(red))));
+            elsif 90 <= $df-record.cap-percent-num < 100 {
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground(red))));
             }
-            elsif $df-record.cap-per-used-num == 100 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right),  :foreground(red), :blink)));
+            elsif $df-record.cap-percent-num == 100 {
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground(red), :blink)));
             }
             else {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity-percent-used),   :justification(justify-right))));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right))));
             }
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),                 :justification(justify-left))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
         }
     }
     if any($text.so, $csv-print.so, $html-print.so, $json-print.so, $xml-print.so) {
