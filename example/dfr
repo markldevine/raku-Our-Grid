@@ -137,7 +137,7 @@ sub MAIN (
     Bool    :$json-print,   #= dump JSON to STDOUT
     Bool    :$xml-print,    #= dump XML to STDOUT
 ) {
-@aix-servers = ();
+#@aix-servers = ();
     @aix-servers            = $aix.split(',')   if $aix;
     my @linux-servers;
     @linux-servers          = $linux.split(',') if $linux;
@@ -164,7 +164,7 @@ sub MAIN (
     $command-manager.sow;
     my %results = $command-manager.reap;
     for %results.keys.sort -> $server {
-        df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || die "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
+        df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || warn "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
     my Our::Grid    $grid  .= new: :title('df Report'), :reverse-highlight($light-mode);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'))),     :0col);
@@ -176,7 +176,7 @@ sub MAIN (
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Mount Point'))),:6col);
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
-            next if $above && $df-record.cap-per-used-num <= $above;
+            next if $above && $df-record.cap-percent-num <= $above;
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem))));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification(justify-right),  :bytes-to-bytes-unit)));
