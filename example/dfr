@@ -7,7 +7,7 @@ use Our::Grid;
 use Our::Grid::Cell;
 use Our::Utilities;
 
-#use Grammar::Debugger;
+use Grammar::Debugger;
 use Data::Dump::Tree;
 
 my @aix-servers             = ();
@@ -66,16 +66,16 @@ my @aix-serversX            = <
                             >;
 
 my %server-results;
-#my @aix-filesystems         = </ /usr /var /tmp /home /opt /var/adm/ras/livedump /nmon /wmata /audit /admin>;
-#my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
+my @aix-filesystems         = </ /usr /var /tmp /home /opt /var/adm/ras/livedump /nmon /wmata /audit /admin>;
+my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
 
 class df-Pk {
     has Str $.filesystem;
     has Int $.total-KBS;
     has Int $.used-KBs;
     has Int $.available-KBs;
-    has Str $.capacity-percent-used;
-    has Int $.cap-per-used-num;
+    has Str $.capacity;
+    has Int $.cap-percent-num;
     has Str $.mount-point;
 }
 
@@ -87,15 +87,16 @@ grammar df-Pk-grammar {
         $
     }
     token df-data-record {
-        \n ^^ <filesystem> \s+ <total-KBS> \s+ <used-KBs> \s+ <available-KBs> \s+ <capacity-percent-used> \s+ <mount-point> $$
+        \n ^^ <filesystem> \s+ <total-KBS> \s+ <used-KBs> \s+ <available-KBs> \s+ <capacity> \s+ <mount-point> $$
     }
-    token filesystem            { <[-\.:/_\w]>+             }
-    token total-KBS             { \d+                       }
-    token used-KBs              { \d+                       }
-    token available-KBs         { \d+                       }
-    token capacity-percent-used { <cap-per-used-num> '%'    }
-    token cap-per-used-num      { \d+                       }
-    token mount-point           { <[-\.:/_\w]>+             }
+    token filesystem        { <[-\.:/_\w]>+             }
+    token total-KBS         { '-' || \d+                }
+    token used-KBs          { '-' || \d+                }
+    token available-KBs     { '-' || \d+                }
+    token capacity          { '-' || <capacity-percent> }
+    token capacity-percent  { <cap-percent-num> '%'     }
+    token cap-percent-num   { \d+                       }
+    token mount-point       { <[-\.:/_\w]>+             }
 }
 
 class df-Pk-actions {
@@ -103,13 +104,17 @@ class df-Pk-actions {
 
     method df-data-record ($/) {
         %server-results{$!server}.push: 
+            my $cap-percent-num     = 0;
+            if $/<capacity><capacity-percent><capacity-percent-num>:exists {
+                $cap-percent-num    = +$/<capacity><capacity-percent><cap-percent-num>;
+            }
             df-Pk.new:
                         :filesystem(~$/<filesystem>),
-                        :total-KBS(+$/<total-KBS>),
-                        :used-KBs(+$/<used-KBs>),
-                        :available-KBs(+$/<available-KBs>),
-                        :capacity-percent-used(~$/<capacity-percent-used>),
-                        :cap-per-used-num(+$/<capacity-percent-used><cap-per-used-num>),
+                        :total-KBS(~$/<total-KBS>),
+                        :used-KBs(~$/<used-KBs>),
+                        :available-KBs(~$/<available-KBs>),
+                        :capacity(~$/<capacity>),
+                        :cap-percent-num($cap-percent-num),
                         :mount-point(~$/<mount-point>),
             ;
     }
@@ -129,35 +134,31 @@ sub MAIN (
     @aix-servers            = $aix.split(',')   if $aix;
     my @linux-servers;
     @linux-servers          = $linux.split(',') if $linux;
-
     my %command;
-    if @aix-servers {
-        for @aix-servers -> $aix {
-            %command{$aix}      = ['ssh', $aix, '/usr/bin/df', '-Pk'];
-#           %command{$aix}.append: @aix-filesystems;
+    if @aix-servers.elems || @linux-servers.elems {
+        if @aix-servers.elems {
+            for @aix-servers -> $aix {
+                %command{$aix}      = ['ssh', $aix, '/usr/bin/df', '-Pk'];
+#               %command{$aix}.append: @aix-filesystems;
+            }
         }
-    }
-    elsif @linux-servers {
-        for @linux-servers -> $linux {
-            %command{$linux}    = ['ssh', '-o', 'StrictHostKeyChecking=accept-new', $linux, '/usr/bin/df', '-Pk'];
-#           %command{$linux}.append: @linux-filesystems;
+        if @linux-servers.elems {
+            for @linux-servers -> $linux {
+                %command{$linux}    = ['ssh', '-o', 'StrictHostKeyChecking=accept-new', $linux, '/usr/bin/df', '-Pk'];
+#               %command{$linux}.append: @linux-filesystems;
+            }
         }
     }
     else {
         $*ERR.put: $*USAGE;
         exit 1;
     }
-
     my $command-manager = Async::Command::Multi.new(:%command, :2time-out, :4batch);
     $command-manager.sow;
     my %results = $command-manager.reap;
     for %results.keys.sort -> $server {
-        df-Pk-grammar.parse(%results{$server}.stdout-results, :actions(df-Pk-actions.new(:$server)));
+        df-Pk-grammar.parse(%results{$server}.stdout-results, :actions(df-Pk-actions.new(:$server))) || die "Failed parsing of: \n\n" ~ %results{$server}.stdout-results.head;
     }
-
-#ddt %server-results;
-#die;
-
     my Our::Grid    $grid  .= new: :title('df Report'), :reverse-highlight($light-mode);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'))),     :0col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'))), :1col);
