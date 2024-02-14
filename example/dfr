@@ -121,10 +121,10 @@ sub MAIN (
     Bool    :$text,         #= TEXT print
     Int     :$above,        #= only display file systesm above the percentage 
     Bool    :$light-mode,   #= reverse header highlight for light-mode
-    Bool    :$to-csv,       #= dump CSV to STDOUT
-    Bool    :$to-html,      #= dump HTML to STDOUT
-    Bool    :$to-json,      #= dump JSON to STDOUT
-    Bool    :$to-xml,       #= dump XML to STDOUT
+    Bool    :$csv-print,    #= dump CSV to STDOUT
+    Bool    :$html-print,   #= dump HTML to STDOUT
+    Bool    :$json-print,   #= dump JSON to STDOUT
+    Bool    :$xml-print,    #= dump XML to STDOUT
 ) {
     @aix-servers            = $aix.split(',')   if $aix;
     my @linux-servers;
@@ -190,11 +190,11 @@ sub MAIN (
         }
     }
     if any($text.so, $to-csv.so, $to-html.so, $to-json.so, $to-xml) {
-        when $text          { $grid.TEXT-print; proceed; }
-        when $to-csv    { .put for $grid.to-csv.list;  proceed; }
-        when $to-html   { $grid.to-html; proceed; }
-        when $to-json   { $grid.to-json; proceed; }
-        when $to-xml    { $grid.to-xml;  proceed; }
+        when $text      { $grid.TEXT-print; proceed; }
+        when $to-csv    { $grid.csv-print;  proceed; }
+        when $to-html   { $grid.html-print; proceed; }
+        when $to-json   { $grid.json-print; proceed; }
+        when $to-xml    { $grid.xml-print;  proceed; }
     }
     else {
         $grid.ANSI-print;
