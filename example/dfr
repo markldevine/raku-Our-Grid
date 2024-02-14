@@ -71,9 +71,9 @@ my @linux-filesystems       = </ /usr /var /tmp /home /opt>;
 
 class df-Pk {
     has Str $.filesystem;
-    has Int $.total-KBS;
-    has Int $.used-KBs;
-    has Int $.available-KBs;
+    has Str $.total-KBS;
+    has Str $.used-KBs;
+    has Str $.available-KBs;
     has Str $.capacity;
     has Int $.cap-percent-num;
     has Str $.mount-point;
