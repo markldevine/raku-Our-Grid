@@ -8,7 +8,6 @@ use Our::Grid::Cell;
 use Our::Utilities;
 
 #use Grammar::Debugger;
-use Data::Dump::Tree;
 
 my @aix-servers             = <
                                 isplc02.wmata.com
@@ -132,10 +131,10 @@ sub MAIN (
     Bool    :$text,         #= TEXT print
     Int     :$above,        #= only display file systesm above the percentage 
     Bool    :$light-mode,   #= reverse header highlight for light-mode
-    Bool    :$csv-print,    #= dump CSV to STDOUT
-    Bool    :$html-print,   #= dump HTML to STDOUT
-    Bool    :$json-print,   #= dump JSON to STDOUT
-    Bool    :$xml-print,    #= dump XML to STDOUT
+    Bool    :$csv,          #= dump CSV to STDOUT
+    Bool    :$html,         #= dump HTML to STDOUT
+    Bool    :$json,         #= dump JSON to STDOUT
+    Bool    :$xml,          #= dump XML to STDOUT
 ) {
 #@aix-servers = ();
     @aix-servers            = $aix.split(',')   if $aix;
@@ -197,12 +196,12 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
         }
     }
-    if any($text.so, $csv-print.so, $html-print.so, $json-print.so, $xml-print.so) {
-        when $text          { $grid.TEXT-print; proceed; }
-        when $csv-print     { $grid.csv-print;  proceed; }
-        when $html-print    { $grid.html-print; proceed; }
-        when $json-print    { $grid.json-print; proceed; }
-        when $xml-print     { $grid.xml-print;  proceed; }
+    if any($text.so, $csv.so, $html.so, $json.so, $xml.so) {
+        when $text  { $grid.TEXT-print; proceed; }
+        when $csv   { $grid.csv-print;  proceed; }
+        when $html  { $grid.html-print; proceed; }
+        when $json  { $grid.json-print; proceed; }
+        when $xml   { $grid.xml-print;  proceed; }
     }
     else {
         $grid.ANSI-print;
@@ -210,22 +209,3 @@ sub MAIN (
 }
 
 =finish
-
-    if $text {
-        $grid.TEXT-print;
-    }
-    elsif $output-csv {
-        $grid.output-csv;
-    }
-    elsif $output-html {
-        $grid.output-html;
-    }
-    elsif $output-json {
-        $grid.output-json;
-    }
-    elsif $output-xml {
-        $grid.output-xml;
-    }
-    else {
-        $grid.ANSI-print;
-    }
