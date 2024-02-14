@@ -116,15 +116,15 @@ class df-Pk-actions {
 }
 
 sub MAIN (
-    Str     :$aix,              #= AIX server name(s) (comma separated list)
-    Str     :$linux,            #= Linux server name(s) (comma separated list)
-    Bool    :$text,             #= TEXT print
-    Int     :$above,            #= only display file systesm above the percentage 
-    Bool    :$light-mode,       #= reverse header highlight for light-mode
-    Bool    :$output-csv,       #= dump CSV to STDOUT
-    Bool    :$output-html,      #= dump HTML to STDOUT
-    Bool    :$output-json,      #= dump JSON to STDOUT
-    Bool    :$output-xml,       #= dump XML to STDOUT
+    Str     :$aix,          #= AIX server name(s) (comma separated list)
+    Str     :$linux,        #= Linux server name(s) (comma separated list)
+    Bool    :$text,         #= TEXT print
+    Int     :$above,        #= only display file systesm above the percentage 
+    Bool    :$light-mode,   #= reverse header highlight for light-mode
+    Bool    :$to-csv,       #= dump CSV to STDOUT
+    Bool    :$to-html,      #= dump HTML to STDOUT
+    Bool    :$to-json,      #= dump JSON to STDOUT
+    Bool    :$to-xml,       #= dump XML to STDOUT
 ) {
     @aix-servers            = $aix.split(',')   if $aix;
     my @linux-servers;
@@ -189,12 +189,12 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),                 :justification(justify-left))));
         }
     }
-    if any($text.so, $output-csv.so, $output-html.so, $output-json.so, $output-xml) {
+    if any($text.so, $to-csv.so, $to-html.so, $to-json.so, $to-xml) {
         when $text          { $grid.TEXT-print; proceed; }
-        when $output-csv    { $grid.CSV-print;  proceed; }
-        when $output-html   { $grid.HTML-print; proceed; }
-        when $output-json   { $grid.JSON-print; proceed; }
-        when $output-xml    { $grid.XML-print;  proceed; }
+        when $to-csv    { .put for $grid.to-csv.list;  proceed; }
+        when $to-html   { $grid.to-html; proceed; }
+        when $to-json   { $grid.to-json; proceed; }
+        when $to-xml    { $grid.to-xml;  proceed; }
     }
     else {
         $grid.ANSI-print;

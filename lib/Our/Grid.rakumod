@@ -56,15 +56,29 @@ method !datafy {
     @data;
 }
 
-method CSV-print {
-    csv(in => csv(in => self!datafy), out => $*OUT);
+method to-csv {
+    my $r;
+#   csv(in => csv(in => self!datafy), out => $*OUT);
+#   my @r = csv(in => csv(in => self!datafy));
+#ddt @r;
+#   for @r -> $r {
+#       for $r.list -> $s {
+#           print $r.string;
+#       }
+#       print "\n";
+#   }
+#   return @r;
+
+    my $csv = Text::CSV.new;
+    $csv.combine(self!datafy);
+    put $csv.string;
 }
 
-method JSON-print {
+method to-json {
     put to-json(self!datafy);
 }
 
-method HTML-print {
+method to-html {
     put '<!DOCTYPE html>';
     put '<html>';
     put ' ' x 4     ~ '<head>';
@@ -125,7 +139,7 @@ method !subst-ml-text (Str:D $s) {
     return $result;
 }
 
-method XML-print {
+method to-xml {
     die 'Cannot generate XML if $!row-zero-headings == False' unless $!row-zero-headings;
     put '<?xml version="1.0" encoding="UTF-8"?>';
     put '<root>';
