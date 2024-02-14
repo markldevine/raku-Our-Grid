@@ -189,12 +189,12 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),                 :justification(justify-left))));
         }
     }
-    if any($text.so, $to-csv.so, $to-html.so, $to-json.so, $to-xml) {
-        when $text      { $grid.TEXT-print; proceed; }
-        when $to-csv    { $grid.csv-print;  proceed; }
-        when $to-html   { $grid.html-print; proceed; }
-        when $to-json   { $grid.json-print; proceed; }
-        when $to-xml    { $grid.xml-print;  proceed; }
+    if any($text.so, $csv-print.so, $html-print.so, $json-print.so, $xml-print.so) {
+        when $text          { $grid.TEXT-print; proceed; }
+        when $csv-print     { $grid.csv-print;  proceed; }
+        when $html-print    { $grid.html-print; proceed; }
+        when $json-print    { $grid.json-print; proceed; }
+        when $xml-print     { $grid.xml-print;  proceed; }
     }
     else {
         $grid.ANSI-print;
