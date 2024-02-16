@@ -17,7 +17,7 @@ has                 $.TEXT                      is built(False);
 has Justification   $.justification             is rw               = justify-left;
 has Justification   $!previous-justification                        = justify-left;
 has Int             $.visibility                is rw               = 100;              # % of mandatory visibility upon display
-has ANSI-Colors     $.highlight                 is rw; 
+has                 $.highlight                 is rw; 
 has Int             $.width                                         = 0;
 has Int             $!previous-width                                = 0;
 has Int             $!spacebefore                                   = 0;
