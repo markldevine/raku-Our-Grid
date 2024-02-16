@@ -6,6 +6,8 @@ use Async::Command::Multi;
 use Our::Grid;
 use Our::Grid::Cell;
 use Our::Utilities;
+use Our::Cache;
+use JSON::Fast;
 
 my %server-results;
 
@@ -85,6 +87,14 @@ sub MAIN (
     Bool    :$xml,          #= dump XML to STDOUT
     Bool    :$light-mode,   #= reverse header highlight for light-mode
 ) {
+    my $reverse-highlight   = $light-mode ?? True !! False;
+    my $cache-file-name     = cache-file-name(:meta('drf preferences'));
+    my $cache               = cache(:$cache-file-name);
+    $cache                  = from-json($cache) if $cache;
+    without $light-mode {
+        $reverse-highlight  = $cache<light-mode> if $cache<light-mode>:exists;
+    }
+    cache(:$cache-file-name, :data(to-json({light-mode => $reverse-highlight})));
     my @servers             = $servers.split(',');
     my %command;
     for @servers -> $server {
@@ -96,7 +106,7 @@ sub MAIN (
     for %results.keys.sort -> $server {
         df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || warn "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
-    my Our::Grid    $grid  .= new: :title('df Report'), :reverse-highlight($light-mode);
+    my Our::Grid    $grid  .= new: :title('df Report'), :$reverse-highlight;
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'))),     :0col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'))), :1col);
     $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'))),      :2col);

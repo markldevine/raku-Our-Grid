@@ -14,7 +14,9 @@ use Color::Names:api<2>;
 # you can mix sets, names are associated with the group
 # they came from
 
-### .say for sort Color::Names.color-data("CSS3");
+.say for sort Color::Names.color-data("CSS3");
+
+=finish
 
 # There is a find-color routine exported you can use to search for partial
 # or exact names.

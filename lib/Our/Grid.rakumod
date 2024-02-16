@@ -70,6 +70,7 @@ method json-print {
 #               table, th, td {
 #                   border: 1px solid #cccccc;
 #               }
+#                   background: #121212;
 
 method html-print {
     print q:to/ENDOFHTMLHEAD/;
