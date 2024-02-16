@@ -1,45 +1,49 @@
 unit class Our::Grid::Cell::Fragment:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
+use Color::Names:api<2>;
 use Our::Utilities;
 
-has ANSI-Colors $.foreground                        is rw;
-has ANSI-Colors $.background                        is rw;
-has ANSI-Colors $.highlight                         is rw;
-has Bool        $.bold                              is rw;
-has Bool        $.faint                             is rw;
-has Bool        $.italic                            is rw;
-has Bool        $.underline                         is rw;
-has Bool        $.blink                             is rw;
-has Bool        $.reverse                           is rw;
-has Bool        $.hide                              is rw;
-has Bool        $.strikethrough                     is rw;
-has Bool        $.doubleunderline                   is rw;
-has Bool        $.superscript                       is rw;
-has Bool        $.subscript                         is rw;
-has Bool        $.allupper                          is rw;
-has Bool        $.alllower                          is rw;
-has Bool        $.titlecase                         is rw;
-has Bool        $.titlecaselowercase                is rw;
-has Int         $.spacebefore                       is rw           = 0;
-has Int         $.spaceafter                        is rw           = 0;
-has Str         $.ANSI-spacebefore-pad                              = '';
-has Str         $.ANSI-spaceafter-pad                               = '';
-has Bool        $.bytes-unit-to-comma-round-bytes;
-has Bool        $.bytes-unit-to-round-bytes;
-has Bool        $.bytes-unit-to-comma-bytes;
-has Bool        $.bytes-unit-to-bytes;
-has Bool        $.bytes-to-bytes-unit;
-has Bool        $.metric-unit-to-comma-round-number;
-has Bool        $.metric-unit-to-round-number;
-has Bool        $.metric-unit-to-comma-number;
-has Bool        $.metric-unit-to-number;
-has Bool        $.number-to-metric-unit;
-has Bool        $.add-commas-to-digits;
-has Bool        $.date-time;
-has Bool        $.trim-input                                        = True;
-has Mu:D        $.text                              is required;
-has Mu          $.TEXT;
-has Mu          $.ANSI;
+has Str     $.foreground                        is rw;
+has         $!foreground-rgb;
+has Str     $.background                        is rw;
+has         $!background-rgb;
+has Str     $.highlight                         is rw;
+has         $!highlight-rgb;
+has Bool    $.bold                              is rw;
+has Bool    $.faint                             is rw;
+has Bool    $.italic                            is rw;
+has Bool    $.underline                         is rw;
+has Bool    $.blink                             is rw;
+has Bool    $.reverse                           is rw;
+has Bool    $.hide                              is rw;
+has Bool    $.strikethrough                     is rw;
+has Bool    $.doubleunderline                   is rw;
+has Bool    $.superscript                       is rw;
+has Bool    $.subscript                         is rw;
+has Bool    $.allupper                          is rw;
+has Bool    $.alllower                          is rw;
+has Bool    $.titlecase                         is rw;
+has Bool    $.titlecaselowercase                is rw;
+has Int     $.spacebefore                       is rw           = 0;
+has Int     $.spaceafter                        is rw           = 0;
+has Str     $.ANSI-spacebefore-pad                              = '';
+has Str     $.ANSI-spaceafter-pad                               = '';
+has Bool    $.bytes-unit-to-comma-round-bytes;
+has Bool    $.bytes-unit-to-round-bytes;
+has Bool    $.bytes-unit-to-comma-bytes;
+has Bool    $.bytes-unit-to-bytes;
+has Bool    $.bytes-to-bytes-unit;
+has Bool    $.metric-unit-to-comma-round-number;
+has Bool    $.metric-unit-to-round-number;
+has Bool    $.metric-unit-to-comma-number;
+has Bool    $.metric-unit-to-number;
+has Bool    $.number-to-metric-unit;
+has Bool    $.add-commas-to-digits;
+has Bool    $.date-time;
+has Bool    $.trim-input                                        = True;
+has Mu:D    $.text                              is required;
+has Mu      $.TEXT;
+has Mu      $.ANSI;
 
 submethod TWEAK {
     my $text        = $!text;
@@ -128,18 +132,21 @@ submethod TWEAK {
 
 method ANSI-fmt (*%options) {
     my $foreground;
-    $foreground         = $!foreground.value            if $!foreground;
-    $foreground         = %options<foreground>.value    if %options<foreground>:exists;
+    $foreground         = $!foreground                  if $!foreground;
+    $foreground         = %options<foreground>          if %options<foreground>:exists;
+    $!foreground-rgb    = Color::Names.color-data(<CSS3>).&find-color($foreground, :exact).values.first<rgb>    if $foreground;
 
     my $background;
-    $background         = $!background.value            if $!background;
-    $background         = %options<background>.value    if %options<background>:exists;
-
+    $background         = $!background                  if $!background;
+    $background         = %options<background>          if %options<background>:exists;
     my $highlight       = $!highlight;
-    $highlight          = %options<highlight>.value     if %options<highlight>:exists;
+    $highlight          = %options<highlight>           if %options<highlight>:exists;
     unless $background {
         $background     = $highlight                    if $highlight;
     }
+    $!background-rgb    = Color::Names.color-data(<CSS3>).&find-color($background, :exact).values.first<rgb>    if $background;
+    $!highlight-rgb     = Color::Names.color-data(<CSS3>).&find-color($highlight, :exact).values.first<rgb>     if $highlight;
+
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;
     my $faint           = $!faint;
@@ -166,17 +173,29 @@ method ANSI-fmt (*%options) {
     my @post-colors     = ();
     $!ANSI-spaceafter-pad   = ' ' x $!spaceafter        if $!spaceafter;
 
-    if $foreground {
-        @pre-colors.push("\o33[38;5;" ~ $foreground ~ 'm');
+    if $!foreground-rgb {
+        @pre-colors.push("\o33[38;2;" ~ $!foreground-rgb[0] ~ ';' ~ $!foreground-rgb[1] ~ ';' ~ $!foreground-rgb[2] ~ 'm');
         @post-colors.push("\o33[39m");
     }
-    if $background {
-        @pre-colors.push("\o33[48;5;" ~ $background ~ 'm');
+    if $!background-rgb {
+        @pre-colors.push("\o33[48;2;" ~ $!background-rgb[0] ~ ';' ~ $!background-rgb[1] ~ ';' ~ $!background-rgb[2] ~ 'm');
         @post-colors.push("\o33[49m");
     }
-    if $highlight {
-        $!ANSI-spacebefore-pad  = "\o33[48;5;" ~ $highlight ~ 'm' ~ $!ANSI-spacebefore-pad ~ "\o33[49m" if $!spacebefore;
-        $!ANSI-spaceafter-pad   = "\o33[48;5;" ~ $highlight ~ 'm' ~ $!ANSI-spaceafter-pad  ~ "\o33[49m" if $!spaceafter;
+    if $!highlight-rgb {
+        $!ANSI-spacebefore-pad  = "\o33[48;2;"
+                                ~ $!highlight-rgb[0] ~ ';'
+                                ~ $!highlight-rgb[1] ~ ';'
+                                ~ $!highlight-rgb[2]
+                                ~ 'm'
+                                ~ $!ANSI-spacebefore-pad
+                                ~ "\o33[49m" if $!spacebefore;
+        $!ANSI-spaceafter-pad   = "\o33[48;2;"
+                                ~ $!highlight-rgb[0] ~ ';'
+                                ~ $!highlight-rgb[1] ~ ';'
+                                ~ $!highlight-rgb[2]
+                                ~ 'm'
+                                ~ $!ANSI-spaceafter-pad
+                                ~ "\o33[49m" if $!spaceafter;
     }
     if $bold {
         @pre-effects.push("\o33[1m");

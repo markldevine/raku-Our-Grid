@@ -1,13 +1,8 @@
 unit class Our::Grid::Cell:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
+use Color::Names:api<2>;
 use Our::Grid::Cell::Fragment;
 use Our::Utilities;
-
-#enum Justification is export ( 
-#    justify-left    => 1, 
-#    justify-center  => 2, 
-#    justify-right   => 3, 
-#);
 
 has                 $.fragments;
 has                 %!fragment-options;
@@ -97,21 +92,37 @@ method TEXT-padded (*%opts) {
 method ANSI-fmt (*%opts) {
     if %opts<width>:exists {
         $!width             = %opts<width> // 0;
-#       %opts<width>:delete;
     }
-#   $!width               //= 0;
     if %opts<justification>:exists {
         $!justification     = %opts<justification>;
-#       %opts<justification>:delete;
     }
     self!calculate-pads     if $!width;
     $!ANSI-spacebefore-pad  = '';
     $!ANSI-spacebefore-pad  = ' ' x $!spacebefore       if $!spacebefore;
     $!ANSI-spaceafter-pad   = '';
     $!ANSI-spaceafter-pad   = ' ' x $!spaceafter        if $!spaceafter;
+    my $highlight-rgb;
     if $!highlight {
-        $!ANSI-spacebefore-pad  = "\o33[48;5;" ~ $!highlight.value ~ 'm' ~ $!ANSI-spacebefore-pad ~ "\o33[49m" if $!spacebefore;
-        $!ANSI-spaceafter-pad   = "\o33[48;5;" ~ $!highlight.value ~ 'm' ~ $!ANSI-spaceafter-pad  ~ "\o33[49m" if $!spaceafter;
+        if my $highlight-rgb   = Color::Names.color-data(<CSS3>).&find-color($!highlight, :exact).values.first<rgb> {
+            if $!spacebefore {
+                $!ANSI-spacebefore-pad  = "\o33[48;2;"
+                                        ~ $highlight-rgb[0] ~ ';'
+                                        ~ $highlight-rgb[1] ~ ';'
+                                        ~ $highlight-rgb[2]
+                                        ~ 'm'
+                                        ~ $!ANSI-spacebefore-pad
+                                        ~ "\o33[49m";
+            }
+            if $!spaceafter {
+                $!ANSI-spaceafter-pad   = "\o33[48;2;"
+                                        ~ $highlight-rgb[0] ~ ';'
+                                        ~ $highlight-rgb[1] ~ ';'
+                                        ~ $highlight-rgb[2]
+                                        ~ 'm'
+                                        ~ $!ANSI-spaceafter-pad
+                                        ~ "\o33[49m";
+            }
+        }
     }
     $!ANSI                  = Nil;
     loop (my $i = 0; $i < $!fragments.elems; $i++ ) {

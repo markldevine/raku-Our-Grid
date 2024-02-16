@@ -3,8 +3,8 @@
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Color::Names:api<2>;
-use Our::Grid;
-use Our::Grid::Cell;
+#use Our::Grid;
+#use Our::Grid::Cell;
 
 # a hash of normalized color names / set ID
 # with rgb values, a pretty name, and possibly color codes
@@ -14,22 +14,27 @@ use Our::Grid::Cell;
 # you can mix sets, names are associated with the group
 # they came from
 
-.say for sort Color::Names.color-data("X11", "CSS3");
-
-=finish
+### .say for sort Color::Names.color-data("CSS3");
 
 # There is a find-color routine exported you can use to search for partial
 # or exact names.
 
-use Color::Names::CSS3;
-.say for sort Color::Names.color-data(<CSS3>).&find-color: <Aqua>;
+### use Color::Names::CSS3;
+### .say for sort Color::Names.color-data(<CSS3>).&find-color: <green>;
+
 # --> aqua-CSS3             => { rgb => [0 255 255], name => Aqua}
 # --> aquamarine-CSS3       => { rgb => [127 255 212], name => Aquamarine}
 # --> mediumaquamarine-CSS3 => { rgb => [102 205 170], name => Medium Aquamarine}
 
+.say for sort Color::Names.color-data(<CSS3>).&find-color: <green>, :exact;
 
-.say for sort Color::Names.color-data(<CSS3>).&find-color: <Aqua>, :exact;
+=finish
+
 # --> aqua-CSS3 => { rgb => [0 255 255], name => Aqua}
+say Color::Names.color-data(<CSS3>).&find-color(<Aqua>, :exact).value()<rgb>;
+say Color::Names.color-data(<CSS3>).&find-color(<Black>, :exact).value()<rgb>;
+say Color::Names.color-data(<CSS3>).&find-color(<White>, :exact).value()<rgb>;
+say Color::Names.color-data(<CSS3>).&find-color(<Magenta>, :exact).value()<rgb>;
 
 ### use Color::Names::X11 :colors;
 ### say COLORS{'red-X11'};
