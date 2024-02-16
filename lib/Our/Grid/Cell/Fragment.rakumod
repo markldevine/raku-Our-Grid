@@ -134,7 +134,7 @@ method ANSI-fmt (*%options) {
     my $foreground;
     $foreground         = $!foreground                  if $!foreground;
     $foreground         = %options<foreground>          if %options<foreground>:exists;
-    $!foreground-rgb    = Color::Names.color-data(<CSS3>).&find-color($foreground, :exact).values.first<rgb>    if $foreground;
+    $!foreground-rgb    = Color::Names.color-data(<CSS3>).&find-color($foreground,  :exact).values.first<rgb>    if $foreground;
 
     my $background;
     $background         = $!background                  if $!background;
@@ -144,8 +144,8 @@ method ANSI-fmt (*%options) {
     unless $background {
         $background     = $highlight                    if $highlight;
     }
-    $!background-rgb    = Color::Names.color-data(<CSS3>).&find-color($background, :exact).values.first<rgb>    if $background;
-    $!highlight-rgb     = Color::Names.color-data(<CSS3>).&find-color($highlight, :exact).values.first<rgb>     if $highlight;
+    $!background-rgb    = Color::Names.color-data(<CSS3>).&find-color($background,  :exact).values.first<rgb>    if $background;
+    $!highlight-rgb     = Color::Names.color-data(<CSS3>).&find-color($highlight,   :exact).values.first<rgb>     if $highlight;
 
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;

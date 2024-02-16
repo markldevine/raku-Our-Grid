@@ -113,13 +113,13 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-bytes),      :justification(justify-right),  :bytes-to-bytes-unit)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-bytes), :justification(justify-right),  :bytes-to-bytes-unit)));
             if 80 <= $df-record.cap-percent-num < 90 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground(orange))));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground<orange>)));
             }
             elsif 90 <= $df-record.cap-percent-num < 100 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground(red))));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground<red>)));
             }
             elsif $df-record.cap-percent-num == 100 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground(red), :blink)));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground<red>, :blink)));
             }
             else {
                 $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right))));

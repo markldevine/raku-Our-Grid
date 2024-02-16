@@ -276,7 +276,7 @@ method ANSI-print {
             given $!grid[$row][$col] {
                 when Our::Grid::Cell:D  {
                     if $row == 0 && $!row-zero-headings {
-                        print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col]), :bold, :reverse($!reverse-highlight), :highlight(gray254), :foreground(black), :justification(justify-center)).ANSI-padded;
+                        print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col]), :bold, :reverse($!reverse-highlight), :highlight<white>, :foreground<black>, :justification(justify-center)).ANSI-padded;
                     }
                     else {
                         print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
