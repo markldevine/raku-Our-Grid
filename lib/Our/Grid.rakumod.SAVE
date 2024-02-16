@@ -64,52 +64,40 @@ method json-print {
     put to-json(self!datafy);
 }
 
+method html-print {
+    put '<!DOCTYPE html>';
+    put '<html>';
+    put ' ' x 4     ~ '<head>';
+    put ' ' x 8     ~ '<style>';
+    put ' ' x 12    ~ 'table, th, td {';
+    put ' ' x 16    ~ 'border: 1px solid #cccccc;';
+    put ' ' x 12    ~ '}';
+    put ' ' x 12    ~ 'td {';
 #   put ' ' x 16    ~ 'height: 40px;';
 #   put ' ' x 16    ~ 'width: 80px;';
-#               table, th, td {
-#                   border: 1px solid #cccccc;
-#               }
+    put ' ' x 16    ~ 'padding: 5px;';
+    put ' ' x 16    ~ 'text-align: center;';
+    put ' ' x 16    ~ 'vertical-align: middle;';
+    put ' ' x 12    ~ '}';
+    put ' ' x 8     ~ '</style>';
+    put ' ' x 4     ~ '</head>';
+    put ' ' x 4     ~ '<body>';
+    my $index   = 0;
+    put ' ' x 8     ~ '<table class="center">';
 
-method html-print {
-    print q:to/ENDOFHTMLHEAD/;
-<!DOCTYPE html>
-<html>
-    <head>
-        <style>
-            table, h1, th, td {
+
+
+            table, th, td {
+                border-bottom: 1px solid #ddd;
                 margin-left: auto; 
                 margin-right: auto;
+            }
+            th, td {
                 padding: 5px;
                 text-align: center;
             }
-            th, td {
-                border-bottom: 1px solid #ddd;
-            }
-            tr:hover {background-color: coral; }
-            body {
-                color: #222;
-                background: #fff;
-                font: 100% system-ui;
-            }
-            a {
-                color: #0033cc;
-            }
-            @media (prefers-color-scheme: dark) {
-                body {
-                    color: #eee;
-                    background: #121212;
-                }
-                body a {
-                    color: #809fff;
-                }
-            }
-        </style>
-    </head>
-ENDOFHTMLHEAD
-    put ' ' x 4 ~ '<body>';
-    put ' ' x 8 ~ '<h1>' ~ $!title ~ '</h1>' if $!title;
-    put ' ' x 8 ~ '<table>';
-    my $index   = 0;
+
+
     if $!row-zero-headings {
         $index++;
         put ' ' x 12 ~ '<tr>';
@@ -121,37 +109,17 @@ ENDOFHTMLHEAD
     loop (my $row = $index; $row < $!grid.elems; $row++) {
         put ' ' x 12 ~ '<tr>';
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
-            print ' ' x 16 ~ '<td style="';
             if $!grid[$row][$col] ~~ Our::Grid::Cell:D {
                 given $!grid[$row][$col] {
-                    if .justification {
-                        when .justification ~~ justify-left     { print 'text-align: left;';   proceed; }
-                        when .justification ~~ justify-center   { print 'text-align: center;'; proceed; }
-                        when .justification ~~ justify-right    { print 'text-align: right;';  proceed; }
-                    }
-                    loop (my $f = 0; $f < .fragments.elems; $f++) {
-                        if .fragments[$f].foreground {
-                            print ' color:'     ~ .fragments[$f].foreground ~ ';';
-                            last;
-                        }
-                    }
-                    my $background = '';
-                    loop ($f = 0; $f < .fragments.elems; $f++) {
-                        if .fragments[$f].background {
-                            $background = .fragments[$f].background;
-                            print ' background-color:' ~ $background   ~ ';';
-                            last;
-                        }
-                    }
-                    print ' background-color:'  ~ .highlight    ~ ';'   if !$background && .highlight;
-                    print '"';
+                    when .justification ~~ justify-left     { print ' ' x 16 ~ '<td style="text-align: left; color:blue">';     }
+                    when .justification ~~ justify-center   { print ' ' x 16 ~ '<td style="text-align: center; color:blue">';   }
+                    when .justification ~~ justify-right    { print ' ' x 16 ~ '<td style="text-align: right; color:blue">';    }
                 }
-                print '>' ~ self!subst-ml-text($!grid[$row][$col].TEXT);
+                put self!subst-ml-text($!grid[$row][$col].TEXT) ~ '</td>';
             }
             else {
-                print '">';
+                put ' ' x 16 ~ '<td></td>';
             }
-            put '</td>';
         }
         put ' ' x 12 ~ '</tr>';
     }
