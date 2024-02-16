@@ -1,6 +1,6 @@
 #!/usr/bin/env raku
 
-use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Async::Command::Multi;
 use Our::Grid;

@@ -14,8 +14,8 @@
   "name": "Our::Grid",
   "perl": "6.*",
   "provides": {
-    "Our::Grid": "lib/Our/Grid.rakumod"
-    "Our::Grid::Cell": "lib/Our/Grid/Cell.rakumod"
+    "Our::Grid": "lib/Our/Grid.rakumod",
+    "Our::Grid::Cell": "lib/Our/Grid/Cell.rakumod",
     "Our::Grid::Cell::Fragment": "lib/Our/Grid/Cell/Fragment.rakumod"
   },
   "resources": [],
