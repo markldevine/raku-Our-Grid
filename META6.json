@@ -2,7 +2,11 @@
   "auth": "zef:markldevine",
   "authors": [ "Mark Devine <mark@markdevine.com>" ],
   "depends": [
-    "Our::Grid"
+    "Our::Grid",
+    "Our::Utilities",
+    "Text::CSV",
+    "JSON::Fast",
+    "Color::Names:api<2>"
   ],
   "description": "Generic Grid of Rows of Cells -- used for manipulating tabular data",
   "license": "Artistic-2.0",
@@ -11,6 +15,8 @@
   "perl": "6.*",
   "provides": {
     "Our::Grid": "lib/Our/Grid.rakumod"
+    "Our::Grid::Cell": "lib/Our/Grid/Cell.rakumod"
+    "Our::Grid::Cell::Fragment": "lib/Our/Grid/Cell/Fragment.rakumod"
   },
   "resources": [],
   "source-url": "https://github.com/markldevine/rake-Our-Grid.git",
