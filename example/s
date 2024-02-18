@@ -5,7 +5,6 @@ use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 use Our::Grid;
 use Our::Grid::Cell;
 
-#my $grid        = Our::Grid.new: :!row-zero-headings;
 my $grid        = Our::Grid.new;
 
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk0>));

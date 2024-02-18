@@ -13,7 +13,7 @@ enum OUTPUTS (
     html            => '???',
     json            => 'JSON::Fast',
     tui             => 'Terminal::UI',
-    xlsl            => 'Spreadsheet::XLSX',
+#   xlsl            => 'Spreadsheet::XLSX',
     xml             => 'LibXML',
 );
 
@@ -38,6 +38,7 @@ has Int     $.current-row       is rw   = 0;
 has Int     $.current-col       is rw   = 0;
 has Int     @.col-width;
 has Bool    $.reverse-highlight;
+has         @!sort-order;
 
 submethod TWEAK {
     $!term-size                 = term-size;                                            # $!term-size.rows $!term-size.cols
@@ -115,17 +116,17 @@ method !datafy {
 }
 
 method csv-print {
-#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     csv(in => csv(in => self!datafy), out => $*OUT);
 }
 
 method json-print {
-#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     put to-json(self!datafy);
 }
 
 method html-print {
-#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     print q:to/ENDOFHTMLHEAD/;
     <!DOCTYPE html>
     <html>
@@ -223,7 +224,7 @@ method !subst-ml-text (Str:D $s) {
 
 method xml-print {
     die 'Cannot generate XML without column @!headings' unless @!headings.elems;
-#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' unless @!headings.elems == $!grid.elems;
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' unless @!headings.elems == $!grid[0].elems;
     put '<?xml version="1.0" encoding="UTF-8"?>';
     put '<root>';
     my @headers;
@@ -245,7 +246,7 @@ method xml-print {
 }
 
 method TEXT-print {
-#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     loop (my $col = 0; $col < @!headings.elems; $col++) {
         print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :justification(justify-center));
         print ' ' unless $col == (@!headings.elems - 1);
@@ -270,7 +271,7 @@ method TEXT-print {
 }
 
 method ANSI-print {
-#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     my $col-width-total = 0;
     for @!col-width -> $colw {
         $col-width-total += $colw;
