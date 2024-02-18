@@ -107,18 +107,26 @@ sub MAIN (
         df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || warn "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
     my Our::Grid    $grid  .= new: :title('df Report'), :$reverse-highlight;
-    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('System'))));
-    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Filesystem'))));
-    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Total'))));
-    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Used'))));
-    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Available'))));
-    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('% Used'))));
-    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Mount Point'))));
+#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('System'))));
+#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Filesystem'))));
+#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Total'))));
+#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Used'))));
+#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Available'))));
+#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('% Used'))));
+#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Mount Point'))));
+    $grid.add-heading('System'),
+    $grid.add-heading('Filesystem');
+    $grid.add-heading('Total');
+    $grid.add-heading('Used');
+    $grid.add-heading('Available');
+    $grid.add-heading('% Used');
+    $grid.add-heading('Mount Point');
+
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
             next if $above && $df-record.cap-percent-num <= $above;
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem),      :justification(justify-left))));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification(justify-right),  :bytes-to-bytes-unit)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-bytes),      :justification(justify-right),  :bytes-to-bytes-unit)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-bytes), :justification(justify-right),  :bytes-to-bytes-unit)));
@@ -140,7 +148,7 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
         }
     }
-    $grid.sort-by-column(3, :numeric);
+#   $grid.sort-by-column(3, :numeric);
 #   $grid.sort-by-column(<Used>, :numeric);
 #   $grid.sort-by-column('Mount Point');
     if any($text.so, $csv.so, $html.so, $json.so, $xml.so) {
