@@ -1,6 +1,6 @@
 #!/usr/bin/env raku
 
-#use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Async::Command::Multi;
 use Our::Grid;
@@ -107,13 +107,13 @@ sub MAIN (
         df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || warn "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
     my Our::Grid    $grid  .= new: :title('df Report'), :$reverse-highlight;
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('System'))),     :0col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Filesystem'))), :1col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Total'))),      :2col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Used'))),       :3col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Available'))),  :4col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('% Used'))),     :5col);
-    $grid.add-cell(:cell(Our::Grid::Cell.new(:text('Mount Point'))),:6col);
+    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('System'))));
+    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Filesystem'))));
+    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Total'))));
+    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Used'))));
+    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Available'))));
+    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('% Used'))));
+    $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Mount Point'))));
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
             next if $above && $df-record.cap-percent-num <= $above;

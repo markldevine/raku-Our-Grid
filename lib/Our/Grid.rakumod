@@ -53,9 +53,9 @@ method add-heading (Our::Grid::Cell:D :$cell) {
 method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     with $row {
         given $row {
-            when Bool   { ++$!current-row;                                  }
-            when Int    { $!current-row = $row;                             }
-        }
+            when Bool   { ++$!current-row if $!grid.elems > 0;          }
+            when Int    { $!current-row = $row;                         }
+            }
     }
     if $!grid[$!current-row]:!exists {
         $!grid[$!current-row]   = Array.new();
@@ -99,12 +99,15 @@ put 'sorting by column heading: ' ~ $heading;
 }
 
 method !datafy {
-    my @data                    = Array.new();
+    my @data    = Array.new();
+    for @!headings -> $heading {
+        @data[0].push: $heading.TEXT;
+    }
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             given $!grid[$row][$col] {
-                when Our::Grid::Cell:D  { @data[$row].push: $!grid[$row][$col].TEXT;    }
-                default                 { @data[$row].push: '';                         }
+                when Our::Grid::Cell:D  { @data[$row + 1].push: $!grid[$row][$col].TEXT;    }
+                default                 { @data[$row + 1].push: '';                         }
             }
         }
     }
@@ -112,17 +115,17 @@ method !datafy {
 }
 
 method csv-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     csv(in => csv(in => self!datafy), out => $*OUT);
 }
 
 method json-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     put to-json(self!datafy);
 }
 
 method html-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     print q:to/ENDOFHTMLHEAD/;
     <!DOCTYPE html>
     <html>
@@ -220,7 +223,7 @@ method !subst-ml-text (Str:D $s) {
 
 method xml-print {
     die 'Cannot generate XML without column @!headings' unless @!headings.elems;
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' unless @!headings.elems == $!grid.elems;
+#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' unless @!headings.elems == $!grid.elems;
     put '<?xml version="1.0" encoding="UTF-8"?>';
     put '<root>';
     my @headers;
@@ -242,7 +245,7 @@ method xml-print {
 }
 
 method TEXT-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     loop (my $col = 0; $col < @!headings.elems; $col++) {
         print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :justification(justify-center));
         print ' ' unless $col == (@!headings.elems - 1);
@@ -267,7 +270,7 @@ method TEXT-print {
 }
 
 method ANSI-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     my $col-width-total = 0;
     for @!col-width -> $colw {
         $col-width-total += $colw;
