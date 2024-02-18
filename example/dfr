@@ -140,6 +140,9 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
         }
     }
+    $grid.sort-by-column(3, :numeric);
+#   $grid.sort-by-column(<Used>, :numeric);
+#   $grid.sort-by-column('Mount Point');
     if any($text.so, $csv.so, $html.so, $json.so, $xml.so) {
         when $text  { $grid.TEXT-print; proceed; }
         when $csv   { $grid.csv-print;  proceed; }

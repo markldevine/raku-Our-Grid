@@ -37,8 +37,9 @@ has         @.headings                  = ();
 has Int     $.current-row       is rw   = 0;
 has Int     $.current-col       is rw   = 0;
 has Int     @.col-width;
+has Int     @.col-raw-text-width;
 has Bool    $.reverse-highlight;
-has         @!sort-order;
+has         @.sort-order                = ();
 
 submethod TWEAK {
     $!term-size                 = term-size;                                            # $!term-size.rows $!term-size.cols
@@ -51,7 +52,11 @@ method add-heading (Our::Grid::Cell:D :$cell) {
     @!col-width[$column]    = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$column];
 }
 
-method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
+multi method add-cell (Str:D $text, *%opts) {
+    self.add-cell(Our::Grid::Cell.new(:$text));
+}
+
+multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     with $row {
         given $row {
             when Bool   { ++$!current-row if $!grid.elems > 0;          }
@@ -69,42 +74,79 @@ method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
             default     { $!current-col = $!grid[$!current-row].elems;  }
         }
     }
-    @!col-width[$!current-col]      = 0                     without @!col-width[$!current-col];
-    @!col-width[$!current-col]      = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$!current-col];
+    @!col-width[$!current-col]          = 0                     without @!col-width[$!current-col];
+    @!col-raw-text-width[$!current-col] = 0                     without @!col-raw-text-width[$!current-col];
+    @!col-width[$!current-col]          = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$!current-col];
+    @!col-raw-text-width[$!current-col] = $cell.text.Str.chars  if $cell.text.Str.chars > @!col-raw-text-width[$!current-col];
     if $!current-col > $!grid[$!current-row].elems {
         loop (my $i = $col; $i >= 0; $i--) {
-            @!col-width[$i] = 0                 without @!col-width[$i];
+            @!col-width[$i]             = 0                 without @!col-width[$i];
+            @!col-raw-text-width[$i]    = 0                 without @!col-raw-text-width[$i];
         }
     }
     $!grid[$!current-row][$!current-col++] = $cell;
 }
 
-multi method sort-by-column (Int:D $column, :$descending) {
-put 'sorting by column :' ~ $column;
-put "\t" ~ 'descending' if $descending;
-die 'NYI';
+multi method sort-by-column (Int:D $column, :$numeric, :$descending) {
+    self!grid-check;
+    my @column_values;
+    my $row-digits          = $!grid.elems;
+    $row-digits             = "$row-digits".chars;
+
+    if $numeric {
+        my $value-digits        = @!col-raw-text-width[$column];
+        loop (my $r = 0; $r < $!grid.elems; $r++) {
+            @column_values.push: sprintf("%0" ~ $value-digits ~ "d", $!grid[$r][$column].text) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
+        }
+        @.sort-order        = ();
+        for @column_values.sort -> $string {
+            @.sort-order.push: $string.substr($value-digits + 1).Int;
+        }
+    }
+    else {
+        loop (my $r = 0; $r < $!grid.elems; $r++) {
+            @column_values.push: $!grid[$r][$column].text ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
+        }
+        @.sort-order        = ();
+        for @column_values.sort <-> $string {
+            $string ~~ s/ ^ .+? '_' (\d+)/$0/;
+            @.sort-order.push: $string;
+        }
+    }
 }
 
-multi method sort-by-column (Str:D $heading, :$descending) {
+multi method sort-by-column (Str:D $heading, *%opts) {
     die 'Cannot sort by "' ~ $heading ~ '" because this grid was created without headings' unless @!headings.elems;
     my $column;
-    loop (my $c = 0; $c < $!grid[0].elems; $c++) {
-        if $heading.lc eq $!grid[0][$c].TEXT.lc {
+    loop (my $c = 0; $c < @!headings.elems; $c++) {
+        if $heading.lc eq @!headings[$c].TEXT.lc {
             $column = $c;
             last;
         }
     }
     die 'Cannot sort by heading.  Heading "' ~ $heading ~ '" unknown.' without $column;
-put 'sorting by column heading: ' ~ $heading;
-    self.sort-by-column($column, :$descending);
+    self.sort-by-column($column, |%opts);
+}
+
+method !sort-order-check {
+    return if @!sort-order.elems;
+    loop (my $s = 0; $s < $!grid.elems; $s++) {
+        @!sort-order.push: $s;
+    }
+}
+
+method !grid-check {
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    self!sort-order-check;
 }
 
 method !datafy {
+    self!sort-order-check;
     my @data    = Array.new();
     for @!headings -> $heading {
         @data[0].push: $heading.TEXT;
     }
-    loop (my $row = 0; $row < $!grid.elems; $row++) {
+    for @!sort-order -> $row {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             given $!grid[$row][$col] {
                 when Our::Grid::Cell:D  { @data[$row + 1].push: $!grid[$row][$col].TEXT;    }
@@ -116,17 +158,17 @@ method !datafy {
 }
 
 method csv-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    self!grid-check;
     csv(in => csv(in => self!datafy), out => $*OUT);
 }
 
 method json-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    self!grid-check;
     put to-json(self!datafy);
 }
 
 method html-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    self!grid-check;
     print q:to/ENDOFHTMLHEAD/;
     <!DOCTYPE html>
     <html>
@@ -170,7 +212,7 @@ method html-print {
         put ' ' x 16 ~ '<th>' ~ self!subst-ml-text($heading.TEXT) ~ '</th>';
     }
     put ' ' x 12 ~ '</tr>';
-    loop (my $row = 0; $row < $!grid.elems; $row++) {
+    for @!sort-order -> $row {
         put ' ' x 12 ~ '<tr>';
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print ' ' x 16 ~ '<td style="';
@@ -225,6 +267,7 @@ method !subst-ml-text (Str:D $s) {
 method xml-print {
     die 'Cannot generate XML without column @!headings' unless @!headings.elems;
     die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' unless @!headings.elems == $!grid[0].elems;
+    self!sort-order-check;
     put '<?xml version="1.0" encoding="UTF-8"?>';
     put '<root>';
     my @headers;
@@ -233,7 +276,7 @@ method xml-print {
         @headers[$i] = @headers[$i].subst: ' ', '';
         @headers[$i] = @headers[$i].subst: '%', 'PCT';
     }
-    loop (my $row = 1; $row < $!grid.elems; $row++) {
+    for @!sort-order -> $row {
         put ' ' x 4 ~ '<row' ~ $row ~ '>';
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             if $!grid[$row][$col] ~~ Our::Grid::Cell:D {
@@ -246,7 +289,7 @@ method xml-print {
 }
 
 method TEXT-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    self!grid-check;
     loop (my $col = 0; $col < @!headings.elems; $col++) {
         print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :justification(justify-center));
         print ' ' unless $col == (@!headings.elems - 1);
@@ -257,7 +300,7 @@ method TEXT-print {
         print ' ' unless $col == (@!headings.elems - 1);
     }
     print "\n";
-    loop (my $row = 0; $row < $!grid.elems; $row++) {
+    for @!sort-order -> $row {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print ' ';
             given $!grid[$row][$col] {
@@ -271,7 +314,7 @@ method TEXT-print {
 }
 
 method ANSI-print {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    self!grid-check;
     my $col-width-total = 0;
     for @!col-width -> $colw {
         $col-width-total += $colw;
@@ -305,7 +348,7 @@ method ANSI-print {
         }
         print "\n";
     }
-    loop (my $row = 0; $row < $!grid.elems; $row++) {
+    for @!sort-order -> $row {
         print ' ' x $margin;
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print %box-char<side> ~ ' ';
