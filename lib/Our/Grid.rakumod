@@ -29,19 +29,73 @@ enum OUTPUTS (
 #   fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 
 has $.title;
-has $.header;
 has $.footer;
 has $.term-size;
 
-has         $.grid              = Array.new();
-has Int     $.current-row       = 0;
-has Int     $.current-col       = 0;
+has         $.grid                      = Array.new();
+has         @.headings                  = ();
+has Int     $.current-row       is rw   = 0;
+has Int     $.current-col       is rw   = 0;
 has Int     @.col-width;
-has Bool    $.row-zero-headings = True;
 has Bool    $.reverse-highlight;
 
 submethod TWEAK {
     $!term-size                 = term-size;                                            # $!term-size.rows $!term-size.cols
+}
+
+method add-heading (Our::Grid::Cell:D :$cell) {
+    my $column              = @!headings.elems;
+    @!headings.append:      $cell;
+    @!col-width[$column]    = 0                     without @!col-width[$column];
+    @!col-width[$column]    = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$column];
+}
+
+method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
+    with $row {
+        given $row {
+            when Bool   { ++$!current-row;                                  }
+            when Int    { $!current-row = $row;                             }
+        }
+    }
+    if $!grid[$!current-row]:!exists {
+        $!grid[$!current-row]   = Array.new();
+        $!current-col               = 0;
+    }
+    with $col {
+        given $col {
+            when Bool   { ++$!current-col                               }
+            when Int    { $!current-col = $col;                         }
+            default     { $!current-col = $!grid[$!current-row].elems;  }
+        }
+    }
+    @!col-width[$!current-col]      = 0                     without @!col-width[$!current-col];
+    @!col-width[$!current-col]      = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$!current-col];
+    if $!current-col > $!grid[$!current-row].elems {
+        loop (my $i = $col; $i >= 0; $i--) {
+            @!col-width[$i] = 0                 without @!col-width[$i];
+        }
+    }
+    $!grid[$!current-row][$!current-col++] = $cell;
+}
+
+multi method sort-by-column (Int:D $column, :$descending) {
+put 'sorting by column :' ~ $column;
+put "\t" ~ 'descending' if $descending;
+die 'NYI';
+}
+
+multi method sort-by-column (Str:D $heading, :$descending) {
+    die 'Cannot sort by "' ~ $heading ~ '" because this grid was created without headings' unless @!headings.elems;
+    my $column;
+    loop (my $c = 0; $c < $!grid[0].elems; $c++) {
+        if $heading.lc eq $!grid[0][$c].TEXT.lc {
+            $column = $c;
+            last;
+        }
+    }
+    die 'Cannot sort by heading.  Heading "' ~ $heading ~ '" unknown.' without $column;
+put 'sorting by column heading: ' ~ $heading;
+    self.sort-by-column($column, :$descending);
 }
 
 method !datafy {
@@ -58,69 +112,61 @@ method !datafy {
 }
 
 method csv-print {
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     csv(in => csv(in => self!datafy), out => $*OUT);
 }
 
 method json-print {
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     put to-json(self!datafy);
 }
 
-#   put ' ' x 16    ~ 'height: 40px;';
-#   put ' ' x 16    ~ 'width: 80px;';
-#               table, th, td {
-#                   border: 1px solid #cccccc;
-#               }
-#                   background: #121212;
-
 method html-print {
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     print q:to/ENDOFHTMLHEAD/;
-<!DOCTYPE html>
-<html>
-    <head>
-        <style>
-            table, h1, th, td {
-                margin-left: auto; 
-                margin-right: auto;
-                padding: 5px;
-                text-align: center;
-            }
-            th, td {
-                border-bottom: 1px solid #ddd;
-            }
-            tr:hover {background-color: coral; }
-            body {
-                color: #222;
-                background: #fff;
-                font: 100% system-ui;
-            }
-            a {
-                color: #0033cc;
-            }
-            @media (prefers-color-scheme: dark) {
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <style>
+                table, h1, th, td {
+                    margin-left: auto; 
+                    margin-right: auto;
+                    padding: 5px;
+                    text-align: center;
+                }
+                th, td {
+                    border-bottom: 1px solid #ddd;
+                }
+                tr:hover {background-color: coral; }
                 body {
-                    color: #eee;
-                    background: #121212;
+                    color: #222;
+                    background: #fff;
+                    font: 100% system-ui;
                 }
-                body a {
-                    color: #809fff;
+                a {
+                    color: #0033cc;
                 }
-            }
-        </style>
-    </head>
-ENDOFHTMLHEAD
+                @media (prefers-color-scheme: dark) {
+                    body {
+                        color: #eee;
+                        background: #121212;
+                    }
+                    body a {
+                        color: #809fff;
+                    }
+                }
+            </style>
+        </head>
+    ENDOFHTMLHEAD
     put ' ' x 4 ~ '<body>';
     put ' ' x 8 ~ '<h1>' ~ $!title ~ '</h1>' if $!title;
     put ' ' x 8 ~ '<table>';
-    my $index   = 0;
-    if $!row-zero-headings {
-        $index++;
-        put ' ' x 12 ~ '<tr>';
-        loop (my $i = 0; $i < $!grid[0].elems; $i++) {
-            put ' ' x 16 ~ '<th>' ~ self!subst-ml-text($!grid[0][$i].TEXT) ~ '</th>';
-        }
-        put ' ' x 12 ~ '</tr>';
+    put ' ' x 12 ~ '<tr>';
+    for @!headings -> $heading {
+        put ' ' x 16 ~ '<th>' ~ self!subst-ml-text($heading.TEXT) ~ '</th>';
     }
-    loop (my $row = $index; $row < $!grid.elems; $row++) {
+    put ' ' x 12 ~ '</tr>';
+    loop (my $row = 0; $row < $!grid.elems; $row++) {
         put ' ' x 12 ~ '<tr>';
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print ' ' x 16 ~ '<td style="';
@@ -173,13 +219,13 @@ method !subst-ml-text (Str:D $s) {
 }
 
 method xml-print {
-    die 'Cannot generate XML if $!row-zero-headings == False' unless $!row-zero-headings;
+    die 'Cannot generate XML without column @!headings' unless @!headings.elems;
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' unless @!headings.elems == $!grid.elems;
     put '<?xml version="1.0" encoding="UTF-8"?>';
     put '<root>';
-    my $headers = $!grid[0];
     my @headers;
-    loop (my $i = 0; $i < $headers.elems; $i++) {
-        @headers[$i] = $headers[$i].TEXT;
+    loop (my $i = 0; $i < @!headings.elems; $i++) {
+        @headers[$i] = @!headings[$i].TEXT;
         @headers[$i] = @headers[$i].subst: ' ', '';
         @headers[$i] = @headers[$i].subst: '%', 'PCT';
     }
@@ -195,35 +241,18 @@ method xml-print {
     put '</root>';
 }
 
-method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
-    with $row {
-        given $row {
-            when Bool   { ++$!current-row;                                  }
-            when Int    { $!current-row = $row;                             }
-        }
-    }
-    if $!grid[$!current-row]:!exists {
-        $!grid[$!current-row]   = Array.new();
-        $!current-col               = 0;
-    }
-    with $col {
-        given $col {
-            when Bool   { ++$!current-col                               }
-            when Int    { $!current-col = $col;                         }
-            default     { $!current-col = $!grid[$!current-row].elems;  }
-        }
-    }
-    @!col-width[$!current-col]      = 0                     without @!col-width[$!current-col];
-    @!col-width[$!current-col]      = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$!current-col];
-    if $!current-col > $!grid[$!current-row].elems {
-        loop (my $i = $col; $i >= 0; $i--) {
-            @!col-width[$i] = 0                 without @!col-width[$i];
-        }
-    }
-    $!grid[$!current-row][$!current-col++] = $cell;
-}
-
 method TEXT-print {
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    loop (my $col = 0; $col < @!headings.elems; $col++) {
+        print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :justification(justify-center));
+        print ' ' unless $col == (@!headings.elems - 1);
+    }
+    print "\n";
+    loop ($col = 0; $col < @!headings.elems; $col++) {
+        print ' ' ~ '-' x @!col-width[$col];
+        print ' ' unless $col == (@!headings.elems - 1);
+    }
+    print "\n";
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print ' ';
@@ -234,17 +263,11 @@ method TEXT-print {
             print ' ' unless $col == ($!grid[$row].elems - 1);
         }
         print " \n";
-        if $row == 0 && $!row-zero-headings {
-            loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
-                print ' ' ~ '-' x @!col-width[$col];
-                print ' ' unless $col == ($!grid[$row].elems - 1);
-            }
-            print "\n";
-        }
     }
 }
 
 method ANSI-print {
+    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid.elems ~ '> $!grid.elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     my $col-width-total = 0;
     for @!col-width -> $colw {
         $col-width-total += $colw;
@@ -270,18 +293,21 @@ method ANSI-print {
         }
         put %box-char<horizontal> x (@!col-width[*-1] + 2) ~ %box-char<top-right-corner>;
     }
+    if @!headings.elems {
+        print ' ' x $margin ~ %box-char<side>;
+        loop (my $col = 0; $col < @!headings.elems; $col++) {
+            print ' ' ~ @!headings[$col].ANSI-fmt(:width(@!col-width[$col]), :bold, :reverse($!reverse-highlight), :highlight<white>, :foreground<black>, :justification(justify-center)).ANSI-padded;
+            print ' ' ~ %box-char<side>;
+        }
+        print "\n";
+    }
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         print ' ' x $margin;
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             print %box-char<side> ~ ' ';
             given $!grid[$row][$col] {
                 when Our::Grid::Cell:D  {
-                    if $row == 0 && $!row-zero-headings {
-                        print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col]), :bold, :reverse($!reverse-highlight), :highlight<white>, :foreground<black>, :justification(justify-center)).ANSI-padded;
-                    }
-                    else {
-                        print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
-                    }
+                    print $!grid[$row][$col].ANSI-fmt(:width(@!col-width[$col])).ANSI-padded;
                 }
                 default                 { print ' ' x @!col-width[$col];                                    }
             }

@@ -1,0 +1,34 @@
+#!/usr/bin/env raku
+
+use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+
+use Our::Grid;
+use Our::Grid::Cell;
+
+#my $grid        = Our::Grid.new: :!row-zero-headings;
+my $grid        = Our::Grid.new;
+
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk0>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk3>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk6>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk9>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk12>));
+
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk1>)), :row;
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk4>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk7>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk10>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk13>));
+
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk2>)), :row;
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk5>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk8>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk11>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk14>));
+
+$grid.TEXT-print;
+
+$grid.sort-by-column(0);
+#$grid.sort-by-column(0, :descending);
+#$grid.sort-by-column('022');
+#$grid.sort-by-column('022', :descending);
