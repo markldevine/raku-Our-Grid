@@ -45,7 +45,11 @@ submethod TWEAK {
     $!term-size                 = term-size;                                            # $!term-size.rows $!term-size.cols
 }
 
-method add-heading (Our::Grid::Cell:D :$cell) {
+multi method add-heading (Str:D $text, *%opts) {
+    self.add-heading(Our::Grid::Cell.new(:$text, |%opts));
+}
+
+multi method add-heading (Our::Grid::Cell:D :$cell) {
     my $column              = @!headings.elems;
     @!headings.append:      $cell;
     @!col-width[$column]    = 0                     without @!col-width[$column];
@@ -53,7 +57,7 @@ method add-heading (Our::Grid::Cell:D :$cell) {
 }
 
 multi method add-cell (Str:D $text, *%opts) {
-    self.add-cell(Our::Grid::Cell.new(:$text));
+    self.add-cell(Our::Grid::Cell.new(:$text, |%opts));
 }
 
 multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
