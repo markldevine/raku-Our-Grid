@@ -82,46 +82,35 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     $!grid[$!current-row][$!current-col++] = $cell;
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    my $proposed-sort-type;
-    loop ($i = 0; $i < $!fragments.elems; $i++ ) {
-        $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
-        $!TEXT                 ~= $!fragments[$i].TEXT;
-        $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
-#   If sort-string is ever prescribed, then no need to evaluate further
-        unless $!cell-sort-type ~~ sort-string {
-            if $!fragments[$i].text.chars {
-                given $!fragments[$i].text {
-                    when /^ <digit>+          $/    {   $proposed-sort-type = sort-numeric; }
-                    when /^ (<alpha>+) <digit>+ $/  {
-                        if $!cell-sort-device-name {
-                            if $!cell-sort-device-name != $0.Str {
-                                $proposed-sort-type     = sort-string;                                              # Nope, the string varies; go string
-                            }
-                            else {
-                                $proposed-sort-type     = sort-device;
-                            }
-                        }
-                        else {
-                            $!cell-sort-device-name = $0.Str;
-                            $proposed-sort-type     = sort-device;
-                        }
-                    }
-                    default                         {   $proposed-sort-type = sort-string;  }
-                }
-                $!cell-sort-type        = $proposed-sort-type   without $!cell-sort-type;
-                $!cell-sort-type        = sort-string           if $proposed-sort-type !~~ $!cell-sort-type;
-            }
-        }
-    }
-    $!cell-sort-type            = sort-string   without $!cell-sort-type;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#    my $proposed-sort-type;
+##   If sort-string is ever prescribed, then no need to evaluate further
+#        unless $!cell-sort-type ~~ sort-string {
+#            if $!fragments[$i].text.chars {
+#                given $!fragments[$i].text {
+#                    when /^ <digit>+          $/    {   $proposed-sort-type = sort-numeric; }
+#                    when /^ (<alpha>+) <digit>+ $/  {
+#                        if $!cell-sort-device-name {
+#                            if $!cell-sort-device-name != $0.Str {
+#                                $proposed-sort-type     = sort-string;                                              # Nope, the string varies; go string
+#                            }
+#                            else {
+#                                $proposed-sort-type     = sort-device;
+#                            }
+#                        }
+#                        else {
+#                            $!cell-sort-device-name = $0.Str;
+#                            $proposed-sort-type     = sort-device;
+#                        }
+#                    }
+#                    default                         {   $proposed-sort-type = sort-string;  }
+#                }
+#                $!cell-sort-type        = $proposed-sort-type   without $!cell-sort-type;
+#                $!cell-sort-type        = sort-string           if $proposed-sort-type !~~ $!cell-sort-type;
+#            }
+#        }
+#    $!cell-sort-type            = sort-string   without $!cell-sort-type;
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 }
