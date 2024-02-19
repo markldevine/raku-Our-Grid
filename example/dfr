@@ -78,14 +78,16 @@ class df-Pk-actions {
 }
 
 sub MAIN (
-    Str     $servers!,      #= server name(s) (comma separated list)
-    Int     :$above,        #= only display file systesm above the percentage 
-    Bool    :$csv,          #= dump CSV to STDOUT
-    Bool    :$html,         #= dump HTML to STDOUT
-    Bool    :$json,         #= dump JSON to STDOUT
-    Bool    :$text,         #= TEXT print
-    Bool    :$xml,          #= dump XML to STDOUT
-    Bool    :$light-mode,   #= reverse header highlight for light-mode
+    Str     $servers        = 'localhost',      #= server name(s) (comma separated list)
+    Int     :$above,                            #= only display file systesm above the percentage 
+    Bool    :$csv,                              #= dump CSV to STDOUT
+    Bool    :$html,                             #= dump HTML to STDOUT
+    Bool    :$json,                             #= dump JSON to STDOUT
+    Bool    :$text,                             #= TEXT print
+    Bool    :$xml,                              #= dump XML to STDOUT
+    Bool    :$light-mode,                       #= reverse header highlight for light-mode
+            :$sort-column,                      #= sort by column # or heading
+    Bool    :$sort-descending,                  #= sort in descending order
 ) {
     my $reverse-highlight   = $light-mode ?? True !! False;
     my $cache-file-name     = cache-file-name(:meta('drf preferences'));
@@ -107,13 +109,6 @@ sub MAIN (
         df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || warn "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
     my Our::Grid    $grid  .= new: :title('df Report'), :$reverse-highlight;
-#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('System'))));
-#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Filesystem'))));
-#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Total'))));
-#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Used'))));
-#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Available'))));
-#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('% Used'))));
-#   $grid.add-heading(:cell(Our::Grid::Cell.new(:text('Mount Point'))));
     $grid.add-heading('System'),
     $grid.add-heading('Filesystem');
     $grid.add-heading('Total');
@@ -148,9 +143,24 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
         }
     }
-#   $grid.sort-by-column(3, :numeric);
-#   $grid.sort-by-column(<Used>, :numeric);
-#   $grid.sort-by-column('Mount Point');
+    if $sort-column {
+        if $sort-column ~~ /^\d+$/ {
+            if 2 <= $sort-column <= 4 {
+                $grid.sort-by-column($sort-column, :descending($sort-descending), :numeric);
+            }
+            else {
+                $grid.sort-by-column($sort-column, :descending($sort-descending));
+            }
+        }
+        else {
+            if $sort-column ~~ m/^ ('Total' || 'Used' || 'Available') $/ {
+                $grid.sort-by-column($sort-column, :descending($sort-descending), :numeric);
+            }
+            else {
+                $grid.sort-by-column($sort-column, :descending($sort-descending));
+            }
+        }
+    }
     if any($text.so, $csv.so, $html.so, $json.so, $xml.so) {
         when $text  { $grid.TEXT-print; proceed; }
         when $csv   { $grid.csv-print;  proceed; }

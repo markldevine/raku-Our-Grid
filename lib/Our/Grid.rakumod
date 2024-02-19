@@ -6,8 +6,6 @@ use Text::CSV;
 use JSON::Fast;
 use Color::Names:api<2>;
 
-use Data::Dump::Tree;
-
 enum OUTPUTS (
     csv             => 'Text::CSV',
     html            => '???',
@@ -91,7 +89,7 @@ multi method sort-by-column (Int:D $column, :$numeric, :$descending) {
         }
         @.sort-order        = ();
         for @column_values.sort -> $string {
-            @.sort-order.push: $string.substr($value-digits + 1).Int;
+            @!sort-order.push: $string.substr($value-digits + 1).Int;
         }
     }
     else {
@@ -101,9 +99,10 @@ multi method sort-by-column (Int:D $column, :$numeric, :$descending) {
         @.sort-order        = ();
         for @column_values.sort <-> $string {
             $string ~~ s/ ^ .+? '_' (\d+)/$0/;
-            @.sort-order.push: $string;
+            @!sort-order.push: $string;
         }
     }
+    @!sort-order            = @!sort-order.reverse if $descending;
 }
 
 multi method sort-by-column (Str:D $heading, *%opts) {
