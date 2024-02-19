@@ -2,7 +2,6 @@
   "auth": "zef:markldevine",
   "authors": [ "Mark Devine <mark@markdevine.com>" ],
   "depends": [
-    "Our::Grid",
     "Our::Utilities",
     "Text::CSV",
     "JSON::Fast",

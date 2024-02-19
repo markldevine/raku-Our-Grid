@@ -1,5 +1,11 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
+#   multi method sort-by-columns
+#       - method add-cell needs to characterize all .text data as
+#           - Str
+#           - Num
+#           - Device+Number
+
 use Our::Grid::Cell;
 use Our::Utilities;
 use Text::CSV;
