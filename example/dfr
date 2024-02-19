@@ -116,6 +116,8 @@ sub MAIN (
     $grid.add-heading('Available');
     $grid.add-heading('% Used');
     $grid.add-heading('Mount Point');
+$grid.add-heading('HDISK');
+my $hdisk-count = 0;
 
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
@@ -141,6 +143,7 @@ sub MAIN (
                 $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right))));
             }
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
+$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification(justify-left))));
         }
     }
     if $sort-column {

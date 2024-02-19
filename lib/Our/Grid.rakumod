@@ -80,6 +80,50 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         }
     }
     $!grid[$!current-row][$!current-col++] = $cell;
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    my $proposed-sort-type;
+    loop ($i = 0; $i < $!fragments.elems; $i++ ) {
+        $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
+        $!TEXT                 ~= $!fragments[$i].TEXT;
+        $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
+#   If sort-string is ever prescribed, then no need to evaluate further
+        unless $!cell-sort-type ~~ sort-string {
+            if $!fragments[$i].text.chars {
+                given $!fragments[$i].text {
+                    when /^ <digit>+          $/    {   $proposed-sort-type = sort-numeric; }
+                    when /^ (<alpha>+) <digit>+ $/  {
+                        if $!cell-sort-device-name {
+                            if $!cell-sort-device-name != $0.Str {
+                                $proposed-sort-type     = sort-string;                                              # Nope, the string varies; go string
+                            }
+                            else {
+                                $proposed-sort-type     = sort-device;
+                            }
+                        }
+                        else {
+                            $!cell-sort-device-name = $0.Str;
+                            $proposed-sort-type     = sort-device;
+                        }
+                    }
+                    default                         {   $proposed-sort-type = sort-string;  }
+                }
+                $!cell-sort-type        = $proposed-sort-type   without $!cell-sort-type;
+                $!cell-sort-type        = sort-string           if $proposed-sort-type !~~ $!cell-sort-type;
+            }
+        }
+    }
+    $!cell-sort-type            = sort-string   without $!cell-sort-type;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
 }
 
 multi method sort-by-column (Int:D $column, :$numeric, :$descending) {
@@ -295,17 +339,18 @@ method TEXT-print {
         print ' ' ~ '-' x @!col-width[$col];
         print ' ' unless $col == (@!headings.elems - 1);
     }
-    print "\n";
+#   print "\n";
     for @!sort-order -> $row {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
-            print ' ';
-            given $!grid[$row][$col] {
-                when Our::Grid::Cell:D  { print $!grid[$row][$col].TEXT-padded(:width(@!col-width[$col]));  }
-                default                 { print ' ' x @!col-width[$col];                                    }
-            }
-            print ' ' unless $col == ($!grid[$row].elems - 1);
+put '$!grid[' ~ $row ~ '][' ~ $col ~ ']' ~ "\t" ~ $!grid[$row][$col].cell-sort-type;
+#           print ' ';
+#           given $!grid[$row][$col] {
+#               when Our::Grid::Cell:D  { print $!grid[$row][$col].TEXT-padded(:width(@!col-width[$col]));  }
+#               default                 { print ' ' x @!col-width[$col];                                    }
+#           }
+#           print ' ' unless $col == ($!grid[$row].elems - 1);
         }
-        print " \n";
+#       print " \n";
     }
 }
 
