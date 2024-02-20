@@ -20,6 +20,9 @@ has Int             $!spaceafter                                    = 0;
 has Str             $!ANSI-spacebefore-pad                          = '';
 has Str             $!ANSI-spaceafter-pad                           = '';
 
+has Sort-Type       $.cell-sort-type;
+has Str             $.cell-sort-device-name;
+
 submethod BUILD(:$text,
                 :$fragments,
                 :$row,
@@ -53,51 +56,18 @@ submethod TWEAK {
     my $i;
     my $proposed-sort-type;
     loop ($i = 0; $i < $!fragments.elems; $i++ ) {
-        $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
-        $!TEXT                 ~= $!fragments[$i].TEXT;
-        $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
-
         $!text                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
         $!text                 ~= $!fragments[$i].text;
         $!text                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
-
+        $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
+        $!TEXT                 ~= $!fragments[$i].TEXT;
+        $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
     }
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    my $proposed-sort-type;
-#   If sort-string is ever prescribed, then no need to evaluate further
-        unless $!cell-sort-type ~~ sort-string {
-            if $!fragments[$i].text.chars {
-                given $!fragments[$i].text {
-                    when /^ <digit>+          $/    {   $proposed-sort-type = sort-numeric; }
-                    when /^ (<alpha>+) <digit>+ $/  {
-                        if $!cell-sort-device-name {
-                            if $!cell-sort-device-name != $0.Str {
-                                $proposed-sort-type     = sort-string;                                              # Nope, the string varies; go string
-                            }
-                            else {
-                                $proposed-sort-type     = sort-device;
-                            }
-                        }
-                        else {
-                            $!cell-sort-device-name = $0.Str;
-                            $proposed-sort-type     = sort-device;
-                        }
-                    }
-                    default                         {   $proposed-sort-type = sort-string;  }
-                }
-                $!cell-sort-type        = $proposed-sort-type   without $!cell-sort-type;
-                $!cell-sort-type        = sort-string           if $proposed-sort-type !~~ $!cell-sort-type;
-            }
-        }
+    given $!text {
+        when /^ <digit>+ $/             { $!cell-sort-type = sort-digits;                                   }
+        when /^ (<alpha>+) <digit>+ $/  { $!cell-sort-device-name = $0.Str; $!cell-sort-type = sort-device; }
+        default                         { $!cell-sort-type = sort-string;                                   }
     }
-    $!cell-sort-type            = sort-string   without $!cell-sort-type;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
     self.ANSI-fmt;
     return self;
 }

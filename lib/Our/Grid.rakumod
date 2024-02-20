@@ -31,6 +31,8 @@ has Int     @.col-width;
 has Int     @.col-raw-text-width;
 has Bool    $.reverse-highlight;
 has         @.sort-order                = ();
+has         @.column-sort-types         = ();
+has         @.column-sort-device-names  = ();
 
 submethod TWEAK {
     $!term-size                 = term-size;                                            # $!term-size.rows $!term-size.cols
@@ -69,6 +71,31 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
             default     { $!current-col = $!grid[$!current-row].elems;  }
         }
     }
+#   sort inferences
+    unless @!column-sort-types[$!current-col]:exists && @!column-sort-types[$!current-col] ~~ sort-string {
+        my $proposed-sort-type;
+        given $cell.cell-sort-type {
+            when sort-digits    { $proposed-sort-type   = sort-digits;  }
+            when sort-device    {
+                if @!column-sort-device-names[$!current-col] {
+                    if @!column-sort-device-names[$!current-col] != $cell.cell-sort-device-name {
+                        $proposed-sort-type     = sort-string;
+                    }
+                    else {
+                        $proposed-sort-type     = sort-device;
+                    }
+                }
+                else {
+                    @!column-sort-device-names[$!current-col] = $cell.cell-sort-device-name;
+                    $proposed-sort-type         = sort-device;
+                }
+            }
+            default             { $proposed-sort-type = sort-string;    }
+        }
+        @!column-sort-types[$!current-col]  = $proposed-sort-type   without @!column-sort-types[$!current-col];
+        @!column-sort-types[$!current-col]  = sort-string           if $proposed-sort-type !~~ @!column-sort-types[$!current-col];
+    }
+#   width
     @!col-width[$!current-col]          = 0                     without @!col-width[$!current-col];
     @!col-raw-text-width[$!current-col] = 0                     without @!col-raw-text-width[$!current-col];
     @!col-width[$!current-col]          = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$!current-col];
@@ -80,48 +107,21 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         }
     }
     $!grid[$!current-row][$!current-col++] = $cell;
+put
 
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#    my $proposed-sort-type;
-##   If sort-string is ever prescribed, then no need to evaluate further
-#        unless $!cell-sort-type ~~ sort-string {
-#            if $!fragments[$i].text.chars {
-#                given $!fragments[$i].text {
-#                    when /^ <digit>+          $/    {   $proposed-sort-type = sort-numeric; }
-#                    when /^ (<alpha>+) <digit>+ $/  {
-#                        if $!cell-sort-device-name {
-#                            if $!cell-sort-device-name != $0.Str {
-#                                $proposed-sort-type     = sort-string;                                              # Nope, the string varies; go string
-#                            }
-#                            else {
-#                                $proposed-sort-type     = sort-device;
-#                            }
-#                        }
-#                        else {
-#                            $!cell-sort-device-name = $0.Str;
-#                            $proposed-sort-type     = sort-device;
-#                        }
-#                    }
-#                    default                         {   $proposed-sort-type = sort-string;  }
-#                }
-#                $!cell-sort-type        = $proposed-sort-type   without $!cell-sort-type;
-#                $!cell-sort-type        = sort-string           if $proposed-sort-type !~~ $!cell-sort-type;
-#            }
-#        }
-#    $!cell-sort-type            = sort-string   without $!cell-sort-type;
+    $!cell-sort-type            = sort-string   without $!cell-sort-type;
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 }
 
-multi method sort-by-column (Int:D $column, :$numeric, :$descending) {
+multi method sort-by-column (Int:D $column, :$digits, :$descending) {
     self!grid-check;
     my @column_values;
     my $row-digits          = $!grid.elems;
     $row-digits             = "$row-digits".chars;
 
-    if $numeric {
+    if $digits {
         my $value-digits        = @!col-raw-text-width[$column];
         loop (my $r = 0; $r < $!grid.elems; $r++) {
             @column_values.push: sprintf("%0" ~ $value-digits ~ "d", $!grid[$r][$column].text) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
