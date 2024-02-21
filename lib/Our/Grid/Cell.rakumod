@@ -72,8 +72,6 @@ submethod TWEAK {
         }
         default                             { $!cell-sort-type = sort-string;                                   }
     }
-print '$!text = ' ~ $!text ~ "\t";
-put '$!cell-sort-type = ' ~ $!cell-sort-type;
     self.ANSI-fmt;
     return self;
 }

@@ -1,11 +1,5 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-#   multi method sort-by-columns
-#       - method add-cell needs to characterize all .text data as
-#           - Str
-#           - Num
-#           - Device+Number
-
 use Our::Grid::Cell;
 use Our::Utilities;
 use Text::CSV;
@@ -141,8 +135,9 @@ multi method sort-by-column (Int:D $column, :$descending) {
     }
     elsif @!column-sort-types[$column] ~~ sort-device {
         my $dev-nam-chars   = @!column-sort-device-names[$column].chars;
+        my $dev-num-chars   = "@!column-sort-device-max[$column]".chars;
         loop (my $r = 0; $r < $!grid.elems; $r++) {
-            @column_values.push: sprintf('%0' ~ @!column-sort-device-max[$column] ~ 'd', $dev-nam-chars) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
+            @column_values.push: sprintf('%0' ~$dev-num-chars ~ 'd', $!grid[$r][$column].text.substr($dev-nam-chars).Int) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
         }
         @.sort-order        = ();
         for @column_values.sort <-> $string {
@@ -332,15 +327,14 @@ method TEXT-print {
         print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :justification(justify-center));
         print ' ' unless $col == (@!headings.elems - 1);
     }
-    print "\n";
+    print "\n"  if @!headings.elems;
     loop ($col = 0; $col < @!headings.elems; $col++) {
         print ' ' ~ '-' x @!col-width[$col];
         print ' ' unless $col == (@!headings.elems - 1);
     }
-    print "\n";
+    print "\n"  if @!headings.elems;
     for @!sort-order -> $row {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
-#put '$!grid[' ~ $row ~ '][' ~ $col ~ ']' ~ "\t" ~ $!grid[$row][$col].cell-sort-type;
             print ' ';
             given $!grid[$row][$col] {
                 when Our::Grid::Cell:D  { print $!grid[$row][$col].TEXT-padded(:width(@!col-width[$col]));  }
