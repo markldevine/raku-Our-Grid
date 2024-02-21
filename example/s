@@ -7,6 +7,37 @@ use Our::Grid::Cell;
 
 my $grid        = Our::Grid.new;
 
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk0>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk3>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk6>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk9>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk12>));
+
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk2>)), :row;
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk5>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk8>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk11>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk14>));
+
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk1>)), :row;
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk4>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk7>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk10>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk13>));
+
+put 'As discovered:';
+$grid.TEXT-print;
+
+put 'sort-by-column(3):';
+$grid.sort-by-column(3);
+$grid.TEXT-print;
+
+put 'sort-by-column(3, :descending):';
+$grid.sort-by-column(3, :descending);
+$grid.TEXT-print;
+
+=finish
+
 my $max-rows    = 5;
 my $max-cols    = 3;
 
@@ -43,32 +74,3 @@ $grid.sort-by-column(2, :descending);
 $grid.TEXT-print;
 
 =finish
-
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk0>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk3>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk6>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk9>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk12>));
-
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk2>)), :row;
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk5>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk8>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk11>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk14>));
-
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk1>)), :row;
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk4>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk7>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk10>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk13>));
-
-put 'As discovered:';
-$grid.TEXT-print;
-
-put 'sort-by-column(3):';
-$grid.sort-by-column(3);
-$grid.TEXT-print;
-
-put 'sort-by-column(3, :descending):';
-$grid.sort-by-column(3, :descending);
-$grid.TEXT-print;
