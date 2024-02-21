@@ -7,6 +7,43 @@ use Our::Grid::Cell;
 
 my $grid        = Our::Grid.new;
 
+my $max-rows    = 5;
+my $max-cols    = 3;
+
+my $day         = 1;
+my @dates-ordered;
+for ^($max-rows * $max-cols) {
+    @dates-ordered.push: DateTime.new(
+        year    => 2024,
+        month   => 2,
+        day     => $day++,
+    );
+}
+
+my @dates;
+for ^@dates-ordered.elems {
+    @dates.push: @dates-ordered.roll;
+}
+
+loop (my $row = 0; $row < $max-rows; $row++) {
+    loop (my $col = 0; $col < $max-cols; $col++) {
+        $grid.add-cell: :cell(Our::Grid::Cell.new(:text(@dates.pop)));
+    }
+    $grid.current-row++;
+}
+
+$grid.TEXT-print;
+
+put 'sort-by-column(2):';
+$grid.sort-by-column(2);
+$grid.TEXT-print;
+
+put 'sort-by-column(2, :descending):';
+$grid.sort-by-column(2, :descending);
+$grid.TEXT-print;
+
+=finish
+
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk0>));
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk3>));
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk6>));

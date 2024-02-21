@@ -109,6 +109,7 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
 
 multi method sort-by-column (Int:D $column, :$descending) {
     self!grid-check;
+    die '$column (' ~ $column ~ ') out of range for grid! (0 <= column <= ' ~ @!col-width.elems - 1 ~ ')' unless 0 <= $column < @!col-width.elems;
     my @column_values;
     my $row-digits          = $!grid.elems;
     $row-digits             = "$row-digits".chars;
