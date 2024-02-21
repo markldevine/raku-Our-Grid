@@ -125,11 +125,11 @@ multi method sort-by-column (Int:D $column, :$descending) {
         }
         @.sort-order        = ();
         for @column_values.sort <-> $string {
-            $string ~~ s/ ^ .+? '_' (\d+)/$0/;
+            $string ~~ s/ ^ .+? '_' (\d+) $/$0/;
             @!sort-order.push: $string.Int;
         }
     }
-    eisif @!column-sort-types[$column] ~~ sort-digits {
+    elsif @!column-sort-types[$column] ~~ sort-digits {
         my $value-digits        = @!col-raw-text-width[$column];
         loop (my $r = 0; $r < $!grid.elems; $r++) {
             @column_values.push: sprintf("%0" ~ $value-digits ~ "d", $!grid[$r][$column].text) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
