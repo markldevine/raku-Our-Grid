@@ -27,7 +27,10 @@ $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk14>));
 
 $grid.TEXT-print;
 
-$grid.sort-by-column(0);
-#$grid.sort-by-column(0, :descending);
+$grid.sort-by-column(3);
+$grid.TEXT-print;
+$grid.sort-by-column(3, :descending);
+$grid.TEXT-print;
 #$grid.sort-by-column('022');
 #$grid.sort-by-column('022', :descending);
+

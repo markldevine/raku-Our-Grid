@@ -33,6 +33,7 @@ has Bool    $.reverse-highlight;
 has         @.sort-order                = ();
 has         @.column-sort-types         = ();
 has         @.column-sort-device-names  = ();
+has Int     @.column-sort-device-max    = ();
 
 submethod TWEAK {
     $!term-size                 = term-size;                                            # $!term-size.rows $!term-size.cols
@@ -77,17 +78,20 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         given $cell.cell-sort-type {
             when sort-digits    { $proposed-sort-type   = sort-digits;  }
             when sort-device    {
+                @!column-sort-device-max[$!current-col] = 0 without @!column-sort-device-max[$!current-col];
                 if @!column-sort-device-names[$!current-col] {
-                    if @!column-sort-device-names[$!current-col] != $cell.cell-sort-device-name {
+                    if @!column-sort-device-names[$!current-col] ne $cell.cell-sort-device-name {
                         $proposed-sort-type     = sort-string;
                     }
                     else {
                         $proposed-sort-type     = sort-device;
+                        @!column-sort-device-max[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > @!column-sort-device-max[$!current-col];
                     }
                 }
                 else {
-                    @!column-sort-device-names[$!current-col] = $cell.cell-sort-device-name;
                     $proposed-sort-type         = sort-device;
+                    @!column-sort-device-names[$!current-col] = $cell.cell-sort-device-name;
+                    @!column-sort-device-max[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > @!column-sort-device-max[$!current-col];
                 }
             }
             default             { $proposed-sort-type = sort-string;    }
@@ -107,21 +111,25 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         }
     }
     $!grid[$!current-row][$!current-col++] = $cell;
-put
-
-    $!cell-sort-type            = sort-string   without $!cell-sort-type;
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 }
 
-multi method sort-by-column (Int:D $column, :$digits, :$descending) {
+multi method sort-by-column (Int:D $column, :$descending) {
     self!grid-check;
     my @column_values;
     my $row-digits          = $!grid.elems;
     $row-digits             = "$row-digits".chars;
 
-    if $digits {
+    if @!column-sort-types[$column] ~~ sort-string {
+        loop (my $r = 0; $r < $!grid.elems; $r++) {
+            @column_values.push: $!grid[$r][$column].text ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
+        }
+        @.sort-order        = ();
+        for @column_values.sort <-> $string {
+            $string ~~ s/ ^ .+? '_' (\d+)/$0/;
+            @!sort-order.push: $string.Int;
+        }
+    }
+    eisif @!column-sort-types[$column] ~~ sort-digits {
         my $value-digits        = @!col-raw-text-width[$column];
         loop (my $r = 0; $r < $!grid.elems; $r++) {
             @column_values.push: sprintf("%0" ~ $value-digits ~ "d", $!grid[$r][$column].text) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
@@ -131,14 +139,15 @@ multi method sort-by-column (Int:D $column, :$digits, :$descending) {
             @!sort-order.push: $string.substr($value-digits + 1).Int;
         }
     }
-    else {
+    elsif @!column-sort-types[$column] ~~ sort-device {
+        my $dev-nam-chars   = @!column-sort-device-names[$column].chars;
         loop (my $r = 0; $r < $!grid.elems; $r++) {
-            @column_values.push: $!grid[$r][$column].text ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
+            @column_values.push: sprintf('%0' ~ @!column-sort-device-max[$column] ~ 'd', $dev-nam-chars) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
         }
         @.sort-order        = ();
         for @column_values.sort <-> $string {
-            $string ~~ s/ ^ .+? '_' (\d+)/$0/;
-            @!sort-order.push: $string;
+            $string ~~ s/ ^ .+? '_' (\d+) $/$0/;
+            @!sort-order.push: $string.Int;
         }
     }
     @!sort-order            = @!sort-order.reverse if $descending;
@@ -328,18 +337,18 @@ method TEXT-print {
         print ' ' ~ '-' x @!col-width[$col];
         print ' ' unless $col == (@!headings.elems - 1);
     }
-#   print "\n";
+    print "\n";
     for @!sort-order -> $row {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
-put '$!grid[' ~ $row ~ '][' ~ $col ~ ']' ~ "\t" ~ $!grid[$row][$col].cell-sort-type;
-#           print ' ';
-#           given $!grid[$row][$col] {
-#               when Our::Grid::Cell:D  { print $!grid[$row][$col].TEXT-padded(:width(@!col-width[$col]));  }
-#               default                 { print ' ' x @!col-width[$col];                                    }
-#           }
-#           print ' ' unless $col == ($!grid[$row].elems - 1);
+#put '$!grid[' ~ $row ~ '][' ~ $col ~ ']' ~ "\t" ~ $!grid[$row][$col].cell-sort-type;
+            print ' ';
+            given $!grid[$row][$col] {
+                when Our::Grid::Cell:D  { print $!grid[$row][$col].TEXT-padded(:width(@!col-width[$col]));  }
+                default                 { print ' ' x @!col-width[$col];                                    }
+            }
+            print ' ' unless $col == ($!grid[$row].elems - 1);
         }
-#       print " \n";
+        print " \n";
     }
 }
 

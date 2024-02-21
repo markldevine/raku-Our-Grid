@@ -22,6 +22,7 @@ has Str             $!ANSI-spaceafter-pad                           = '';
 
 has Sort-Type       $.cell-sort-type;
 has Str             $.cell-sort-device-name;
+has Int             $.cell-sort-device-number;
 
 submethod BUILD(:$text,
                 :$fragments,
@@ -32,7 +33,7 @@ submethod BUILD(:$text,
                 :$width,
                 *%fragment-options,
                ) {
-#   die "Must initialize with either ':text' or ':fragments'" unless any($text.so, $fragments.so) && !all($text.so, $fragments.so);
+    die "Must initialize with either ':text' or ':fragments'" unless any($text.so, $fragments.so) && !all($text.so, $fragments.so);
     $!text              = $text;
     $!width             = $width                with $width;
     %!fragment-options  = %fragment-options     with %fragment-options;
@@ -50,12 +51,11 @@ submethod BUILD(:$text,
 }
 
 submethod TWEAK {
-    $!TEXT                      = Nil;
+    $!text                      = '';
+    $!TEXT                      = '';
     $!fragments[0].spacebefore  = 0;
     $!fragments[*-1].spaceafter = 0;
-    my $i;
-    my $proposed-sort-type;
-    loop ($i = 0; $i < $!fragments.elems; $i++ ) {
+    loop (my $i = 0; $i < $!fragments.elems; $i++ ) {
         $!text                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
         $!text                 ~= $!fragments[$i].text;
         $!text                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
@@ -64,10 +64,16 @@ submethod TWEAK {
         $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
     }
     given $!text {
-        when /^ <digit>+ $/             { $!cell-sort-type = sort-digits;                                   }
-        when /^ (<alpha>+) <digit>+ $/  { $!cell-sort-device-name = $0.Str; $!cell-sort-type = sort-device; }
-        default                         { $!cell-sort-type = sort-string;                                   }
+        when /^ <digit>+ $/                 { $!cell-sort-type = sort-digits;                                   }
+        when /^ (<alpha>+) (<digit>+) $/    {
+            $!cell-sort-device-name     = $0.Str;
+            $!cell-sort-device-number   = $1.Int;
+            $!cell-sort-type            = sort-device;
+        }
+        default                             { $!cell-sort-type = sort-string;                                   }
     }
+print '$!text = ' ~ $!text ~ "\t";
+put '$!cell-sort-type = ' ~ $!cell-sort-type;
     self.ANSI-fmt;
     return self;
 }
