@@ -1,6 +1,6 @@
 #!/usr/bin/env raku
 
-use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Our::Grid;
 use Our::Grid::Cell;
@@ -10,7 +10,8 @@ my $grid        = Our::Grid.new;
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk0>));
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk3>));
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk6>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk8>));
+#$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk8>));
+$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk11>));
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk9>));
 
 $grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk2>)), :row;
