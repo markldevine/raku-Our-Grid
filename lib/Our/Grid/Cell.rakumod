@@ -33,7 +33,7 @@ submethod BUILD(:$text,
                 :$width,
                 *%fragment-options,
                ) {
-    die "Must initialize with either ':text' or ':fragments'" unless any($text.so, $fragments.so) && !all($text.so, $fragments.so);
+#   die "Must initialize with either ':text' or ':fragments'" unless any($text.so, $fragments.so) && !all($text.so, $fragments.so);
     $!text              = $text;
     $!width             = $width                with $width;
     %!fragment-options  = %fragment-options     with %fragment-options;
