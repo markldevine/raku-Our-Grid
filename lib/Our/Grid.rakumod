@@ -108,7 +108,7 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
 }
 
 multi method sort-by-columns (:@columns!, :$descending) {
-    self!grid-check;
+    return False unless self!grid-check;
     my $row-digits          = $!grid.elems;
     $row-digits             = "$row-digits".chars;
     my @sortable-rows;
@@ -134,15 +134,17 @@ multi method sort-by-columns (:@columns!, :$descending) {
 }
 
 method !sort-order-check {
-    return if @!sort-order.elems;
+    return True if @!sort-order.elems;
     loop (my $s = 0; $s < $!grid.elems; $s++) {
         @!sort-order.push: $s;
     }
 }
 
 method !grid-check {
-    die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
+    return False if @!headings.elems && @!headings.elems != $!grid[0].elems;
+#   die '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems' if @!headings.elems && @!headings.elems != $!grid[0].elems;
     self!sort-order-check;
+    return True;
 }
 
 method !datafy {
@@ -163,17 +165,17 @@ method !datafy {
 }
 
 method csv-print {
-    self!grid-check;
+    return False unless self!grid-check;
     csv(in => csv(in => self!datafy), out => $*OUT);
 }
 
 method json-print {
-    self!grid-check;
+    return False unless self!grid-check;
     put to-json(self!datafy);
 }
 
 method html-print {
-    self!grid-check;
+    return False unless self!grid-check;
     print q:to/ENDOFHTMLHEAD/;
     <!DOCTYPE html>
     <html>
@@ -294,7 +296,7 @@ method xml-print {
 }
 
 method TEXT-print {
-    self!grid-check;
+    return False unless self!grid-check;
     loop (my $col = 0; $col < @!headings.elems; $col++) {
         print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :justification(justify-center));
         print ' ' unless $col == (@!headings.elems - 1);
@@ -319,7 +321,7 @@ method TEXT-print {
 }
 
 method ANSI-print {
-    self!grid-check;
+    return False unless self!grid-check;
     my $col-width-total = 0;
     for @!col-width -> $colw {
         $col-width-total += $colw;
