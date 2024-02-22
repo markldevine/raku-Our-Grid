@@ -86,7 +86,7 @@ sub MAIN (
     Bool    :$text,                             #= TEXT print
     Bool    :$xml,                              #= dump XML to STDOUT
     Bool    :$light-mode,                       #= reverse header highlight for light-mode
-            :$sort-column,                      #= sort by column # or heading
+            :$sort-columns,                     #= sort by column number(s)
     Bool    :$sort-descending,                  #= sort in descending order
 ) {
     my $reverse-highlight   = $light-mode ?? True !! False;
@@ -116,8 +116,8 @@ sub MAIN (
     $grid.add-heading('Available');
     $grid.add-heading('% Used');
     $grid.add-heading('Mount Point');
-$grid.add-heading('HDISK');
-my $hdisk-count = 0;
+#$grid.add-heading('HDISK');
+#my $hdisk-count = 0;
 
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
@@ -143,26 +143,12 @@ my $hdisk-count = 0;
                 $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right))));
             }
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
-$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification(justify-left))));
+#$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification(justify-left))));
         }
     }
-    if $sort-column {
-        if $sort-column ~~ /^\d+$/ {
-            if 2 <= $sort-column <= 4 {
-                $grid.sort-by-column($sort-column, :descending($sort-descending), :numeric);
-            }
-            else {
-                $grid.sort-by-column($sort-column, :descending($sort-descending));
-            }
-        }
-        else {
-            if $sort-column ~~ m/^ ('Total' || 'Used' || 'Available') $/ {
-                $grid.sort-by-column($sort-column, :descending($sort-descending), :numeric);
-            }
-            else {
-                $grid.sort-by-column($sort-column, :descending($sort-descending));
-            }
-        }
+    if $sort-columns {
+        my @columns = $sort-columns.split: ',';
+        $grid.sort-by-columns(:@columns, :descending($sort-descending));
     }
     if any($text.so, $csv.so, $html.so, $json.so, $xml.so) {
         when $text  { $grid.TEXT-print; proceed; }

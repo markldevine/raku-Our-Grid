@@ -107,7 +107,7 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     $!grid[$!current-row][$!current-col++] = $cell;
 }
 
-multi method sort-by-columns (:@columns, :$descending) {
+multi method sort-by-columns (:@columns!, :$descending) {
     self!grid-check;
     my $row-digits          = $!grid.elems;
     $row-digits             = "$row-digits".chars;
