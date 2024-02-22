@@ -122,7 +122,8 @@ sub MAIN (
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
             next if $above && $df-record.cap-percent-num <= $above;
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
+#           $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem),      :justification(justify-left))));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification(justify-right),  :bytes-to-bytes-unit)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-bytes),      :justification(justify-right),  :bytes-to-bytes-unit)));
@@ -144,6 +145,7 @@ sub MAIN (
             }
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
 #$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification(justify-left))));
+            $grid.current-row++;
         }
     }
     if $sort-columns {
@@ -151,10 +153,12 @@ sub MAIN (
         $grid.sort-by-columns(:@columns, :descending($sort-descending));
     }
     if any($text.so, $csv.so, $html.so, $json.so, $xml.so) {
-        when $text  { $grid.TEXT-print; proceed; }
         when $csv   { $grid.csv-print;  proceed; }
+#       when $gui   { $grid.gui-print;  proceed; }
         when $html  { $grid.html-print; proceed; }
         when $json  { $grid.json-print; proceed; }
+        when $text  { $grid.TEXT-print; proceed; }
+#       when $tui   { $grid.tui-print;  proceed; }
         when $xml   { $grid.xml-print;  proceed; }
     }
     else {
