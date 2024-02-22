@@ -93,7 +93,7 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         @!column-sort-types[$!current-col]  = $proposed-sort-type   without @!column-sort-types[$!current-col];
         @!column-sort-types[$!current-col]  = sort-string           if $proposed-sort-type !~~ @!column-sort-types[$!current-col];
     }
-#   width
+#   width accumulators
     @!col-width[$!current-col]          = 0                     without @!col-width[$!current-col];
     @!col-raw-text-width[$!current-col] = 0                     without @!col-raw-text-width[$!current-col];
     @!col-width[$!current-col]          = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > @!col-width[$!current-col];
@@ -107,59 +107,30 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     $!grid[$!current-row][$!current-col++] = $cell;
 }
 
-multi method sort-by-column (Int:D $column, :$descending) {
+multi method sort-by-columns (:@columns, :$descending) {
     self!grid-check;
-    die '$column (' ~ $column ~ ') out of range for grid! (0 <= column <= ' ~ @!col-width.elems - 1 ~ ')' unless 0 <= $column < @!col-width.elems;
-    my @column_values;
     my $row-digits          = $!grid.elems;
     $row-digits             = "$row-digits".chars;
-
-    if @!column-sort-types[$column] ~~ sort-string {
-        loop (my $r = 0; $r < $!grid.elems; $r++) {
-            @column_values.push: $!grid[$r][$column].text ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
+    my @sortable-rows;
+    my $sort-string;
+    loop (my $row = 0; $row < $!grid.elems; $row++) {
+        $sort-string        = '';
+        for @columns -> $col {
+            die '$col (' ~ $col ~ ') out of range for grid! (0 <= col <= ' ~ @!col-width.elems - 1 ~ ')' unless 0 <= $col < @!col-width.elems;
+            given @!column-sort-types[$col] {
+                when sort-string    { $sort-string ~= $!grid[$row][$col].text ~ '_';                                                                                                                    }
+                when sort-digits    { $sort-string ~= sprintf('%0' ~ @!col-raw-text-width[$col] ~ 'd', $!grid[$row][$col].text) ~ '_';                                                                  }
+                when sort-device    { $sort-string ~= sprintf('%0' ~  "@!column-sort-device-max[$col]".chars ~ 'd', $!grid[$row][$col].text.substr(@!column-sort-device-names[$col].chars).Int) ~ '_';  }
+            }
         }
-        @.sort-order        = ();
-        for @column_values.sort <-> $string {
-            $string ~~ s/ ^ .+? '_' (\d+) $/$0/;
-            @!sort-order.push: $string.Int;
-        }
+        @sortable-rows.push: $sort-string ~ sprintf("%0" ~ $row-digits ~ "d", $row);
     }
-    elsif @!column-sort-types[$column] ~~ sort-digits {
-        my $value-digits        = @!col-raw-text-width[$column];
-        loop (my $r = 0; $r < $!grid.elems; $r++) {
-            @column_values.push: sprintf("%0" ~ $value-digits ~ "d", $!grid[$r][$column].text) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
-        }
-        @.sort-order        = ();
-        for @column_values.sort -> $string {
-            @!sort-order.push: $string.substr($value-digits + 1).Int;
-        }
-    }
-    elsif @!column-sort-types[$column] ~~ sort-device {
-        my $dev-nam-chars   = @!column-sort-device-names[$column].chars;
-        my $dev-num-chars   = "@!column-sort-device-max[$column]".chars;
-        loop (my $r = 0; $r < $!grid.elems; $r++) {
-            @column_values.push: sprintf('%0' ~$dev-num-chars ~ 'd', $!grid[$r][$column].text.substr($dev-nam-chars).Int) ~ '_' ~ sprintf("%0" ~ $row-digits ~ "d", $r);
-        }
-        @.sort-order        = ();
-        for @column_values.sort <-> $string {
-            $string ~~ s/ ^ .+? '_' (\d+) $/$0/;
-            @!sort-order.push: $string.Int;
-        }
+    @.sort-order            = ();
+    for @sortable-rows.sort <-> $row-string {
+        $row-string ~~ s/ ^ .+? '_' (\d+) $/$0/;
+        @!sort-order.push: $row-string.Int;
     }
     @!sort-order            = @!sort-order.reverse if $descending;
-}
-
-multi method sort-by-column (Str:D $heading, *%opts) {
-    die 'Cannot sort by "' ~ $heading ~ '" because this grid was created without headings' unless @!headings.elems;
-    my $column;
-    loop (my $c = 0; $c < @!headings.elems; $c++) {
-        if $heading.lc eq @!headings[$c].TEXT.lc {
-            $column = $c;
-            last;
-        }
-    }
-    die 'Cannot sort by heading.  Heading "' ~ $heading ~ '" unknown.' without $column;
-    self.sort-by-column($column, |%opts);
 }
 
 method !sort-order-check {
