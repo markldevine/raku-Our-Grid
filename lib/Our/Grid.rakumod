@@ -19,7 +19,7 @@ enum OUTPUTS (
     xml             => 'LibXML',
 );
 
-has         $.title;
+has         $.title             is rw;
 has         $.term-size;
 has         $.grid                      = Array.new();
 has         @.headings                  = ();
