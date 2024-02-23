@@ -323,7 +323,9 @@ method xml-print {
 method TEXT-print {
     return False unless self!grid-check;
     loop (my $col = 0; $col < @!headings.elems; $col++) {
-        print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :justification(justify-center));
+        my $justification   = justify-center;
+        $justification      = @!headings[$col].justification with @!headings[$col].justification;
+        print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :$justification);
         print ' ' unless $col == (@!headings.elems - 1);
     }
     print "\n"  if @!headings.elems;
