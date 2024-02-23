@@ -116,13 +116,12 @@ sub MAIN (
     $grid.add-heading('Available');
     $grid.add-heading('% Used');
     $grid.add-heading('Mount Point');
-#$grid.add-heading('HDISK');
-#my $hdisk-count = 0;
+$grid.add-heading('HDISK');
+my $hdisk-count = 0;
 
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
             next if $above && $df-record.cap-percent-num <= $above;
-#           $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)), :row);
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem),      :justification(justify-left))));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification(justify-right),  :bytes-to-bytes-unit)));
@@ -144,7 +143,7 @@ sub MAIN (
                 $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right))));
             }
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
-#$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification(justify-left))));
+$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification(justify-left))));
             $grid.current-row++;
         }
     }
@@ -164,6 +163,8 @@ sub MAIN (
     else {
         $grid.ANSI-print;
     }
+#$grid.marshal;
+#$grid.unmarshal;
 }
 
 =finish
