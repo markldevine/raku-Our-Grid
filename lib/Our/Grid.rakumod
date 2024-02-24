@@ -41,10 +41,12 @@ submethod TWEAK {
     $!cache-file-name       = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
 }
 
+# multi -> Redis
 method marshal {
     cache(:$!cache-file-name, :data(marshal($!grid)));
 }
 
+# multi <- Redis
 method unmarshal {
     $!grid                  = unmarshal(cache(:$!cache-file-name), Our::Grid);
     loop (my $row = 0; $row < $!grid.elems; $row++) {
