@@ -12,7 +12,7 @@ use Color::Names:api<2>;
 
 enum OUTPUTS (
     csv             => 'Text::CSV',
-    html            => '???',
+    html            => 1,
     json            => 'JSON::Fast',
     tui             => 'Terminal::UI',
 #   xlsl            => 'Spreadsheet::XLSX',
@@ -90,7 +90,7 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     }
 #   sort inferences
     unless @!column-sort-types[$!current-col]:exists && @!column-sort-types[$!current-col] ~~ 'string' {
-        my Sort-Type $proposed-sort-type;
+        my $proposed-sort-type;
         given $cell.cell-sort-type {
             when 'digits'       { $proposed-sort-type   = sort-digits;  }
             when 'name-number'  {
