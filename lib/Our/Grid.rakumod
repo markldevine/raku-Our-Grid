@@ -145,6 +145,7 @@ multi method sort-by-columns (:@sort-columns!, :$descending) {
                 when sort-device    { $sort-string ~= $!grid[$row][$col].text.chars ?? sprintf('%0' ~  "@!column-sort-device-max[$col]".chars ~ 'd', $!grid[$row][$col].text.substr(@!column-sort-device-names[$col].chars).Int) ~ '_' !! ' _'; }
             }
         }
+        $sort-string       ~= sprintf("%0" ~ $row-digits ~ "d", $row);
         %sortable-rows{$sort-string} = $row;
     }
     @.sort-order            = ();

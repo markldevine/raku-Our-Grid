@@ -1,6 +1,6 @@
 #!/usr/bin/env raku
 
-use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Async::Command::Multi;
 use Our::Grid;
@@ -148,8 +148,8 @@ $grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :j
         }
     }
     if $sort-columns {
-        my @columns = $sort-columns.split: ',';
-        $grid.sort-by-columns(:@columns, :descending($sort-descending));
+        my @sort-columns = $sort-columns.split: ',';
+        $grid.sort-by-columns(:@sort-columns, :descending($sort-descending));
     }
     if any($text.so, $csv.so, $html.so, $json.so, $xml.so) {
         when $csv   { $grid.csv-print;  proceed; }
