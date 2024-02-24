@@ -1,5 +1,7 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
+use Data::Dump::Tree;
+
 use Our::Cache;
 use Our::Grid::Cell;
 use Our::Grid::Cell::Fragment;
@@ -12,7 +14,7 @@ use Color::Names:api<2>;
 
 enum OUTPUTS (
     csv             => 'Text::CSV',
-    html            => 1,
+    html            => '1',
     json            => 'JSON::Fast',
     tui             => 'Terminal::UI',
 #   xlsl            => 'Spreadsheet::XLSX',
@@ -46,11 +48,15 @@ method marshal {
 method unmarshal {
     $!grid                  = unmarshal(cache(:$!cache-file-name), Our::Grid);
     loop (my $row = 0; $row < $!grid.elems; $row++) {
-        loop (my $col = 0; $col < $!grid.elems; $col++) {
-            $!grid[$row][$col] = unmarshal($!grid[$row][$col], Our::Grid::Cell);
-            loop (my $fragment = 0; $fragment < $!grid[$row][$col].fragments.elems; $fragment++) {
-                $!grid[$row][$col].fragments[$fragment] = unmarshal($!grid[$row][$col].fragments[$fragment], Our::Grid::Cell::Fragment);
+        loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
+            loop (my $fragment = 0; $fragment < $!grid[$row][$col]<fragments>.elems; $fragment++) {
+                $!grid[$row][$col]<fragments>[$fragment] = unmarshal($!grid[$row][$col]<fragments>[$fragment], Our::Grid::Cell::Fragment);
             }
+        }
+    }
+    loop ($row = 0; $row < $!grid.elems; $row++) {
+        loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
+            $!grid[$row][$col] = unmarshal($!grid[$row][$col], Our::Grid::Cell);
         }
     }
 }
@@ -92,7 +98,7 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     unless @!column-sort-types[$!current-col]:exists && @!column-sort-types[$!current-col] ~~ 'string' {
         my $proposed-sort-type;
         given $cell.cell-sort-type {
-            when 'digits'       { $proposed-sort-type   = sort-digits;  }
+            when 'digits'       { $proposed-sort-type   = 'digits';     }
             when 'name-number'  {
                 @!column-sort-device-max[$!current-col] = 0 without @!column-sort-device-max[$!current-col];
                 if @!column-sort-device-names[$!current-col] {
