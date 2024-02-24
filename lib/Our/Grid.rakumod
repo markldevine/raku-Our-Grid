@@ -39,24 +39,21 @@ submethod TWEAK {
     $!cache-file-name       = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
 }
 
-#method marshal {
-#put '@!headings.elems <' ~ @!headings.elems ~ '> != <' ~ $!grid[0].elems ~ '> $!grid[0].elems';
-#dd $!grid;
-#print "\n\n\n\n\n\n\n";
-#    cache(:$!cache-file-name, :data(marshal($!grid)));
-#}
+method marshal {
+    cache(:$!cache-file-name, :data(marshal($!grid)));
+}
 
-#method unmarshal {
-#    $!grid                  = unmarshal(cache(:$!cache-file-name), Our::Grid);
-#    loop (my $row = 0; $row < $!grid.elems; $row++) {
-#        loop (my $col = 0; $col < $!grid.elems; $col++) {
-#            $!grid[$row][$col] = unmarshal($!grid[$row][$col], Our::Grid::Cell);
-#            loop (my $fragment = 0; $fragment < $!grid[$row][$col].fragments.elems; $fragment++) {
-#                $!grid[$row][$col].fragments[$fragment] = unmarshal($!grid[$row][$col].fragments[$fragment], Our::Grid::Cell::Fragment);
-#            }
-#        }
-#    }
-#}
+method unmarshal {
+    $!grid                  = unmarshal(cache(:$!cache-file-name), Our::Grid);
+    loop (my $row = 0; $row < $!grid.elems; $row++) {
+        loop (my $col = 0; $col < $!grid.elems; $col++) {
+            $!grid[$row][$col] = unmarshal($!grid[$row][$col], Our::Grid::Cell);
+            loop (my $fragment = 0; $fragment < $!grid[$row][$col].fragments.elems; $fragment++) {
+                $!grid[$row][$col].fragments[$fragment] = unmarshal($!grid[$row][$col].fragments[$fragment], Our::Grid::Cell::Fragment);
+            }
+        }
+    }
+}
 
 multi method add-heading (Str:D $text!, *%opts) {
     self.add-heading(:cell(Our::Grid::Cell.new(:$text, |%opts)));
@@ -132,28 +129,27 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     $!grid[$!current-row][$!current-col++] = $cell;
 }
 
-multi method sort-by-columns (:@columns!, :$descending) {
+multi method sort-by-columns (:@sort-columns!, :$descending) {
     return False unless self!grid-check;
     my $row-digits          = $!grid.elems;
     $row-digits             = "$row-digits".chars;
-    my @sortable-rows;
+    my %sortable-rows;
     my $sort-string;
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         $sort-string        = '';
-        for @columns -> $col {
+        for @sort-columns -> $col {
             die '$col (' ~ $col ~ ') out of range for grid! (0 <= col <= ' ~ @!col-width.elems - 1 ~ ')' unless 0 <= $col < @!col-width.elems;
             given @!column-sort-types[$col] {
-                when sort-string    { $sort-string ~= $!grid[$row][$col].text ~ '_';                                                                                                                    }
-                when sort-digits    { $sort-string ~= sprintf('%0' ~ @!col-raw-text-width[$col] ~ 'd', $!grid[$row][$col].text) ~ '_';                                                                  }
-                when sort-device    { $sort-string ~= sprintf('%0' ~  "@!column-sort-device-max[$col]".chars ~ 'd', $!grid[$row][$col].text.substr(@!column-sort-device-names[$col].chars).Int) ~ '_';  }
+                when sort-string    { $sort-string ~= $!grid[$row][$col].text.chars ?? $!grid[$row][$col].text ~ '_' !! ' _';                                                                                                                   }
+                when sort-digits    { $sort-string ~= sprintf('%0' ~ @!col-raw-text-width[$col] ~ 'd', $!grid[$row][$col].text.chars ?? $!grid[$row][$col].text !! "0") ~ '_';                                                                  }
+                when sort-device    { $sort-string ~= $!grid[$row][$col].text.chars ?? sprintf('%0' ~  "@!column-sort-device-max[$col]".chars ~ 'd', $!grid[$row][$col].text.substr(@!column-sort-device-names[$col].chars).Int) ~ '_' !! ' _'; }
             }
         }
-        @sortable-rows.push: $sort-string ~ sprintf("%0" ~ $row-digits ~ "d", $row);
+        %sortable-rows{$sort-string} = $row;
     }
     @.sort-order            = ();
-    for @sortable-rows.sort <-> $row-string {
-        $row-string ~~ s/ ^ .+? '_' (\d+) $/$0/;
-        @!sort-order.push: $row-string.Int;
+    for %sortable-rows.keys.sort -> $key {
+        @!sort-order.push: %sortable-rows{$key};
     }
     @!sort-order            = @!sort-order.reverse if $descending;
 }
