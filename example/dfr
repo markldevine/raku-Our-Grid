@@ -163,8 +163,8 @@ $grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :j
     else {
         $grid.ANSI-print;
     }
-#$grid.marshal;
-#$grid.unmarshal;
+$grid.marshal;
+$grid.unmarshal;
 }
 
 =finish

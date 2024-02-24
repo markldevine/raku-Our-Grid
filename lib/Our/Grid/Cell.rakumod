@@ -9,13 +9,9 @@ has                 %!fragment-options;
 has                 $.text;
 has                 $.ANSI                      is built(False);
 has                 $.TEXT                      is built(False);
-
-#has Justification   $.justification             is rw               = justify-left;
-#has Justification   $!previous-justification                        = justify-left;
-
-my   subset         Justification               where * (elem) $Justification;
-has  Justification  $.justification             is rw               = 'left';
-has  Justification  $!previous-justification                        = 'left';
+my  subset          Justification               where * (elem) $Justification;
+has Justification   $.justification             is rw               = 'left';
+has Justification   $!previous-justification                        = 'left';
 
 has Int             $.visibility                is rw               = 100;              # % of mandatory visibility upon display
 has                 $.highlight                 is rw; 
@@ -26,6 +22,7 @@ has Int             $!spaceafter                                    = 0;
 has Str             $!ANSI-spacebefore-pad                          = '';
 has Str             $!ANSI-spaceafter-pad                           = '';
 
+my  subset          Sort-Type                   where * (elem) $Sort-Type;
 has Sort-Type       $.cell-sort-type;
 has Str             $.cell-sort-device-name;
 has Int             $.cell-sort-device-number;
@@ -70,13 +67,13 @@ submethod TWEAK {
         $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
     }
     given $!text {
-        when /^ <digit>+ $/                 { $!cell-sort-type = sort-digits;                                   }
+        when /^ <digit>+ $/                 { $!cell-sort-type = 'digits';  }
         when /^ (<alpha>+) (<digit>+) $/    {
             $!cell-sort-device-name     = $0.Str;
             $!cell-sort-device-number   = $1.Int;
-            $!cell-sort-type            = sort-device;
+            $!cell-sort-type            = 'name-number';
         }
-        default                             { $!cell-sort-type = sort-string;                                   }
+        default                             { $!cell-sort-type = 'string';  }
     }
     self.ANSI-fmt;
     return self;

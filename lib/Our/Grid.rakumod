@@ -89,31 +89,31 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         }
     }
 #   sort inferences
-    unless @!column-sort-types[$!current-col]:exists && @!column-sort-types[$!current-col] ~~ sort-string {
-        my $proposed-sort-type;
+    unless @!column-sort-types[$!current-col]:exists && @!column-sort-types[$!current-col] ~~ 'string' {
+        my Sort-Type $proposed-sort-type;
         given $cell.cell-sort-type {
-            when sort-digits    { $proposed-sort-type   = sort-digits;  }
-            when sort-device    {
+            when 'digits'       { $proposed-sort-type   = sort-digits;  }
+            when 'name-number'  {
                 @!column-sort-device-max[$!current-col] = 0 without @!column-sort-device-max[$!current-col];
                 if @!column-sort-device-names[$!current-col] {
                     if @!column-sort-device-names[$!current-col] ne $cell.cell-sort-device-name {
-                        $proposed-sort-type     = sort-string;
+                        $proposed-sort-type     = 'string';
                     }
                     else {
-                        $proposed-sort-type     = sort-device;
+                        $proposed-sort-type     = 'name-number';
                         @!column-sort-device-max[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > @!column-sort-device-max[$!current-col];
                     }
                 }
                 else {
-                    $proposed-sort-type         = sort-device;
+                    $proposed-sort-type         = 'name-number';
                     @!column-sort-device-names[$!current-col] = $cell.cell-sort-device-name;
                     @!column-sort-device-max[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > @!column-sort-device-max[$!current-col];
                 }
             }
-            default             { $proposed-sort-type = sort-string;    }
+            default             { $proposed-sort-type = 'string';       }
         }
         @!column-sort-types[$!current-col]  = $proposed-sort-type   without @!column-sort-types[$!current-col];
-        @!column-sort-types[$!current-col]  = sort-string           if $proposed-sort-type !~~ @!column-sort-types[$!current-col];
+        @!column-sort-types[$!current-col]  = 'string'              if $proposed-sort-type !~~ @!column-sort-types[$!current-col];
     }
 #   width accumulators
     @!col-width[$!current-col]          = 0                     without @!col-width[$!current-col];
@@ -140,9 +140,9 @@ multi method sort-by-columns (:@sort-columns!, :$descending) {
         for @sort-columns -> $col {
             die '$col (' ~ $col ~ ') out of range for grid! (0 <= col <= ' ~ @!col-width.elems - 1 ~ ')' unless 0 <= $col < @!col-width.elems;
             given @!column-sort-types[$col] {
-                when sort-string    { $sort-string ~= $!grid[$row][$col].text.chars ?? $!grid[$row][$col].text ~ '_' !! ' _';                                                                                                                   }
-                when sort-digits    { $sort-string ~= sprintf('%0' ~ @!col-raw-text-width[$col] ~ 'd', $!grid[$row][$col].text.chars ?? $!grid[$row][$col].text !! "0") ~ '_';                                                                  }
-                when sort-device    { $sort-string ~= $!grid[$row][$col].text.chars ?? sprintf('%0' ~  "@!column-sort-device-max[$col]".chars ~ 'd', $!grid[$row][$col].text.substr(@!column-sort-device-names[$col].chars).Int) ~ '_' !! ' _'; }
+                when 'string'       { $sort-string ~= $!grid[$row][$col].text.chars ?? $!grid[$row][$col].text ~ '_' !! ' _';                                                                                                                   }
+                when 'digits'       { $sort-string ~= sprintf('%0' ~ @!col-raw-text-width[$col] ~ 'd', $!grid[$row][$col].text.chars ?? $!grid[$row][$col].text !! "0") ~ '_';                                                                  }
+                when 'name-number'  { $sort-string ~= $!grid[$row][$col].text.chars ?? sprintf('%0' ~  "@!column-sort-device-max[$col]".chars ~ 'd', $!grid[$row][$col].text.substr(@!column-sort-device-names[$col].chars).Int) ~ '_' !! ' _'; }
             }
         }
         $sort-string       ~= sprintf("%0" ~ $row-digits ~ "d", $row);
