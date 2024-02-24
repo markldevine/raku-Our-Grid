@@ -21,7 +21,7 @@ loop (my $row = 0; $row < $max-rows; $row++) {
         $grid.add-cell(:cell(Our::Grid::Cell.new(:text(DateTime.new(now)))), :$row, :$col);
 #       $grid.add-cell(:cell(Our::Grid::Cell.new(:text(DateTime.new(now)), :foreground<red>)), :$row, :$col);
 #       $grid.add-cell(:cell(Our::Grid::Cell.new(:text(DateTime.new(now)), :foreground<green>, :background<yellow>)), :$row, :$col);
-#       $grid.add-cell(:cell(Our::Grid::Cell.new(:text($row ~ ';' ~ $col), :foreground<white>, :justification(justify-right))), :$row, :$col);
+#       $grid.add-cell(:cell(Our::Grid::Cell.new(:text($row ~ ';' ~ $col), :foreground<white>, :justification<right>)), :$row, :$col);
     }
 }
 

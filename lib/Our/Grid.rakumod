@@ -251,9 +251,9 @@ method html-print {
             if $!grid[$row][$col] ~~ Our::Grid::Cell:D {
                 given $!grid[$row][$col] {
                     if .justification {
-                        when .justification ~~ justify-left     { print 'text-align: left;';   proceed; }
-                        when .justification ~~ justify-center   { print 'text-align: center;'; proceed; }
-                        when .justification ~~ justify-right    { print 'text-align: right;';  proceed; }
+                        when 'left'     { print 'text-align: left;';    }
+                        when 'center'   { print 'text-align: center;';  }
+                        when 'right'    { print 'text-align: right;';   }
                     }
                     loop (my $f = 0; $f < .fragments.elems; $f++) {
                         if .fragments[$f].foreground {
@@ -323,7 +323,7 @@ method xml-print {
 method TEXT-print {
     return False unless self!grid-check;
     loop (my $col = 0; $col < @!headings.elems; $col++) {
-        my $justification   = justify-center;
+        my $justification   = 'center';
         $justification      = @!headings[$col].justification with @!headings[$col].justification;
         print ' ' ~ @!headings[$col].TEXT-padded(:width(@!col-width[$col]), :$justification);
         print ' ' unless $col == (@!headings.elems - 1);
@@ -377,7 +377,8 @@ method ANSI-print {
     if @!headings.elems {
         print ' ' x $margin ~ %box-char<side>;
         loop (my $col = 0; $col < @!headings.elems; $col++) {
-            print ' ' ~ @!headings[$col].ANSI-fmt(:width(@!col-width[$col]), :bold, :reverse($!reverse-highlight), :highlight<white>, :foreground<black>, :justification(justify-center)).ANSI-padded;
+#           print ' ' ~ @!headings[$col].ANSI-fmt(:width(@!col-width[$col]), :bold, :reverse($!reverse-highlight), :highlight<white>, :foreground<black>, :justification<center>).ANSI-padded;
+            print ' ' ~ @!headings[$col].ANSI-fmt(:width(@!col-width[$col]), :bold, :reverse($!reverse-highlight), :highlight<white>, :foreground<black>).ANSI-padded;
             print ' ' ~ %box-char<side>;
         }
         print "\n";

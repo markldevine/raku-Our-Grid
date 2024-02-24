@@ -123,27 +123,27 @@ my $hdisk-count = 0;
         for %server-results{$server}.list -> $df-record {
             next if $above && $df-record.cap-percent-num <= $above;
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem),      :justification(justify-left))));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification(justify-right),  :bytes-to-bytes-unit)));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-bytes),      :justification(justify-right),  :bytes-to-bytes-unit)));
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-bytes), :justification(justify-right),  :bytes-to-bytes-unit)));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem),      :justification<left>)));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification<right>,  :bytes-to-bytes-unit)));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-bytes),      :justification<right>,  :bytes-to-bytes-unit)));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-bytes), :justification<right>,  :bytes-to-bytes-unit)));
             if 70 <= $df-record.cap-percent-num < 80 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground<yellow>)));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>,  :foreground<yellow>)));
             }
             elsif 80 <= $df-record.cap-percent-num < 90 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground<orange>)));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>,  :foreground<orange>)));
             }
             elsif 90 <= $df-record.cap-percent-num < 100 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground<red>)));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>,  :foreground<red>)));
             }
             elsif $df-record.cap-percent-num == 100 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right),  :foreground<red>, :blink)));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>,  :foreground<red>, :blink)));
             }
             else {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification(justify-right))));
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>)));
             }
-            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification(justify-left))));
-$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification(justify-left))));
+            $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification<left>)));
+$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification<left>)));
             $grid.current-row++;
         }
     }

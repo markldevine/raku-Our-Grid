@@ -9,10 +9,10 @@ use Data::Dump::Tree;
 
 my Our::Grid::Cell $c;
 
-$c .= new(:text(' 12345     '), :trim-input(True), :foreground<yellow>, :highlight<green>, :18width, :justification(justify-left),); put '|' ~ $c.ANSI-padded ~ '|';
-$c .= new(:text(' 12345     '), :trim-input(True), :foreground<yellow>, :background<black> :highlight<pink>, :18width, :justification(justify-left),); put '|' ~ $c.ANSI-padded ~ '|';
-$c .= new(:text('12345 '), :allupper, :foreground<yellow>, :background<black> :highlight<gray244>, :18width, :justification(justify-center),); put '|' ~ $c.ANSI-padded ~ '|';
-$c .= new(:text('12345'), :allupper, :foreground<yellow>, :background<black> :highlight<gray244>, :18width, :justification(justify-right),); put '|' ~ $c.ANSI-padded ~ '|';
+$c .= new(:text(' 12345     '), :trim-input(True), :foreground<yellow>, :highlight<green>, :18width, :justification<left>,); put '|' ~ $c.ANSI-padded ~ '|';
+$c .= new(:text(' 12345     '), :trim-input(True), :foreground<yellow>, :background<black> :highlight<pink>, :18width, :justification<left>,); put '|' ~ $c.ANSI-padded ~ '|';
+$c .= new(:text('12345 '), :allupper, :foreground<yellow>, :background<black> :highlight<gray244>, :18width, :justification<center>,); put '|' ~ $c.ANSI-padded ~ '|';
+$c .= new(:text('12345'), :allupper, :foreground<yellow>, :background<black> :highlight<gray244>, :18width, :justification<right>,); put '|' ~ $c.ANSI-padded ~ '|';
 
 my @fragments;
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('1st'),                    :1spaceafter,   :bold);
@@ -34,13 +34,13 @@ my @fragments;
 @fragments.push: Our::Grid::Cell::Fragment.new(:text('tITLE cASE lOWER CASE'),  :1spaceafter,   :titlecaselowercase,    :foreground<red>);
 $c .= new(:@fragments);
 put $c.TEXT;
-put '|' ~ $c.TEXT-padded(:200width, :justification(justify-center)) ~ '|';
+put '|' ~ $c.TEXT-padded(:200width, :justification<center>) ~ '|';
 put $c.ANSI;
 put '|' ~ $c.ANSI-fmt(:highlight<green>).ANSI ~ '|';
 put '|' ~ $c.ANSI-fmt(:highlight<green>).ANSI-padded ~ '|';
-put '|' ~ $c.ANSI-fmt(:highlight<yellow>, :130width, :justification(justify-left)).ANSI-padded ~ '|';
-put '|' ~ $c.ANSI-fmt(:highlight<blue>, :150width, :justification(justify-center)).ANSI-padded ~ '|';
-put '|' ~ $c.ANSI-fmt(:highlight<white>, :foreground<black>, :180width, :justification(justify-right)).ANSI-padded ~ '|';
+put '|' ~ $c.ANSI-fmt(:highlight<yellow>, :130width, :justification<left>).ANSI-padded ~ '|';
+put '|' ~ $c.ANSI-fmt(:highlight<blue>, :150width, :justification<center>).ANSI-padded ~ '|';
+put '|' ~ $c.ANSI-fmt(:highlight<white>, :foreground<black>, :180width, :justification<right>).ANSI-padded ~ '|';
 put '|' ~ $c.ANSI-padded ~ '|';
 put $c.ANSI;
 

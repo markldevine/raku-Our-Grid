@@ -9,8 +9,14 @@ has                 %!fragment-options;
 has                 $.text;
 has                 $.ANSI                      is built(False);
 has                 $.TEXT                      is built(False);
-has Justification   $.justification             is rw               = justify-left;
-has Justification   $!previous-justification                        = justify-left;
+
+#has Justification   $.justification             is rw               = justify-left;
+#has Justification   $!previous-justification                        = justify-left;
+
+my   subset         Justification               where * (elem) $Justification;
+has  Justification  $.justification             is rw               = 'left';
+has  Justification  $!previous-justification                        = 'left';
+
 has Int             $.visibility                is rw               = 100;              # % of mandatory visibility upon display
 has                 $.highlight                 is rw; 
 has Int             $.width                                         = 0;
@@ -77,23 +83,25 @@ submethod TWEAK {
 }
 
 method !calculate-pads {
-    return 1                    if $!width == $!previous-width && $!justification.value == $!previous-justification.value;
+    return 1                    if $!width == $!previous-width && $!justification eq $!previous-justification;
     $!previous-width            = $!width;
     $!previous-justification    = $!justification;
     my $text-chars              = $!TEXT.Str.chars;
     die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width < $text-chars;
     if $!width != $text-chars {
-        if $!justification ~~ justify-left {
-            $!spacebefore       = 0;
-            $!spaceafter        = ($!width - $text-chars);
-        }
-        elsif $!justification ~~ justify-center {
-            $!spacebefore       = ($!width - $text-chars) div 2;
-            $!spaceafter        = $!width - $text-chars - $!spacebefore;
-        }
-        elsif $!justification ~~ justify-right {
-            $!spacebefore       = ($!width - $text-chars);
-            $!spaceafter        = 0;
+        given $!justification {
+            when 'left'     {
+                $!spacebefore       = 0;
+                $!spaceafter        = ($!width - $text-chars);
+            }
+            when 'center'   {
+                $!spacebefore       = ($!width - $text-chars) div 2;
+                $!spaceafter        = $!width - $text-chars - $!spacebefore;
+            }
+            when 'right'    {
+                $!spacebefore       = ($!width - $text-chars);
+                $!spaceafter        = 0;
+            }
         }
     }
 }
