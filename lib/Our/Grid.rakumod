@@ -3,7 +3,7 @@ unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 #use Data::Dump::Tree;
 
 use Color::Names:api<2>;
-use Cro::HTTP::Session::Redis;
+#use Cro::HTTP::Session::Redis;
 use JSON::Fast;
 use JSON::Marshal;
 use JSON::Unmarshal;
