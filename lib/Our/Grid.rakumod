@@ -3,7 +3,7 @@ unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 #use Data::Dump::Tree;
 
 use Color::Names:api<2>;
-#use Cro::HTTP::Session::Redis;
+use Cro::HTTP::Client;
 use JSON::Fast;
 use JSON::Marshal;
 use JSON::Unmarshal;
@@ -37,17 +37,38 @@ has         @.column-sort-types         = ();
 has         @.column-sort-device-names  = ();
 has Int     @.column-sort-device-max    = ();
 has         $.cache-file-name;
+has Str     $.redis-key;
 
 submethod TWEAK {
     $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
     $!cache-file-name   = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
 }
 
+method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
+    $!grid              = unmarshal-to-grid($redis.get($!redis-key));
+#   get-html -> SMTP
+}
+
+method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-port = 80) {
+    $!redis-key         = $*PROGRAM ~ ' ' ~ @*ARGS.join(' ') ~ DateTime.now.posix;
+    self.redis-set;
+# add options like From:, To:, Cc:, Bcc:, Subj:
+    my $Cro-URL         = 'http://'
+                        ~ $cro-host
+                        ~ ':'
+                        ~ $cro-port
+                        ~ '/proxy-mail-via-redis'
+                        ;
+    my $response        = await Cro::HTTP::Client.get($Cro-URL);
+    my $body            = await $response.body;
+put $body;
+}
+
 method redis-set {
     die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
     my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
     my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
-    $redis.set("key", self.marshal-from-grid);
+    $redis.set($!redis-key, self.marshal-from-grid);
 }
 
 method marshal-from-grid {
@@ -58,7 +79,7 @@ method redis-get {
     die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
     my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
     my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
-    self.unmarshal-to-grid($redis.get("key"));
+    self.unmarshal-to-grid($redis.get($!redis-key));
 }
 
 method unmarshal-to-grid (Str:D $string) {
