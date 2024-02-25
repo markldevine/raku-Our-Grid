@@ -1,8 +1,8 @@
 #!/usr/bin/env raku
 
-use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
-use Data::Dump::Tree;
+#use Data::Dump::Tree;
 
 use Async::Command::Multi;
 use Our::Grid;
@@ -90,15 +90,16 @@ sub MAIN (
     Bool    :$light-mode,                       #= reverse header highlight for light-mode
             :$sort-columns,                     #= sort by column number(s)
     Bool    :$sort-descending,                  #= sort in descending order
+    Bool    :$cache
 ) {
     my $reverse-highlight   = $light-mode ?? True !! False;
-    my $cache-file-name     = cache-file-name(:meta('drf preferences'));
-    my $cache               = cache(:$cache-file-name);
-    $cache                  = from-json($cache) if $cache;
+    my $preferences-cache-file-name = cache-file-name(:meta('drf preferences'));
+    my $preferences-cache   = cache(:cache-file-name($preferences-cache-file-name));
+    $preferences-cache      = from-json($preferences-cache) if $preferences-cache;
     without $light-mode {
         $reverse-highlight  = $cache<light-mode> if $cache<light-mode>:exists;
     }
-    cache(:$cache-file-name, :data(to-json({light-mode => $reverse-highlight})));
+    cache(:cache-file-name($preferences-cache-file-name), :data(to-json({light-mode => $reverse-highlight})));
     my @servers             = $servers.split(',');
     my %command;
     for @servers -> $server {
@@ -165,10 +166,9 @@ $grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :j
     else {
         $grid.ANSI-print;
     }
-$grid.marshal;
-$grid.unmarshal;
-$grid.TEXT-print;
-ddt $grid;
+#$grid.marshal;
+#$grid.unmarshal;
+#$grid.TEXT-print;
 }
 
 =finish
