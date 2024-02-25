@@ -1,16 +1,18 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-use Data::Dump::Tree;
+#use Data::Dump::Tree;
 
+use Color::Names:api<2>;
+use Cro::HTTP::Session::Redis;
+use JSON::Fast;
+use JSON::Marshal;
+use JSON::Unmarshal;
 use Our::Cache;
 use Our::Grid::Cell;
 use Our::Grid::Cell::Fragment;
 use Our::Utilities;
+use Redis::Async;
 use Text::CSV;
-use JSON::Fast;
-use JSON::Marshal;
-use JSON::Unmarshal;
-use Color::Names:api<2>;
 
 enum OUTPUTS (
     csv             => 'Text::CSV',
@@ -37,18 +39,30 @@ has Int     @.column-sort-device-max    = ();
 has         $.cache-file-name;
 
 submethod TWEAK {
-    $!term-size             = term-size;                                            # $!term-size.rows $!term-size.cols
-    $!cache-file-name       = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
+    $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
+    $!cache-file-name   = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
 }
 
-# multi -> Redis
-method marshal {
-    cache(:$!cache-file-name, :data(marshal($!grid)));
+method redis-set {
+    die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
+    my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
+    my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
+    $redis.set("key", self.marshal-from-grid);
 }
 
-# multi <- Redis
-method unmarshal {
-    $!grid                  = unmarshal(cache(:$!cache-file-name), Our::Grid);
+method marshal-from-grid {
+    return marshal($!grid);
+}
+
+method redis-get {
+    die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
+    my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
+    my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
+    self.unmarshal-to-grid($redis.get("key"));
+}
+
+method unmarshal-to-grid (Str:D $string) {
+    $!grid              = unmarshal($string, Our::Grid);
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             loop (my $fragment = 0; $fragment < $!grid[$row][$col]<fragments>.elems; $fragment++) {
