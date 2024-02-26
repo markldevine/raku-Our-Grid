@@ -1,7 +1,7 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
 #use Data::Dump::Tree;
-
+use  Base64::Native;
 use Color::Names:api<2>;
 use Cro::HTTP::Client;
 use JSON::Fast;
@@ -37,7 +37,7 @@ has         @.column-sort-types         = ();
 has         @.column-sort-device-names  = ();
 has Int     @.column-sort-device-max    = ();
 has         $.cache-file-name;
-has Str     $.redis-key;
+has         $.redis-key;
 
 submethod TWEAK {
     $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
@@ -45,12 +45,15 @@ submethod TWEAK {
 }
 
 method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
-    $!grid              = unmarshal-to-grid($redis.get($!redis-key));
+    die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
+    my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
+    my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
+    self.unmarshal-to-grid($redis.get($redis-key));
 #   get-html -> SMTP
 }
 
-method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-port = 80) {
-    $!redis-key         = $*PROGRAM ~ ' ' ~ @*ARGS.join(' ') ~ DateTime.now.posix;
+method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-port = 22151) {
+    $!redis-key         = base64-encode($*PROGRAM ~ ' ' ~ @*ARGS.join(' ') ~ DateTime.now.posix).decode.encode;
     self.redis-set;
 # add options like From:, To:, Cc:, Bcc:, Subj:
     my $Cro-URL         = 'http://'
@@ -58,10 +61,12 @@ method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-po
                         ~ ':'
                         ~ $cro-port
                         ~ '/proxy-mail-via-redis'
+                        ~ '/' ~ $!redis-key.Str
                         ;
+#put $Cro-URL;
     my $response        = await Cro::HTTP::Client.get($Cro-URL);
     my $body            = await $response.body;
-put $body;
+#say $body;
 }
 
 method redis-set {
@@ -69,21 +74,24 @@ method redis-set {
     my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
     my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
     $redis.set($!redis-key, self.marshal-from-grid);
+    $redis.expireat($!redis-key, now + 60);
 }
 
 method marshal-from-grid {
     return marshal($!grid);
 }
 
-method redis-get {
-    die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
-    my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
-    my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
-    self.unmarshal-to-grid($redis.get($!redis-key));
-}
+#method redis-get {
+#    die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
+#    my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
+#    my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
+#    self.unmarshal-to-grid($redis.get($!redis-key));
+#}
 
 method unmarshal-to-grid (Str:D $string) {
     $!grid              = unmarshal($string, Our::Grid);
+put $!grid.elems;
+dd $!grid;
     loop (my $row = 0; $row < $!grid.elems; $row++) {
         loop (my $col = 0; $col < $!grid[$row].elems; $col++) {
             loop (my $fragment = 0; $fragment < $!grid[$row][$col]<fragments>.elems; $fragment++) {

@@ -169,6 +169,7 @@ $grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :j
 #$grid.redis-set;
 #$grid.redis-get;
 #$grid.ANSI-print;
+$grid.send-proxy-mail-via-redis;
 }
 
 =finish
