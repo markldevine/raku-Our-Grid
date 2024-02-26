@@ -1,0 +1,36 @@
+{
+  "tags": [
+    ""
+  ],
+  "authors": [
+    ""
+  ],
+  "build-depends": [
+    
+  ],
+  "provides": {
+    "Routes.pm6": "lib/Routes.pm6"
+  },
+  "perl": "6.*",
+  "version": "0.0.1",
+  "depends": [
+    "Cro::HTTP"
+  ],
+  "auth": "Write me!",
+  "resources": [
+    "fake-tls/ca-crt.pem",
+    "fake-tls/server-crt.pem",
+    "fake-tls/server-key.pem"
+  ],
+  "source-url": "Write me!",
+  "test-depends": [
+    
+  ],
+  "license": "Write me!",
+  "name": "repository",
+  "support": {
+    "source": "Write me!"
+  },
+  "description": "Write me!",
+  "meta-version": "0"
+}
