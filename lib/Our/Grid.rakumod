@@ -64,6 +64,18 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
     my $redis           = Redis::Async.new('127.0.0.1' ~ ':6379');
 
     $!body              = unmarshal($redis.get($redis-key), Body);
+
+
+    loop (my $heading = 0; $heading < $!body.headings.elems; $heading++) {
+        loop (my $fragment = 0; $fragment < $!body.headings[$heading]<fragments>.elems; $fragment++) {
+            $!body.headings[$heading]<fragments>[$fragment] = unmarshal($!body.headings[$heading]<fragments>[$fragment], Our::Grid::Cell::Fragment);
+        }
+    }
+
+    loop ($heading = 0; $heading < $!body.headings.elems; $heading++) {
+         $!body.headings[$heading] = unmarshal($!body.headings[$heading], Our::Grid::Cell);
+    }
+
     loop (my $row = 0; $row < $!body.cells.elems; $row++) {
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             loop (my $fragment = 0; $fragment < $!body.cells[$row][$col]<fragments>.elems; $fragment++) {
@@ -74,6 +86,7 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
     loop ($row = 0; $row < $!body.cells.elems; $row++) {
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             $!body.cells[$row][$col] = unmarshal($!body.cells[$row][$col], Our::Grid::Cell);
+#ddt $!body.cells[$row][$col];
         }
     }
 
@@ -373,7 +386,7 @@ method TEXT-print {
     return False unless self!grid-check;
     loop (my $col = 0; $col < $!body.headings.elems; $col++) {
         my $justification   = 'center';
-        $justification      = $!body.headings[$col].justification with $!body.headings[$col].justification;
+        $justification      = $!body.headings[$col]<justification> with $!body.headings[$col]<justification>;
         print ' ' ~ $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]), :$justification);
         print ' ' unless $col == ($!body.headings.elems - 1);
     }

@@ -22,7 +22,8 @@ my $application         = route {
     get     -> 'proxy-mail-via-redis', *$redis-key {
         my Our::Grid $grid .= new;
         $grid.receive-proxy-mail-via-redis(:$redis-key);
-$grid.TEXT-print;
+$grid.ANSI-print;
+$grid.html-print;
 #       content 'text/plain', $grid.html-print;
     },
 };
