@@ -398,3 +398,185 @@
 13289:M 27 Feb 2024 14:58:13.727 - DB 0: 1 keys (1 volatile) in 4 slots HT.
 13289:M 27 Feb 2024 14:59:34.755 - Client closed connection id=74 addr=127.0.0.1:56458 laddr=127.0.0.1:6379 fd=11 name= age=139 idle=139 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
 13289:M 27 Feb 2024 14:59:34.755 - Client closed connection id=73 addr=127.0.0.1:56452 laddr=127.0.0.1:6379 fd=10 name= age=139 idle=139 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:24:59.619 - Accepted 127.0.0.1:34746
+13289:M 27 Feb 2024 15:24:59.822 - Accepted 127.0.0.1:34748
+13289:M 27 Feb 2024 15:25:00.042 - Accepted 127.0.0.1:34764
+13289:M 27 Feb 2024 15:25:00.048 - Accepted 127.0.0.1:34770
+13289:M 27 Feb 2024 15:25:00.854 - Client closed connection id=76 addr=127.0.0.1:34748 laddr=127.0.0.1:6379 fd=9 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:25:00.855 - Client closed connection id=75 addr=127.0.0.1:34746 laddr=127.0.0.1:6379 fd=8 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:25:01.350 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:06.374 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:11.399 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:16.424 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:21.448 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:26.472 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:30.048 - Client closed connection id=78 addr=127.0.0.1:34770 laddr=127.0.0.1:6379 fd=11 name= age=30 idle=30 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:25:30.048 - Client closed connection id=77 addr=127.0.0.1:34764 laddr=127.0.0.1:6379 fd=10 name= age=30 idle=30 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:25:31.496 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:36.521 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:41.546 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:46.569 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:51.593 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:56.616 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:25:59.051 - Accepted 127.0.0.1:43368
+13289:M 27 Feb 2024 15:25:59.264 - Accepted 127.0.0.1:43384
+13289:M 27 Feb 2024 15:25:59.569 - Accepted 127.0.0.1:43390
+13289:M 27 Feb 2024 15:25:59.597 - Accepted 127.0.0.1:43400
+13289:M 27 Feb 2024 15:26:00.734 - Client closed connection id=80 addr=127.0.0.1:43384 laddr=127.0.0.1:6379 fd=9 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:26:00.734 - Client closed connection id=79 addr=127.0.0.1:43368 laddr=127.0.0.1:6379 fd=8 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:26:01.640 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:06.663 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:11.687 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:16.712 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:17.244 - Client closed connection id=82 addr=127.0.0.1:43400 laddr=127.0.0.1:6379 fd=11 name= age=18 idle=18 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:26:17.244 - Client closed connection id=81 addr=127.0.0.1:43390 laddr=127.0.0.1:6379 fd=10 name= age=18 idle=18 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:26:21.737 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:26.762 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:31.786 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:36.810 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:41.835 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:46.859 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:51.884 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:53.043 - Accepted 127.0.0.1:43960
+13289:M 27 Feb 2024 15:26:53.228 - Accepted 127.0.0.1:43966
+13289:M 27 Feb 2024 15:26:53.543 - Accepted 127.0.0.1:43976
+13289:M 27 Feb 2024 15:26:53.562 - Accepted 127.0.0.1:43990
+13289:M 27 Feb 2024 15:26:54.808 - Client closed connection id=84 addr=127.0.0.1:43966 laddr=127.0.0.1:6379 fd=9 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:26:54.809 - Client closed connection id=83 addr=127.0.0.1:43960 laddr=127.0.0.1:6379 fd=8 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:26:56.910 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:26:58.492 - Client closed connection id=86 addr=127.0.0.1:43990 laddr=127.0.0.1:6379 fd=11 name= age=5 idle=5 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:26:58.492 - Client closed connection id=85 addr=127.0.0.1:43976 laddr=127.0.0.1:6379 fd=10 name= age=5 idle=5 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:27:01.935 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:06.958 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:11.981 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:17.005 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:22.029 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:27.053 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:32.076 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:37.100 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:42.124 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:43.026 - Accepted 127.0.0.1:53766
+13289:M 27 Feb 2024 15:27:43.284 - Accepted 127.0.0.1:53774
+13289:M 27 Feb 2024 15:27:43.548 - Accepted 127.0.0.1:53780
+13289:M 27 Feb 2024 15:27:43.559 - Accepted 127.0.0.1:53790
+13289:M 27 Feb 2024 15:27:44.561 - Client closed connection id=88 addr=127.0.0.1:53774 laddr=127.0.0.1:6379 fd=9 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:27:44.561 - Client closed connection id=87 addr=127.0.0.1:53766 laddr=127.0.0.1:6379 fd=8 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:27:47.149 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:52.173 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:57.197 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:27:57.835 - Client closed connection id=90 addr=127.0.0.1:53790 laddr=127.0.0.1:6379 fd=11 name= age=14 idle=14 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:27:57.835 - Client closed connection id=89 addr=127.0.0.1:53780 laddr=127.0.0.1:6379 fd=10 name= age=14 idle=14 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 15:28:02.221 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:28:07.246 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:28:12.270 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:28:17.294 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:28:22.317 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:28:27.340 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:28:32.364 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:28:37.389 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:28:42.415 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 15:47:10.059 * 1 changes in 3600 seconds. Saving...
+13289:M 27 Feb 2024 15:47:10.060 * Background saving started by pid 14604
+14604:C 27 Feb 2024 15:47:10.074 * DB saved on disk
+14604:C 27 Feb 2024 15:47:10.076 * Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+13289:M 27 Feb 2024 15:47:10.161 * Background saving terminated with success
+13289:M 27 Feb 2024 17:31:39.612 - Accepted 127.0.0.1:49930
+13289:M 27 Feb 2024 17:31:39.694 - Accepted 127.0.0.1:49946
+13289:M 27 Feb 2024 17:31:39.761 * 1 changes in 3600 seconds. Saving...
+13289:M 27 Feb 2024 17:31:39.762 * Background saving started by pid 15128
+15128:C 27 Feb 2024 17:31:39.767 - Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+15128:C 27 Feb 2024 17:31:39.782 * DB saved on disk
+15128:C 27 Feb 2024 17:31:39.782 * Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+13289:M 27 Feb 2024 17:31:39.864 * Background saving terminated with success
+13289:M 27 Feb 2024 17:31:39.962 - Accepted 127.0.0.1:49950
+13289:M 27 Feb 2024 17:31:39.977 - Accepted 127.0.0.1:49962
+13289:M 27 Feb 2024 17:31:40.155 - Client closed connection id=92 addr=127.0.0.1:49946 laddr=127.0.0.1:6379 fd=9 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:31:40.155 - Client closed connection id=91 addr=127.0.0.1:49930 laddr=127.0.0.1:6379 fd=8 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:31:43.082 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:31:48.108 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:31:48.653 - Client closed connection id=94 addr=127.0.0.1:49962 laddr=127.0.0.1:6379 fd=11 name= age=9 idle=9 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:31:48.653 - Client closed connection id=93 addr=127.0.0.1:49950 laddr=127.0.0.1:6379 fd=10 name= age=9 idle=9 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:31:53.134 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:31:58.158 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:03.183 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:08.208 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:13.232 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:18.256 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:21.577 - Accepted 127.0.0.1:43970
+13289:M 27 Feb 2024 17:32:21.660 - Accepted 127.0.0.1:43980
+13289:M 27 Feb 2024 17:32:21.922 - Accepted 127.0.0.1:43990
+13289:M 27 Feb 2024 17:32:21.939 - Accepted 127.0.0.1:43992
+13289:M 27 Feb 2024 17:32:23.281 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:24.079 - Client closed connection id=96 addr=127.0.0.1:43980 laddr=127.0.0.1:6379 fd=9 name= age=3 idle=3 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:32:24.079 - Client closed connection id=95 addr=127.0.0.1:43970 laddr=127.0.0.1:6379 fd=8 name= age=3 idle=3 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:32:28.307 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:29.588 - Client closed connection id=98 addr=127.0.0.1:43992 laddr=127.0.0.1:6379 fd=11 name= age=8 idle=8 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:32:29.589 - Client closed connection id=97 addr=127.0.0.1:43990 laddr=127.0.0.1:6379 fd=10 name= age=8 idle=8 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:32:33.333 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:38.358 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:43.384 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:48.410 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:53.437 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:32:58.461 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:33:03.487 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:33:08.511 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:33:13.537 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:33:18.562 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:33:58.950 - Accepted 127.0.0.1:60090
+13289:M 27 Feb 2024 17:33:59.034 - Accepted 127.0.0.1:60092
+13289:M 27 Feb 2024 17:33:59.334 - Accepted 127.0.0.1:60094
+13289:M 27 Feb 2024 17:33:59.377 - Accepted 127.0.0.1:60098
+13289:M 27 Feb 2024 17:33:59.692 - Client closed connection id=100 addr=127.0.0.1:60092 laddr=127.0.0.1:6379 fd=9 name= age=0 idle=0 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:33:59.692 - Client closed connection id=99 addr=127.0.0.1:60090 laddr=127.0.0.1:6379 fd=8 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:34:03.788 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:08.812 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:13.836 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:18.862 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:23.887 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:28.912 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:33.937 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:38.962 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:43.985 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:49.009 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:50.216 - Accepted 127.0.0.1:39150
+13289:M 27 Feb 2024 17:34:50.301 - Accepted 127.0.0.1:39164
+13289:M 27 Feb 2024 17:34:50.469 - Accepted 127.0.0.1:39166
+13289:M 27 Feb 2024 17:34:50.469 - Accepted 127.0.0.1:39170
+13289:M 27 Feb 2024 17:34:50.702 - Client closed connection id=104 addr=127.0.0.1:39164 laddr=127.0.0.1:6379 fd=9 name= age=0 idle=0 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:34:50.702 - Client closed connection id=103 addr=127.0.0.1:39150 laddr=127.0.0.1:6379 fd=8 name= age=0 idle=0 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:34:54.034 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:34:57.405 - Client closed connection id=106 addr=127.0.0.1:39170 laddr=127.0.0.1:6379 fd=13 name= age=7 idle=7 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:34:57.405 - Client closed connection id=105 addr=127.0.0.1:39166 laddr=127.0.0.1:6379 fd=12 name= age=7 idle=7 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:34:57.405 - Client closed connection id=102 addr=127.0.0.1:60098 laddr=127.0.0.1:6379 fd=11 name= age=58 idle=58 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:34:57.405 - Client closed connection id=101 addr=127.0.0.1:60094 laddr=127.0.0.1:6379 fd=10 name= age=58 idle=58 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:34:59.059 - DB 0: 2 keys (2 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:04.083 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:09.115 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:14.141 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:19.168 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:24.193 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:29.219 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:34.244 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:39.270 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:44.297 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:35:49.323 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:36:27.743 - Accepted 127.0.0.1:39948
+13289:M 27 Feb 2024 17:36:27.828 - Accepted 127.0.0.1:39964
+13289:M 27 Feb 2024 17:36:28.147 - Accepted 127.0.0.1:39966
+13289:M 27 Feb 2024 17:36:28.163 - Accepted 127.0.0.1:39976
+13289:M 27 Feb 2024 17:36:28.720 - Client closed connection id=108 addr=127.0.0.1:39964 laddr=127.0.0.1:6379 fd=9 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=expireat user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:36:28.720 - Client closed connection id=107 addr=127.0.0.1:39948 laddr=127.0.0.1:6379 fd=8 name= age=1 idle=1 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:36:29.526 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:36:34.552 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:36:39.577 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:36:44.602 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:36:49.628 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:36:54.654 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:36:59.678 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:37:04.702 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:37:09.727 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:37:14.752 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:37:19.777 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:37:24.798 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 17:38:47.304 - Client closed connection id=110 addr=127.0.0.1:39976 laddr=127.0.0.1:6379 fd=11 name= age=139 idle=139 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 17:38:47.304 - Client closed connection id=109 addr=127.0.0.1:39966 laddr=127.0.0.1:6379 fd=10 name= age=139 idle=139 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
