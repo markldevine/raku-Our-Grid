@@ -111,16 +111,13 @@ sub MAIN (
         df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || warn "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
     my Our::Grid    $grid  .= new: :title('df Report'), :$reverse-highlight;
-    $grid.add-heading('System'),
-    $grid.add-heading('Filesystem');
-    $grid.add-heading('Total');
-    $grid.add-heading('Used');
-    $grid.add-heading('Available');
-    $grid.add-heading('% Used');
-    $grid.add-heading('Mount Point');
-$grid.add-heading('HDISK');
-my $hdisk-count = 0;
-
+    $grid.add-heading('System',         :justification<left>),
+    $grid.add-heading('Filesystem',     :justification<left>);
+    $grid.add-heading('Total',          :justification<right>);
+    $grid.add-heading('Used',           :justification<right>);
+    $grid.add-heading('Available',      :justification<right>);
+    $grid.add-heading('% Used',         :justification<right>);
+    $grid.add-heading('Mount Point',    :justification<left>);
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
             next if $above && $df-record.cap-percent-num <= $above;
@@ -145,7 +142,6 @@ my $hdisk-count = 0;
                 $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>)));
             }
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.mount-point),     :justification<left>)));
-$grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :justification<left>)));
             $grid.current-row++;
         }
     }
@@ -165,8 +161,7 @@ $grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :j
     else {
         $grid.ANSI-print;
     }
-#$grid.ANSI-print;
-#$grid.send-proxy-mail-via-redis;
+$grid.send-proxy-mail-via-redis;
 }
 
 =finish

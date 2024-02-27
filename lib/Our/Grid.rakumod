@@ -1,6 +1,6 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-#use Data::Dump::Tree;
+use Data::Dump::Tree;
 use  Base64::Native;
 use Color::Names:api<2>;
 use Cro::HTTP::Client;
@@ -23,30 +23,38 @@ enum OUTPUTS (
     xml             => 'LibXML',
 );
 
-has         $!title             is built    = '';
 has         $.term-size;
 has         $.grid                          = Hash.new;
+has         $.cache-file-name;
 has Int     $.current-row       is rw       = 0;
 has Int     $.current-col       is rw       = 0;
 
-#has Int     @.col-width;
-has Int     @.col-raw-text-width;
-has Bool    $.reverse-highlight;
-has         @.sort-order                    = ();
-has         @.column-sort-types             = ();
-has         @.column-sort-device-names      = ();
-has Int     @.column-sort-device-max        = ();
-has         $.cache-file-name;
 has         $.redis-key;
 
+has         $!title             is built    = '';
+has Bool    $.reverse-highlight is built    = False;
+
 submethod TWEAK {
-    $!term-size                              = term-size;                                            # $!term-size.rows $!term-size.cols
-    $!cache-file-name                        = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
-    $!grid<cells>                            = Array.new;
-    $!grid<headings>                         = Array.new;
-    $!grid<meta>                             = Hash.new;
-    $!grid<meta><col-width>                  = Array.new;
-    $!grid<title>                            = $!title;
+    $!term-size                             = term-size;                                            # $!term-size.rows $!term-size.cols
+    $!cache-file-name                       = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
+#   use $!grid as an envelope so that simpler marshalling/unmarshalling the object is possible
+#       - reduce adherence to the hierarchical-objects idiom, use more direct data structures
+#       - less typed objects in the hierarchy means less custom unmarshalling
+#       - directly managing hierarchical data structures herein reduces module sprawl -- a matter of aesthetic taste
+    $!grid<cells>                           = Array.new;
+    $!grid<headings>                        = Array.new;
+    $!grid<meta>                            = Hash.new;
+    $!grid<meta><col-width>                 = Array.new;
+    $!grid<meta><col-raw-text-width>        = Array.new;
+    $!grid<meta><column-sort-device-max>    = Array.new;
+    $!grid<meta><reverse-highlight>         = $!reverse-highlight;
+    $!grid<meta><sort-order>                = Array.new;
+    $!grid<title>                           = $!title;
+}
+
+method reverse-highlight (Bool $reverse-highlight?) {
+    $!grid<meta><reverse-highlight>         = $!grid<meta><reverse-highlight> with $!grid<meta><reverse-highlight>;
+    return $!grid<meta><reverse-highlight>;
 }
 
 method title (Str $title?) {
@@ -55,36 +63,63 @@ method title (Str $title?) {
 }
 
 method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
-    die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
-    my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
-    my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
-    self.unmarshal-to-grid($redis.get($redis-key));
+#   die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
+#   my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
+#   my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
+    my $redis           = Redis::Async.new('127.0.0.1' ~ ':6379');
+
+#   self.unmarshal-to-grid($redis.get($redis-key));
+
+    my $s = $redis.get($redis-key);
+#put $s;
+#die;
+#   self.unmarshal-to-grid($s);
+    my $obj             = unmarshal($s, Our::Grid);
+ddt $obj;
+die;
+    $!grid              = unmarshal($redis.get($redis-key), Our::Grid);
+dd $!grid;
+put $!grid<cells>.elems;
+    loop (my $row = 0; $row < $!grid<cells>.elems; $row++) {
+        loop (my $col = 0; $col < $!grid<cells>[$row].elems; $col++) {
+            loop (my $fragment = 0; $fragment < $!grid<cells>[$row][$col]<fragments>.elems; $fragment++) {
+                $!grid<cells>[$row][$col]<fragments>[$fragment] = unmarshal($!grid<cells>[$row][$col]<fragments>[$fragment], Our::Grid::Cell::Fragment);
+            }
+        }
+    }
+    loop ($row = 0; $row < $!grid<cells>.elems; $row++) {
+        loop (my $col = 0; $col < $!grid<cells>[$row].elems; $col++) {
+            $!grid<cells>[$row][$col] = unmarshal($!grid<cells>[$row][$col], Our::Grid::Cell);
+        }
+    }
+
 #   get-html -> SMTP
 }
 
 method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-port = 22151) {
-    $!redis-key         = base64-encode($*PROGRAM ~ ' ' ~ $*PID ~ DateTime.now.posix).decode.encode;
-    self.redis-set;
+    my $redis-key       = base64-encode($*PROGRAM ~ ' ' ~ $*PID ~ DateTime.now.posix).decode.encode.Str;
+    self.redis-set($redis-key);
 # add options like From:, To:, Cc:, Bcc:, Subj:
     my $Cro-URL         = 'http://'
                         ~ $cro-host
                         ~ ':'
                         ~ $cro-port
                         ~ '/proxy-mail-via-redis'
-                        ~ '/' ~ $!redis-key.Str
+                        ~ '/' ~ $redis-key
                         ;
-#put $Cro-URL;
+put $Cro-URL;
     my $response        = await Cro::HTTP::Client.get($Cro-URL);
     my $body            = await $response.body;
 #say $body;
 }
 
-method redis-set {
-    die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
-    my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
-    my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
-    $redis.set($!redis-key, self.marshal-from-grid);
-    $redis.expireat($!redis-key, now + 60);
+method redis-set (Str:D $redis-key!) {
+#   die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
+#   my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
+#   my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
+my $redis = Redis::Async.new('127.0.0.1' ~ ':6379');
+    $redis.set($redis-key, self.marshal-from-grid);
+    $redis.expireat($redis-key, now + 60);
 }
 
 method marshal-from-grid {
@@ -100,8 +135,7 @@ method marshal-from-grid {
 
 method unmarshal-to-grid (Str:D $string) {
     $!grid              = unmarshal($string, Our::Grid);
-put $!grid.elems;
-dd $!grid;
+put $!grid<cells>.elems;
     loop (my $row = 0; $row < $!grid<cells>.elems; $row++) {
         loop (my $col = 0; $col < $!grid<cells>[$row].elems; $col++) {
             loop (my $fragment = 0; $fragment < $!grid<cells>[$row][$col]<fragments>.elems; $fragment++) {
@@ -114,6 +148,7 @@ dd $!grid;
             $!grid<cells>[$row][$col] = unmarshal($!grid<cells>[$row][$col], Our::Grid::Cell);
         }
     }
+dd $!grid;
 }
 
 multi method add-heading (Str:D $text!, *%opts) {
@@ -150,41 +185,41 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         }
     }
 #   sort inferences
-    unless @!column-sort-types[$!current-col]:exists && @!column-sort-types[$!current-col] ~~ 'string' {
+    unless $!grid<meta><column-sort-types>[$!current-col]:exists && $!grid<meta><column-sort-types>[$!current-col] ~~ 'string' {
         my $proposed-sort-type;
         given $cell.cell-sort-type {
             when 'digits'       { $proposed-sort-type   = 'digits';     }
             when 'name-number'  {
-                @!column-sort-device-max[$!current-col] = 0 without @!column-sort-device-max[$!current-col];
-                if @!column-sort-device-names[$!current-col] {
-                    if @!column-sort-device-names[$!current-col] ne $cell.cell-sort-device-name {
+                $!grid<meta><column-sort-device-max>[$!current-col] = 0 without $!grid<meta><column-sort-device-max>[$!current-col];
+                if $!grid<meta><column-sort-device-names>[$!current-col] {
+                    if $!grid<meta><column-sort-device-names>[$!current-col] ne $cell.cell-sort-device-name {
                         $proposed-sort-type     = 'string';
                     }
                     else {
                         $proposed-sort-type     = 'name-number';
-                        @!column-sort-device-max[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > @!column-sort-device-max[$!current-col];
+                        $!grid<meta><column-sort-device-max>[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > $!grid<meta><column-sort-device-max>[$!current-col];
                     }
                 }
                 else {
                     $proposed-sort-type         = 'name-number';
-                    @!column-sort-device-names[$!current-col] = $cell.cell-sort-device-name;
-                    @!column-sort-device-max[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > @!column-sort-device-max[$!current-col];
+                    $!grid<meta><column-sort-device-names>[$!current-col] = $cell.cell-sort-device-name;
+                    $!grid<meta><column-sort-device-max>[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > $!grid<meta><column-sort-device-max>[$!current-col];
                 }
             }
             default             { $proposed-sort-type = 'string';       }
         }
-        @!column-sort-types[$!current-col]  = $proposed-sort-type   without @!column-sort-types[$!current-col];
-        @!column-sort-types[$!current-col]  = 'string'              if $proposed-sort-type !~~ @!column-sort-types[$!current-col];
+        $!grid<meta><column-sort-types>[$!current-col]  = $proposed-sort-type   without $!grid<meta><column-sort-types>[$!current-col];
+        $!grid<meta><column-sort-types>[$!current-col]  = 'string'              if $proposed-sort-type !~~ $!grid<meta><column-sort-types>[$!current-col];
     }
 #   width accumulators
     $!grid<meta><col-width>[$!current-col]          = 0                     without $!grid<meta><col-width>[$!current-col];
-    @!col-raw-text-width[$!current-col] = 0                     without @!col-raw-text-width[$!current-col];
+    $!grid<meta><col-raw-text-width>[$!current-col] = 0                     without $!grid<meta><col-raw-text-width>[$!current-col];
     $!grid<meta><col-width>[$!current-col]          = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > $!grid<meta><col-width>[$!current-col];
-    @!col-raw-text-width[$!current-col] = $cell.text.Str.chars  if $cell.text.Str.chars > @!col-raw-text-width[$!current-col];
+    $!grid<meta><col-raw-text-width>[$!current-col] = $cell.text.Str.chars  if $cell.text.Str.chars > $!grid<meta><col-raw-text-width>[$!current-col];
     if $!current-col > $!grid<cells>[$!current-row].elems {
         loop (my $i = $col; $i >= 0; $i--) {
             $!grid<meta><col-width>[$i]             = 0                 without $!grid<meta><col-width>[$i];
-            @!col-raw-text-width[$i]    = 0                 without @!col-raw-text-width[$i];
+            $!grid<meta><col-raw-text-width>[$i]    = 0                 without $!grid<meta><col-raw-text-width>[$i];
         }
     }
     $!grid<cells>[$!current-row][$!current-col++] = $cell;
@@ -200,26 +235,27 @@ multi method sort-by-columns (:@sort-columns!, :$descending) {
         $sort-string        = '';
         for @sort-columns -> $col {
             die '$col (' ~ $col ~ ') out of range for grid! (0 <= col <= ' ~ $!grid<meta><col-width>.elems - 1 ~ ')' unless 0 <= $col < $!grid<meta><col-width>.elems;
-            given @!column-sort-types[$col] {
+            given $!grid<meta><column-sort-types>[$col] {
                 when 'string'       { $sort-string ~= $!grid<cells>[$row][$col].text.chars ?? $!grid<cells>[$row][$col].text ~ '_' !! ' _';                                                                                                                   }
-                when 'digits'       { $sort-string ~= sprintf('%0' ~ @!col-raw-text-width[$col] ~ 'd', $!grid<cells>[$row][$col].text.chars ?? $!grid<cells>[$row][$col].text !! "0") ~ '_';                                                                  }
-                when 'name-number'  { $sort-string ~= $!grid<cells>[$row][$col].text.chars ?? sprintf('%0' ~  "@!column-sort-device-max[$col]".chars ~ 'd', $!grid<cells>[$row][$col].text.substr(@!column-sort-device-names[$col].chars).Int) ~ '_' !! ' _'; }
+                when 'digits'       { $sort-string ~= sprintf('%0' ~ $!grid<meta><col-raw-text-width>[$col] ~ 'd', $!grid<cells>[$row][$col].text.chars ?? $!grid<cells>[$row][$col].text !! "0") ~ '_';                                                                  }
+                when 'name-number'  { $sort-string ~= $!grid<cells>[$row][$col].text.chars ?? sprintf('%0' ~  "$!grid<meta><column-sort-device-max>[$col]".chars ~ 'd', $!grid<cells>[$row][$col].text.substr($!grid<meta><column-sort-device-names>[$col].chars).Int) ~ '_' !! ' _'; }
             }
         }
         $sort-string       ~= sprintf("%0" ~ $row-digits ~ "d", $row);
         %sortable-rows{$sort-string} = $row;
     }
-    @.sort-order            = ();
+    $!grid<meta><sort-order>    = Array.new;
     for %sortable-rows.keys.sort -> $key {
-        @!sort-order.push: %sortable-rows{$key};
+        $!grid<meta><sort-order>.push: %sortable-rows{$key};
     }
-    @!sort-order            = @!sort-order.reverse if $descending;
+    $!grid<meta><sort-order>    = $!grid<meta><sort-order>.reverse.Array if $descending;
 }
 
 method !sort-order-check {
-    return True if @!sort-order.elems;
+    return True                 if $!grid<meta><sort-order> ~~ Array && $!grid<meta><sort-order>.elems;
+    $!grid<meta><sort-order>    = Array.new;
     loop (my $s = 0; $s < $!grid<cells>.elems; $s++) {
-        @!sort-order.push: $s;
+        $!grid<meta><sort-order>.push: $s;
     }
 }
 
@@ -233,10 +269,10 @@ method !grid-check {
 method !datafy {
     self!sort-order-check;
     my @data    = Array.new();
-    for $!grid<headings> -> $heading {
+    for $!grid<headings>.list -> $heading {
         @data[0].push: $heading.TEXT;
     }
-    for @!sort-order -> $row {
+    for $!grid<meta><sort-order>.list -> $row {
         loop (my $col = 0; $col < $!grid<cells>[$row].elems; $col++) {
             given $!grid<cells>[$row][$col] {
                 when Our::Grid::Cell:D  { @data[$row + 1].push: $!grid<cells>[$row][$col].TEXT;    }
@@ -298,11 +334,11 @@ method html-print {
     put ' ' x 8 ~ '<h1>' ~ self.title ~ '</h1>' if self.title;
     put ' ' x 8 ~ '<table>';
     put ' ' x 12 ~ '<tr>';
-    for $!grid<headings> -> $heading {
+    for $!grid<headings>.list -> $heading {
         put ' ' x 16 ~ '<th>' ~ self!subst-ml-text($heading.TEXT) ~ '</th>';
     }
     put ' ' x 12 ~ '</tr>';
-    for @!sort-order -> $row {
+    for $!grid<meta><sort-order>.list -> $row {
         put ' ' x 12 ~ '<tr>';
         loop (my $col = 0; $col < $!grid<cells>[$row].elems; $col++) {
             print ' ' x 16 ~ '<td style="';
@@ -366,7 +402,7 @@ method xml-print {
         @headers[$i] = @headers[$i].subst: ' ', '';
         @headers[$i] = @headers[$i].subst: '%', 'PCT';
     }
-    for @!sort-order -> $row {
+    for $!grid<meta><sort-order>.list -> $row {
         put ' ' x 4 ~ '<row' ~ $row ~ '>';
         loop (my $col = 0; $col < $!grid<cells>[$row].elems; $col++) {
             if $!grid<cells>[$row][$col] ~~ Our::Grid::Cell:D {
@@ -392,7 +428,7 @@ method TEXT-print {
         print ' ' unless $col == ($!grid<headings>.elems - 1);
     }
     print "\n"  if $!grid<headings>.elems;
-    for @!sort-order -> $row {
+    for $!grid<meta><sort-order>.list -> $row {
         loop (my $col = 0; $col < $!grid<cells>[$row].elems; $col++) {
             print ' ';
             given $!grid<cells>[$row][$col] {
@@ -435,13 +471,12 @@ method ANSI-print {
     if $!grid<headings>.elems {
         print ' ' x $margin ~ %box-char<side>;
         loop (my $col = 0; $col < $!grid<headings>.elems; $col++) {
-#           print ' ' ~ $!grid<headings>[$col].ANSI-fmt(:width($!grid<meta><col-width>[$col]), :bold, :reverse($!reverse-highlight), :highlight<white>, :foreground<black>, :justification<center>).ANSI-padded;
-            print ' ' ~ $!grid<headings>[$col].ANSI-fmt(:width($!grid<meta><col-width>[$col]), :bold, :reverse($!reverse-highlight), :highlight<white>, :foreground<black>).ANSI-padded;
+            print ' ' ~ $!grid<headings>[$col].ANSI-fmt(:width($!grid<meta><col-width>[$col]), :bold, :reverse($!grid<meta><reverse-highlight>), :highlight<white>, :foreground<black>).ANSI-padded;
             print ' ' ~ %box-char<side>;
         }
         print "\n";
     }
-    for @!sort-order -> $row {
+    for $!grid<meta><sort-order>.list -> $row {
         print ' ' x $margin;
         loop (my $col = 0; $col < $!grid<cells>[$row].elems; $col++) {
             print %box-char<side> ~ ' ';
