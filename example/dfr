@@ -90,14 +90,13 @@ sub MAIN (
     Bool    :$light-mode,                       #= reverse header highlight for light-mode
             :$sort-columns,                     #= sort by column number(s)
     Bool    :$sort-descending,                  #= sort in descending order
-    Bool    :$cache
 ) {
     my $reverse-highlight   = $light-mode ?? True !! False;
     my $preferences-cache-file-name = cache-file-name(:meta('drf preferences'));
     my $preferences-cache   = cache(:cache-file-name($preferences-cache-file-name));
     $preferences-cache      = from-json($preferences-cache) if $preferences-cache;
     without $light-mode {
-        $reverse-highlight  = $cache<light-mode> if $cache<light-mode>:exists;
+        $reverse-highlight  = $preferences-cache<light-mode> if $preferences-cache<light-mode>:exists;
     }
     cache(:cache-file-name($preferences-cache-file-name), :data(to-json({light-mode => $reverse-highlight})));
     my @servers             = $servers.split(',');
@@ -166,10 +165,8 @@ $grid.add-cell(:cell(Our::Grid::Cell.new(:text('hdisk' ~ $hdisk-count++),     :j
     else {
         $grid.ANSI-print;
     }
-#$grid.redis-set;
-#$grid.redis-get;
 #$grid.ANSI-print;
-$grid.send-proxy-mail-via-redis;
+#$grid.send-proxy-mail-via-redis;
 }
 
 =finish
