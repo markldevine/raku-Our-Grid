@@ -722,3 +722,12 @@
 13289:M 27 Feb 2024 17:59:21.229 - DB 0: 1 keys (1 volatile) in 4 slots HT.
 13289:M 27 Feb 2024 17:59:26.252 - DB 0: 1 keys (1 volatile) in 4 slots HT.
 13289:M 27 Feb 2024 17:59:31.271 - DB 0: 1 keys (1 volatile) in 4 slots HT.
+13289:M 27 Feb 2024 18:29:55.321 - Accepted 127.0.0.1:40292
+13289:M 27 Feb 2024 18:29:55.323 - Client closed connection id=143 addr=127.0.0.1:40292 laddr=127.0.0.1:6379 fd=8 name= age=0 idle=0 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=16384 rbp=16384 obl=0 oll=0 omem=0 tot-mem=37760 events=r cmd=keys user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 18:31:40.050 * 1 changes in 3600 seconds. Saving...
+13289:M 27 Feb 2024 18:31:40.052 * Background saving started by pid 15875
+15875:C 27 Feb 2024 18:31:40.065 * DB saved on disk
+15875:C 27 Feb 2024 18:31:40.067 * Fork CoW for RDB: current 0 MB, peak 0 MB, average 0 MB
+13289:M 27 Feb 2024 18:31:40.153 * Background saving terminated with success
+13289:M 27 Feb 2024 18:54:54.429 - Client closed connection id=142 addr=127.0.0.1:59784 laddr=127.0.0.1:6379 fd=11 name= age=3380 idle=3380 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=NULL user=default redir=-1 resp=2 lib-name= lib-ver=
+13289:M 27 Feb 2024 18:54:54.429 - Client closed connection id=141 addr=127.0.0.1:59774 laddr=127.0.0.1:6379 fd=10 name= age=3380 idle=3380 flags=N db=0 sub=0 psub=0 ssub=0 multi=-1 qbuf=0 qbuf-free=20474 argv-mem=0 multi-mem=0 rbs=1024 rbp=0 obl=0 oll=0 omem=0 tot-mem=22400 events=r cmd=get user=default redir=-1 resp=2 lib-name= lib-ver=
