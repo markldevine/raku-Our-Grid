@@ -1,8 +1,7 @@
 #!/usr/bin/env raku
 
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
-
-use Data::Dump::Tree;
+use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
 
 use Async::Command::Multi;
 use Our::Grid;

@@ -1,6 +1,6 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-use Data::Dump::Tree;
+#use Data::Dump::Tree;
 use Base64::Native;
 use Color::Names:api<2>;
 use Cro::HTTP::Client;
@@ -11,7 +11,7 @@ use Our::Cache;
 use Our::Grid::Cell;
 use Our::Grid::Cell::Fragment;
 use Our::Utilities;
-use Redis::Async;
+use Our::Redis;
 use Text::CSV;
 
 enum OUTPUTS (
@@ -58,24 +58,16 @@ method title (Str $title?) {
 }
 
 method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
-#   die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
-#   my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
-#   my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
-    my $redis           = Redis::Async.new('127.0.0.1' ~ ':6379');
-
-    $!body              = unmarshal($redis.get($redis-key), Body);
-
-
+    my $redis           = Our::Redis.new;
+    $!body              = unmarshal($redis.GET(:key($redis-key)), Body);
     loop (my $heading = 0; $heading < $!body.headings.elems; $heading++) {
         loop (my $fragment = 0; $fragment < $!body.headings[$heading]<fragments>.elems; $fragment++) {
             $!body.headings[$heading]<fragments>[$fragment] = unmarshal($!body.headings[$heading]<fragments>[$fragment], Our::Grid::Cell::Fragment);
         }
     }
-
     loop ($heading = 0; $heading < $!body.headings.elems; $heading++) {
          $!body.headings[$heading] = unmarshal($!body.headings[$heading], Our::Grid::Cell);
     }
-
     loop (my $row = 0; $row < $!body.cells.elems; $row++) {
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             loop (my $fragment = 0; $fragment < $!body.cells[$row][$col]<fragments>.elems; $fragment++) {
@@ -86,10 +78,8 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
     loop ($row = 0; $row < $!body.cells.elems; $row++) {
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             $!body.cells[$row][$col] = unmarshal($!body.cells[$row][$col], Our::Grid::Cell);
-#ddt $!body.cells[$row][$col];
         }
     }
-
 #   get-html -> SMTP
 }
 
@@ -105,18 +95,15 @@ method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-po
                         ~ '/' ~ $redis-key
                         ;
 put $Cro-URL;
-    my $response        = await Cro::HTTP::Client.get($Cro-URL);
+    my $response        = await Cro::HTTP::Client.GET($Cro-URL);
     my $body            = await $response.body;
 #say $body;
 }
 
 method redis-set (Str:D $redis-key!) {
-#   die 'No Redis servers file: ~/.redis-servers' unless "$*HOME/.redis-servers".IO ~~ :s;
-#   my @redis-servers   = slurp($*HOME ~ '/.redis-servers').split(/\s+/);
-#   my $redis           = Redis::Async.new(@redis-servers[0] ~ ':6379');
-my $redis = Redis::Async.new('127.0.0.1' ~ ':6379');
-    $redis.set($redis-key, marshal($!body));
-    $redis.expireat($redis-key, now + 60);
+    my $redis   = Our::Redis.new;
+    $redis.SET(:key($redis-key), :value(marshal($!body))) or die 'Redis SET failed!';
+    $redis.EXPIRE($redis-key, 60) or die 'Redis EXPIRE failed!';
 }
 
 multi method add-heading (Str:D $text!, *%opts) {
