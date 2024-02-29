@@ -1,6 +1,5 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-#use Data::Dump::Tree;
 use Base64::Native;
 use Color::Names:api<2>;
 use Cro::HTTP::Client;
@@ -32,7 +31,6 @@ my class Body {
 
 has                 $.term-size;
 has Body            $!body;
-#has Str             $.cache-file-name;
 has Int             $.current-row       is rw       = 0;
 has Int             $.current-col       is rw       = 0;
 
@@ -41,7 +39,6 @@ has Bool    $!reverse-highlight is built    = False;
 
 submethod TWEAK {
     $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
-#   $!cache-file-name   = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
     $!body             .= new;
     self.title($!title) if $!title;
     self.reverse-highlight($!reverse-highlight);
