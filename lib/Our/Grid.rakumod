@@ -32,7 +32,7 @@ my class Body {
 
 has                 $.term-size;
 has Body            $!body;
-has Str             $.cache-file-name;
+#has Str             $.cache-file-name;
 has Int             $.current-row       is rw       = 0;
 has Int             $.current-col       is rw       = 0;
 
@@ -41,7 +41,7 @@ has Bool    $!reverse-highlight is built    = False;
 
 submethod TWEAK {
     $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
-    $!cache-file-name   = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
+#   $!cache-file-name   = cache-file-name(:meta($*PROGRAM ~ ' ' ~ @*ARGS.join(' ')));
     $!body             .= new;
     self.title($!title) if $!title;
     self.reverse-highlight($!reverse-highlight);
@@ -84,7 +84,7 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
 }
 
 method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-port = 22151) {
-    my $redis-key       = base64-encode($*PROGRAM ~ ' ' ~ $*PID ~ DateTime.now.posix).decode.encode.Str;
+    my $redis-key       = base64-encode($*PROGRAM ~ '_' ~ sprintf("%09d", $*PID) ~ '_' ~ DateTime.now.posix(:real)).decode.encode.Str;
     self.redis-set($redis-key);
 # add options like From:, To:, Cc:, Bcc:, Subj:
     my $Cro-URL         = 'http://'
@@ -94,16 +94,17 @@ method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-po
                         ~ '/proxy-mail-via-redis'
                         ~ '/' ~ $redis-key
                         ;
-put $Cro-URL;
-    my $response        = await Cro::HTTP::Client.GET($Cro-URL);
+#put $Cro-URL;
+    my $response        = await Cro::HTTP::Client.get($Cro-URL);
     my $body            = await $response.body;
 #say $body;
 }
 
 method redis-set (Str:D $redis-key!) {
     my $redis   = Our::Redis.new;
-    $redis.SET(:key($redis-key), :value(marshal($!body))) or die 'Redis SET failed!';
-    $redis.EXPIRE($redis-key, 60) or die 'Redis EXPIRE failed!';
+    my $status  = $redis.SET(:key($redis-key), :value(marshal($!body)));
+    die 'Redis SET failed with status <' ~ $status ~ '>' if $status;
+    $redis.EXPIRE(:key($redis-key), :60seconds) or die 'Redis EXPIRE failed!';
 }
 
 multi method add-heading (Str:D $text!, *%opts) {

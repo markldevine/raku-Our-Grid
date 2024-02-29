@@ -1,6 +1,7 @@
 #!/usr/bin/env raku
 
 use lib </home/mdevine/github.com/raku-Our-Grid/lib>;
+use lib </home/mdevine/github.com/raku-Our-Redis/lib>;
 
 use Cro::HTTP::Router;
 use Cro::HTTP::Log::File;
@@ -8,6 +9,7 @@ use Cro::HTTP::Server;
 use Our::Grid;
 
 #use Data::Dump::Tree;
+
 
 my Cro::Service $grid-relay;
 
@@ -23,7 +25,7 @@ my $application         = route {
         my Our::Grid $grid .= new;
         $grid.receive-proxy-mail-via-redis(:$redis-key);
 $grid.ANSI-print;
-$grid.html-print;
+#$grid.html-print;
 #       content 'text/plain', $grid.html-print;
     },
 };

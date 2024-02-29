@@ -80,7 +80,7 @@ class df-Pk-actions {
 
 sub MAIN (
     Str     $servers        = 'localhost',      #= server name(s) (comma separated list)
-    Int     :$above,                            #= only display file systesm above the percentage 
+    Int     :$percent-above = -1,               #= only display file systems above the percentage 
     Bool    :$csv,                              #= dump CSV to STDOUT
     Bool    :$html,                             #= dump HTML to STDOUT
     Bool    :$json,                             #= dump JSON to STDOUT
@@ -91,7 +91,7 @@ sub MAIN (
     Bool    :$sort-descending,                  #= sort in descending order
 ) {
     my $reverse-highlight   = $light-mode ?? True !! False;
-    my $preferences-cache-file-name = cache-file-name(:meta('drf preferences'));
+    my $preferences-cache-file-name = cache-file-name(:meta<preferences>);
     my $preferences-cache   = cache(:cache-file-name($preferences-cache-file-name));
     $preferences-cache      = from-json($preferences-cache) if $preferences-cache;
     without $light-mode {
@@ -119,7 +119,7 @@ sub MAIN (
     $grid.add-heading('Mount Point',    :justification<left>);
     for %server-results.keys.sort -> $server {
         for %server-results{$server}.list -> $df-record {
-            next if $above && $df-record.cap-percent-num <= $above;
+            next if $df-record.cap-percent-num <= $percent-above;
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($server), :bold)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.filesystem),      :justification<left>)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification<right>,  :bytes-to-bytes-unit)));
