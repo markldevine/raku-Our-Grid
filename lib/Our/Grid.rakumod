@@ -12,7 +12,7 @@ use Our::Grid::Cell::Fragment;
 use Our::Utilities;
 use Our::Redis;
 use Text::CSV;
-use Terminal::UI;
+use Terminal::UI 'ui';
 
 enum OUTPUTS (
     csv             => 'Text::CSV',
@@ -190,9 +190,10 @@ multi method sort-by-columns (:@sort-columns!, :$descending) {
         for @sort-columns -> $col {
             die '$col (' ~ $col ~ ') out of range for grid! (0 <= col <= ' ~ $!body.meta<col-width>.elems - 1 ~ ')' unless 0 <= $col < $!body.meta<col-width>.elems;
             given $!body.meta<column-sort-types>[$col] {
-                when 'string'       { $sort-string ~= $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text ~ '_' !! ' _';                                                                                                                   }
-                when 'digits'       { $sort-string ~= sprintf('%0' ~ $!body.meta<col-raw-text-width>[$col] ~ 'd', $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text !! "0") ~ '_';                                                                  }
-                when 'name-number'  { $sort-string ~= $!body.cells[$row][$col].text.chars ?? sprintf('%0' ~  "$!body.meta<column-sort-device-max>[$col]".chars ~ 'd', $!body.cells[$row][$col].text.substr($!body.meta<column-sort-device-names>[$col].chars).Int) ~ '_' !! ' _'; }
+                when 'string'       { $sort-string ~= $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text ~ '_' !! ' _';                                                               }
+                when 'digits'       { $sort-string ~= sprintf('%0' ~ $!body.meta<col-raw-text-width>[$col] ~ 'd', $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text !! "0") ~ '_';   }
+                when 'name-number'  { $sort-string ~= $!body.cells[$row][$col].text.chars ?? sprintf('%0' ~  "$!body.meta<column-sort-device-max>[$col]".chars ~ 'd',
+                                                        $!body.cells[$row][$col].text.substr($!body.meta<column-sort-device-names>[$col].chars).Int) ~ '_' !! ' _';                                     }
             }
         }
         $sort-string       ~= sprintf("%0" ~ $row-digits ~ "d", $row);
@@ -452,27 +453,64 @@ method ANSI-print {
 }
 
 method TUI {
-    my $screen  = Terminal::UI::Screen.new;
-    my $frame   = $screen.add-frame;
-    my @panes   = $frame.add-panes(heights => [1,1, fr => 1]);
-#ui.setup: heights => [ 1, 1, fr => 1];
-#my \Title       = ui.panes[0];
-#my \Headings    = ui.panes[1];
-#my \Body        = ui.panes[2];
+    return                  unless $*IN.t;
+    return False            unless self!grid-check;
 
-my \Title       = @panes[0];
-my \Headings    = @panes[1];
-my \Body        = @panes[2];
+    ui.setup: heights => [ 1, 1, fr => 1];
 
-Title.put: "Grid Title";
-#Headings.put: "H1  H2  H3  H4       H5    H6   H7", meta => :planet<earth>;
-Headings.put: "H1  H2  H3  H4       H5    H6   H7";
-#Body.put: "",  meta => :planet<mars>;
-Body.put: "11111111111111111111";
-Body.put: "  222222222222222222";
-Body.put: "    3333333333333333";
-$screen.interact;
-$screen.shutdown;
+    my \Title               = ui.panes[0];
+    my \Headings            = ui.panes[1];
+    my \Body                = ui.panes[2];
+
+#   Title
+    Title.put: ' ' x ((($!term-size.cols - $!body.title.chars) div 2) - 1) ~ $!body.title;
+
+#   Margin
+    my $col-width-total     = 0;
+    for $!body.meta<col-width>.list -> $colw {
+        $col-width-total   += $colw;
+    }
+    $col-width-total       += ($!body.meta<col-width>.elems * 2) - 2;
+#put '$col-width-total = ' ~ $col-width-total;
+    my $margin              = (($!term-size.cols - $col-width-total) div 2) - 1;
+#put '$margin = ' ~ $margin;
+
+#   Headings
+    if $!body.headings.elems {
+        my $headings        = ' ' x $margin;
+        loop (my $col = 0; $col < $!body.headings.elems; $col++) {
+            my $justification   = 'center';
+            $justification      = $!body.headings[$col]<justification> with $!body.headings[$col]<justification>;
+            $headings          ~= $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]), :$justification);
+            $headings          ~= ' ' unless $col == ($!body.headings.elems - 1);
+        }
+        Headings.put: $headings;
+    }
+
+#   Body
+    my $body-record;
+    for $!body.meta<sort-order>.list -> $row {
+        $body-record = ' ' x $margin;
+        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
+            $body-record ~= ' ' unless $col == 0;
+            given $!body.cells[$row][$col] {
+                when Our::Grid::Cell:D  {
+                    my $record      = $!body.cells[$row][$col].ANSI-fmt(:width($!body.meta<col-width>[$col])).ANSI-padded;
+                    $record         = $record.trim-trailing if $col == ($!body.cells[$row].elems - 1);
+                    $body-record   ~= $record;
+                }
+                default                 {
+                    $body-record   ~= ' ' x $!body.meta<col-width>[$col] unless $col == ($!body.cells[$row].elems - 1);
+                }
+            }
+            $body-record ~= ' ' unless $col == ($!body.cells[$row].elems - 1);
+        }
+#put '$body-record.trim = |' ~ $body-record.trim ~ '|' ~ $body-record.trim.chars;
+        Body.put: $body-record;
+    }
+    ui.interact;
+    ui.shutdown;
+    qx/stty erase /;
 }
 
 =finish

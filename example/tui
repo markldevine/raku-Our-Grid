@@ -17,6 +17,8 @@ Body.put: "11111111111111111111";
 Body.put: "  222222222222222222";
 Body.put: "    3333333333333333";
 
+ui.panes[2].focus;
+
 
 
 #my $commenced-countdown = False;
