@@ -3,7 +3,7 @@
 use Terminal::UI 'ui';
 
 #ui.setup: heights => [ 1, 1, 1, fr => 1];
-ui.setup: heights => [ 1, 1, fr => 1];
+ui.setup: heights => [ 1, 1, fr => 1];          # f1 = absolute 1, f2 = absolute 1, f3 = computed height
 
 my \Title       = ui.panes[0];
 my \Headings    = ui.panes[1];
@@ -12,7 +12,7 @@ my \Body        = ui.panes[2];
 Title.put: "Grid Title";
 #Headings.put: "H1  H2  H3  H4       H5    H6   H7", meta => :planet<earth>;
 Headings.put: "H1  H2  H3  H4       H5    H6   H7";
-Body.put: "",  meta => :planet<mars>;
+#Body.put: "",  meta => :planet<mars>;
 Body.put: "11111111111111111111";
 Body.put: "  222222222222222222";
 Body.put: "    3333333333333333";
