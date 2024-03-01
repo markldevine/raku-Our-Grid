@@ -78,8 +78,10 @@ class df-Pk-actions {
     }
 }
 
+constant    $default-server = '127.0.0.1';
+
 sub MAIN (
-    Str     $servers        = 'localhost',      #= server name(s) (comma separated list)
+    Str     $servers        = $default-server,  #= server name(s) (comma separated list)
     Int     :$percent-above = -1,               #= only display file systems above the percentage 
     Bool    :$csv,                              #= dump CSV to STDOUT
     Bool    :$html,                             #= dump HTML to STDOUT
@@ -102,7 +104,12 @@ sub MAIN (
     my @servers             = $servers.split(',');
     my %command;
     for @servers -> $server {
-        %command{$server}   = ['ssh', $server, '/usr/bin/df', '-Pk'];
+        if $server eq $default-server {
+            %command{$server}   = ['/usr/bin/df', '-Pk'];
+        }
+        else {
+            %command{$server}   = ['ssh', $server, '/usr/bin/df', '-Pk'];
+        }
     }
     my $command-manager = Async::Command::Multi.new(:%command, :20time-out, :8batch);
     $command-manager.sow;
