@@ -1,7 +1,7 @@
 #!/usr/bin/env raku
 
-use lib </home/mdevine/github.com/raku-Our-Grid/lib>;
-use lib </home/mdevine/github.com/raku-Our-Redis/lib>;
+#use lib </home/mdevine/github.com/raku-Our-Grid/lib>;
+#use lib </home/mdevine/github.com/raku-Our-Redis/lib>;
 
 use Cro::HTTP::Router;
 use Cro::HTTP::Log::File;
@@ -59,3 +59,36 @@ react {
         done;
     }
 }
+
+=finish
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Awesome Email</title>
+    <style>
+        /* Add your inline CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+        .email-content {
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="email-content">
+        <h1>Welcome to Our Newsletter!</h1>
+        <p>Dear subscriber,</p>
+        <p>Thank you for joining our newsletter. Stay tuned for exciting updates and special offers.</p>
+        <p>Best regards,</p>
+        <p>The Awesome Team</p>
+    </div>
+</body>
+</html>

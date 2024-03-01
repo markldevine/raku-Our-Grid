@@ -1,7 +1,7 @@
 #!/usr/bin/env raku
 
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
-use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
 
 use Async::Command::Multi;
 use Our::Grid;
@@ -85,6 +85,7 @@ sub MAIN (
     Bool    :$html,                             #= dump HTML to STDOUT
     Bool    :$json,                             #= dump JSON to STDOUT
     Bool    :$text,                             #= TEXT print
+    Bool    :$tui,                              #= TUI
     Bool    :$xml,                              #= dump XML to STDOUT
     Bool    :$light-mode,                       #= reverse header highlight for light-mode
             :$sort-columns,                     #= sort by column number(s)
@@ -148,19 +149,19 @@ sub MAIN (
         my @sort-columns = $sort-columns.split: ',';
         $grid.sort-by-columns(:@sort-columns, :descending($sort-descending));
     }
-    if any($text.so, $csv.so, $html.so, $json.so, $xml.so) {
-        when $csv   { $grid.csv-print;  proceed; }
-#       when $gui   { $grid.gui-print;  proceed; }
-        when $html  { $grid.html-print; proceed; }
-        when $json  { $grid.json-print; proceed; }
-        when $text  { $grid.TEXT-print; proceed; }
-#       when $tui   { $grid.tui-print;  proceed; }
-        when $xml   { $grid.xml-print;  proceed; }
+    if any($text.so, $csv.so, $html.so, $json.so, $xml.so, $tui.so) {
+        when $text  { $grid.TEXT-print; proceed;    }
+        when $html  { $grid.html-print; proceed;    }
+        when $csv   { $grid.csv-print;  proceed;    }
+        when $json  { $grid.json-print; proceed;    }
+        when $xml   { $grid.xml-print;  proceed;    }
+        when $tui   { $grid.TUI;                    }
+#       when $gui   { $grid.GUI                     }
     }
     else {
         $grid.ANSI-print;
     }
-$grid.send-proxy-mail-via-redis;
+#$grid.send-proxy-mail-via-redis;
 }
 
 =finish

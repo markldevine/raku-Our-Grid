@@ -12,6 +12,7 @@ use Our::Grid::Cell::Fragment;
 use Our::Utilities;
 use Our::Redis;
 use Text::CSV;
+use Terminal::UI;
 
 enum OUTPUTS (
     csv             => 'Text::CSV',
@@ -448,6 +449,30 @@ method ANSI-print {
         print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<up-and-horizontal>;
     }
     put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<bottom-right-corner>;
+}
+
+method TUI {
+    my $screen  = Terminal::UI::Screen.new;
+    my $frame   = $screen.add-frame;
+    my @panes   = $frame.add-panes(heights => [1,1, fr => 1]);
+#ui.setup: heights => [ 1, 1, fr => 1];
+#my \Title       = ui.panes[0];
+#my \Headings    = ui.panes[1];
+#my \Body        = ui.panes[2];
+
+my \Title       = @panes[0];
+my \Headings    = @panes[1];
+my \Body        = @panes[2];
+
+Title.put: "Grid Title";
+#Headings.put: "H1  H2  H3  H4       H5    H6   H7", meta => :planet<earth>;
+Headings.put: "H1  H2  H3  H4       H5    H6   H7";
+#Body.put: "",  meta => :planet<mars>;
+Body.put: "11111111111111111111";
+Body.put: "  222222222222222222";
+Body.put: "    3333333333333333";
+$screen.interact;
+$screen.shutdown;
 }
 
 =finish
