@@ -507,7 +507,7 @@ method TUI {
     ui.focus(pane => 2);
     ui.interact;
     ui.shutdown;
-    qx/stty erase /;
+#   qx/stty erase /;
 }
 
 method GUI {
