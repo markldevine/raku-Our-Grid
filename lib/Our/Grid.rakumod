@@ -14,6 +14,8 @@ use Our::Utilities;
 use Our::Redis;
 use Text::CSV;
 use Terminal::UI 'ui';
+use GTK::Simple;
+use GTK::Simple::App;
 
 enum OUTPUTS (
     csv             => 'Text::CSV',
@@ -456,10 +458,11 @@ method ANSI-print {
 method TUI {
     return                  unless $*IN.t;
     return False            unless self!grid-check;
-    ui.setup: heights => [ 1, 1, fr => 1];
+    ui.setup: heights => [ 1, 1, fr => 1, 1];
     my \Title               = ui.panes[0];
     my \Headings            = ui.panes[1];
     my \Body                = ui.panes[2];
+    my \Footer              = ui.panes[3];
     Body.auto-scroll        = False;
 #   Title
     Title.put: ' ' x ((($!term-size.cols - $!body.title.chars) div 2) - 1) ~ $!body.title;
@@ -500,10 +503,86 @@ method TUI {
         }
         Body.put: $body-record;
     }
+    Footer.put: " Press 'q' to quit";
     ui.focus(pane => 2);
     ui.interact;
     ui.shutdown;
     qx/stty erase /;
 }
 
+method GUI {
+    return                  unless $*IN.t;
+    return False            unless self!grid-check;
+
+    my GTK::Simple::App $gui;
+    $gui               .= new(title => $!body.title);
+
+    my @cells;
+    loop (my $col = 0; $col < $!body.headings.elems; $col++) {
+        @cells.push: [$col, 0, 1, 1] => GTK::Simple::Button.new(label => $!body.headings[$col].TEXT);
+    }
+    for $!body.meta<sort-order>.list -> $row {
+        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
+            my $body    = ' ';
+            $body       = $!body.cells[$row][$col].TEXT when $!body.cells[$row][$col] ~~ Our::Grid::Cell:D;
+            @cells.push: [$col, ($row + 1), 1, 1] => GTK::Simple::Button.new(label => $body);
+        }
+    }
+    my $grid            = GTK::Simple::Grid.new(@cells);
+
+#   my $structure = GTK::Simple::Grid.new(
+#       [0, 0, 1, 1] => $headings-grid,
+#       [0, 1, 1, 1] => $body-grid,
+#   );
+#   $structure.column-spacing = 16;
+#   $grid.column-spacing = 16;
+#   $gui.set-content($structure);
+    $gui.set-content($grid);
+#   $gui.border-width = 20;
+#   $grid.baseline-row: 4;
+    $gui.run;
+}
+
 =finish
+
+my $app = GTK::Simple::App.new(title => 'Calendar', height => 300, width => 600);
+my $calendar = GTK::Simple::Calendar.new;
+
+my $month-entry = GTK::Simple::Entry.new(text => ~$calendar.month);
+my $year-entry  = GTK::Simple::Entry.new(text => ~$calendar.year);
+my $day-entry   = GTK::Simple::Entry.new(text => ~$calendar.day);
+
+$calendar.day-selected.tap: {
+    $year-entry.text    = .year.Str;
+    $month-entry.text   = .month.Str;
+    $day-entry.text     = .day.Str;
+};
+
+my $date-view = GTK::Simple::Grid.new(
+    [0, 0, 1, 1] => GTK::Simple::Label.new(text => "Day"),
+    [1, 0, 1, 1] => $day-entry,
+    [2, 0, 1, 1] => GTK::Simple::Label.new(text => "Month"),
+    [3, 0, 1, 1] => $month-entry,
+    [4, 0, 1, 1] => GTK::Simple::Label.new(text => "Year"),
+    [5, 0, 1, 1] => $year-entry
+);
+
+$date-view.column-spacing = 8;
+
+my $structure = GTK::Simple::Grid.new(
+    [0, 0, 1, 1] => $calendar,
+    [1, 0, 1, 1] => $date-view
+);
+
+$structure.column-spacing = 16;
+
+$app.set-content($structure);
+
+($day-entry, $month-entry).map: { .width-chars = 2 };
+$year-entry.width-chars = 4;
+
+$date-view.size-request(300, 120);
+$calendar.size-request(300,300);
+
+$app.run;
+

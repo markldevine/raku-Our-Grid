@@ -84,10 +84,11 @@ sub MAIN (
     Str     $servers        = $default-server,  #= server name(s) (comma separated list)
     Int     :$percent-above = -1,               #= only display file systems above the percentage 
     Bool    :$csv,                              #= dump CSV to STDOUT
+    Bool    :$gui,                              #= Graphical User Interface
     Bool    :$html,                             #= dump HTML to STDOUT
     Bool    :$json,                             #= dump JSON to STDOUT
     Bool    :$text,                             #= TEXT print
-    Bool    :$tui,                              #= TUI
+    Bool    :$tui,                              #= Terminal User Interface
     Bool    :$xml,                              #= dump XML to STDOUT
     Bool    :$light-mode,                       #= reverse header highlight for light-mode
             :$sort-columns,                     #= sort by column number(s)
@@ -156,14 +157,14 @@ sub MAIN (
         my @sort-columns = $sort-columns.split: ',';
         $grid.sort-by-columns(:@sort-columns, :descending($sort-descending));
     }
-    if any($text.so, $csv.so, $html.so, $json.so, $xml.so, $tui.so) {
+    if any($text.so, $csv.so, $html.so, $json.so, $xml.so, $tui.so, $gui.so) {
         when $text  { $grid.TEXT-print; proceed;    }
         when $html  { $grid.html-print; proceed;    }
         when $csv   { $grid.csv-print;  proceed;    }
         when $json  { $grid.json-print; proceed;    }
         when $xml   { $grid.xml-print;  proceed;    }
         when $tui   { $grid.TUI;                    }
-#       when $gui   { $grid.GUI                     }
+        when $gui   { $grid.GUI;                    }
     }
     else {
         $grid.ANSI-print;
