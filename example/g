@@ -1,0 +1,6 @@
+#!/usr/bin/env raku
+
+my $erase = qx/stty -a/;
+$erase   ~~ s/ ^ .+? \s 'erase' \s '=' \s (..) ';' .+ $ /$0/;
+
+say '|' ~ $erase ~ '|';

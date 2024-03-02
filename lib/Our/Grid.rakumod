@@ -142,6 +142,7 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
         }
     }
 #   sort inferences
+
     unless $!body.meta<column-sort-types>[$!current-col]:exists && $!body.meta<column-sort-types>[$!current-col] ~~ 'string' {
         my $proposed-sort-type;
         given $cell.cell-sort-type {
@@ -203,6 +204,14 @@ multi method sort-by-columns (:@sort-columns!, :$descending) {
         %sortable-rows{$sort-string} = $row;
     }
     $!body.meta<sort-order>    = Array.new;
+
+### The below incantation sorts name_number & string & digit all together, magically.
+### Since we need to sort by multiple columns (normalizing data by their peculiarity),
+### I'll stick with the current ham-handed implementation for now.  Maybe I'll see a
+### way to benefit from this magic spell and change it at some future date.
+###
+###     sort(*.split(/\d+/, :kv).map({ (try .Numeric) // $_}).List)
+
     for %sortable-rows.keys.sort -> $key {
         $!body.meta<sort-order>.push: %sortable-rows{$key};
     }
@@ -458,6 +467,8 @@ method ANSI-print {
 method TUI {
     return                  unless $*IN.t;
     return False            unless self!grid-check;
+    my $erase-char          = qx/stty -a/;
+    $erase-char            ~~ s/ ^ .+? \s 'erase' \s '=' \s (..) ';' .+ $ /$0/;
     ui.setup: heights => [ 1, 1, fr => 1, 1];
     my \Title               = ui.panes[0];
     my \Headings            = ui.panes[1];
@@ -507,7 +518,7 @@ method TUI {
     ui.focus(pane => 2);
     ui.interact;
     ui.shutdown;
-#   qx/stty erase /;
+    qqx/stty erase $erase-char/;
 }
 
 method GUI {
