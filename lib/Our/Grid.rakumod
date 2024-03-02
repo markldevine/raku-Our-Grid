@@ -1,5 +1,6 @@
 unit class Our::Grid:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
+use Data::Dump::Tree;
 use Base64::Native;
 use Color::Names:api<2>;
 use Cro::HTTP::Client;
@@ -110,10 +111,10 @@ multi method add-heading (Str:D $text!, *%opts) {
 }
 
 multi method add-heading (Our::Grid::Cell:D :$cell, *%opts) {
-    my $column              = $!body.headings.elems;
-    $!body.headings.append:      $cell;
-    $!body.meta<col-width>[$column]    = 0                     without $!body.meta<col-width>[$column];
-    $!body.meta<col-width>[$column]    = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > $!body.meta<col-width>[$column];
+    my $column                      = $!body.headings.elems;
+    $!body.headings.append:         $cell;
+    $!body.meta<col-width>[$column] = 0                     without $!body.meta<col-width>[$column];
+    $!body.meta<col-width>[$column] = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > $!body.meta<col-width>[$column];
 }
 
 multi method add-cell (Str:D $text!, *%opts) {
@@ -455,38 +456,30 @@ method ANSI-print {
 method TUI {
     return                  unless $*IN.t;
     return False            unless self!grid-check;
-
     ui.setup: heights => [ 1, 1, fr => 1];
-
     my \Title               = ui.panes[0];
     my \Headings            = ui.panes[1];
     my \Body                = ui.panes[2];
-
+    Body.auto-scroll        = False;
 #   Title
     Title.put: ' ' x ((($!term-size.cols - $!body.title.chars) div 2) - 1) ~ $!body.title;
-
 #   Margin
     my $col-width-total     = 0;
     for $!body.meta<col-width>.list -> $colw {
         $col-width-total   += $colw;
     }
     $col-width-total       += ($!body.meta<col-width>.elems * 2) - 2;
-#put '$col-width-total = ' ~ $col-width-total;
     my $margin              = (($!term-size.cols - $col-width-total) div 2) - 1;
-#put '$margin = ' ~ $margin;
-
 #   Headings
     if $!body.headings.elems {
-        my $headings        = ' ' x $margin;
+        my $headings        = ' ' x ($margin - 1);
         loop (my $col = 0; $col < $!body.headings.elems; $col++) {
-            my $justification   = 'center';
-            $justification      = $!body.headings[$col]<justification> with $!body.headings[$col]<justification>;
-            $headings          ~= $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]), :$justification);
+            $headings          ~= ' ';
+            $headings          ~= $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]));
             $headings          ~= ' ' unless $col == ($!body.headings.elems - 1);
         }
         Headings.put: $headings;
     }
-
 #   Body
     my $body-record;
     for $!body.meta<sort-order>.list -> $row {
@@ -505,9 +498,9 @@ method TUI {
             }
             $body-record ~= ' ' unless $col == ($!body.cells[$row].elems - 1);
         }
-#put '$body-record.trim = |' ~ $body-record.trim ~ '|' ~ $body-record.trim.chars;
         Body.put: $body-record;
     }
+    ui.focus(pane => 2);
     ui.interact;
     ui.shutdown;
     qx/stty erase /;
