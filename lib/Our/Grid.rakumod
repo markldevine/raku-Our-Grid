@@ -529,15 +529,17 @@ method GUI {
         }
     }
     my $grid            = GTK::Simple::Grid.new(@cells);
+    my $exit-b          = GTK::Simple::ToggleButton.new(label=>'Exit');
+    $exit-b.toggled.tap(-> $b { $gui.exit } );
 
-#   my $structure = GTK::Simple::Grid.new(
-#       [0, 0, 1, 1] => $headings-grid,
-#       [0, 1, 1, 1] => $body-grid,
-#   );
+    my $structure = GTK::Simple::Grid.new(
+        [0, 0, 1, 1] => $grid,
+        [0, 1, 1, 1] => $exit-b,
+    );
 #   $structure.column-spacing = 16;
 #   $grid.column-spacing = 16;
-#   $gui.set-content($structure);
-    $gui.set-content($grid);
+    $gui.set-content($structure);
+#   $gui.set-content($grid);
 #   $gui.border-width = 20;
 #   $grid.baseline-row: 4;
     $gui.run;
