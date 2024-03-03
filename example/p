@@ -1,23 +1,13 @@
-Our::Grid
-=========
-Load a grid, then output it in convenient ways.
-
-In the royal "Our::" namespace for now, as I want to hack on this 
-as Alpha for a while.
-
-SYNOPSIS
-========
-
-~~~raku
 #!/usr/bin/env raku
 
 use Our::Grid;
 
 my Our::Grid $grid .= new;
 
-#  PID TTY          TIME CMD
-# 8654 pts/2    00:00:00 bash
-# 8751 pts/2    00:00:00 ps
+=comment
+  PID TTY          TIME CMD
+ 8654 pts/2    00:00:00 bash
+ 8751 pts/2    00:00:00 ps
 
 my grammar PS-grammar {
     token TOP       { <data> || <heading> }
@@ -77,9 +67,5 @@ sub MAIN (
     when    $xml    { $grid.xml-print   }
     default         { $grid.ANSI-print  }
 }
-~~~
 
-
-AUTHOR
-======
-Mark Devine <mark@markdevine.com>
+=finish
