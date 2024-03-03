@@ -47,7 +47,7 @@ my class PS-actions {
         $grid.add-heading:  $/<h3>.Str;
     }
     method data ($/) {
-        $grid.add-cell:     $/<d0>.Str;
+        $grid.add-cell:     $/<d0>.Str, :superscript;
         $grid.add-cell:     $/<d1>.Str, :foreground<yellow>, :background<green>, :italic, :faint;
         $grid.add-cell:     $/<d2>.Str, :foreground<brown>;
         my $proc-name       = $/<d3>.Str;
@@ -74,6 +74,7 @@ sub MAIN (
     Bool    :$tui,  #= Terminal User Interface
     Bool    :$xml,  #= dump XML to STDOUT
 ) {
+    $grid.sort-by-columns(:sort-columns([2,0]), :descending);
     when    $csv    { $grid.csv-print   }
     when    $gui    { $grid.GUI         }
     when    $html   { $grid.html-print  }

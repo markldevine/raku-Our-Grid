@@ -22,7 +22,7 @@ my grammar PS-grammar {
     token data      {
                         ^ \s*
                         $<d0>=[\d+] \s+
-                        $<d1>=[pts '/' \d+] \s+
+                        $<d1>=[.+?] \s+
                         $<d2>=[\d\d':'\d\d':'\d\d] \s+
                         $<d3>=[.+?] \s*
                         $
@@ -37,7 +37,7 @@ my class PS-actions {
         $grid.add-heading:  $/<h3>.Str;
     }
     method data ($/) {
-        $grid.add-cell:     $/<d0>.Str;
+        $grid.add-cell:     $/<d0>.Str, :superscript;
         $grid.add-cell:     $/<d1>.Str, :foreground<yellow>, :background<green>, :italic, :faint;
         $grid.add-cell:     $/<d2>.Str, :foreground<brown>;
         my $proc-name       = $/<d3>.Str;
@@ -51,7 +51,7 @@ my class PS-actions {
     }
 }
 
-for qx|/usr/bin/ps|.lines -> $ps {
+for qx|/usr/bin/ps -e|.lines -> $ps {
     PS-grammar.parse($ps, :actions(PS-actions.new)) or warn;
 }
 
@@ -64,6 +64,7 @@ sub MAIN (
     Bool    :$tui,  #= Terminal User Interface
     Bool    :$xml,  #= dump XML to STDOUT
 ) {
+    $grid.sort-by-columns(:sort-columns([2,0]), :descending);
     when    $csv    { $grid.csv-print   }
     when    $gui    { $grid.GUI         }
     when    $html   { $grid.html-print  }
