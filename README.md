@@ -3,7 +3,7 @@ Our::Grid
 Load a grid, then output it in convenient ways.
 
 In the royal "Our::" namespace for now, as I want to hack on this 
-as Alpha for a while.
+as `alpha` for a while.
 
 SYNOPSIS
 ========
