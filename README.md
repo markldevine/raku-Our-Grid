@@ -2,7 +2,7 @@ Our::Grid
 =========
 Load a grid, then output it in convenient ways.
 
-In the royal "Our::" namespace, as I want to hack on this 
+In the "royal Our::" namespace, as I want to hack on this 
 as alpha for a while.
 
 SYNOPSIS
