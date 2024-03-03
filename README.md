@@ -32,7 +32,7 @@ my grammar PS-grammar {
     token data      {
                         ^ \s*
                         $<d0>=[\d+] \s+
-                        $<d1>=[pts '/' \d+] \s+
+                        $<d1>=[.+?] \s+
                         $<d2>=[\d\d':'\d\d':'\d\d] \s+
                         $<d3>=[.+?] \s*
                         $
@@ -61,7 +61,7 @@ my class PS-actions {
     }
 }
 
-for qx|/usr/bin/ps|.lines -> $ps {
+for qx|/usr/bin/ps -e|.lines -> $ps {
     PS-grammar.parse($ps, :actions(PS-actions.new)) or warn;
 }
 
