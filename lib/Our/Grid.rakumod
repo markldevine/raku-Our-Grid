@@ -41,7 +41,7 @@ has Body            $!body;
 has Int             $.current-row       is rw       = 0;
 has Int             $.current-col       is rw       = 0;
 
-has         $!title             is built    = '';
+has         $.title             is built    = '';
 has Bool    $!reverse-highlight is built    = False;
 
 submethod TWEAK {
@@ -57,7 +57,10 @@ method reverse-highlight (Bool $reverse-highlight?) {
 }
 
 method title (Str $title?) {
-    $!body.title   = $title with $title;
+    with $title {
+        $!title         = $title;
+        $!body.title    = $title;
+    }
     return $!body.title;
 }
 
@@ -212,8 +215,29 @@ multi method sort-by-columns (:@sort-columns!, :$descending) {
 ### Since we need to sort by multiple columns (normalizing data by their peculiarity),
 ### I'll stick with the current ham-handed implementation for now.  Maybe I'll see a
 ### way to benefit from this magic spell and change it at some future date.
-###
-###     sort(*.split(/\d+/, :kv).map({ (try .Numeric) // $_}).List)
+### 
+###      sort(*.split(/\d+/, :kv).map({ (try .Numeric) // $_}).List)
+### 
+###  Or more simply:
+###   my @h = ( 
+###     { 
+###       name => "albert", 
+###       age => 40, 
+###       size => 2 
+###     }, 
+###     { 
+###       name => "andy", 
+###       age => 22, 
+###       size => 3 
+###     }, 
+###     { 
+###       name => "albert", 
+###       age => 69, 
+###       size => 3 
+###     } 
+###   ); 
+###   @h.sort( *<name age> ).gist.say;
+### Results in: ({age => 40, name => albert, size => 2} {age => 69, name => albert, size => 3} {age => 22, name => andy, size => 3})
 
     for %sortable-rows.keys.sort -> $key {
         $!body.meta<sort-order>.push: %sortable-rows{$key};
@@ -557,7 +581,13 @@ method GUI {
     $grid.baseline-row:         $!body.meta<sort-order>.elems;
     my $scrolled-grid           = GTK::Simple::ScrolledWindow.new;
     $scrolled-grid.set-content($grid);
-    $gui.border-width = 20;
+#   my $exit-b                  = GTK::Simple::ToggleButton.new(label=>'Exit');
+#   $exit-b.toggled.tap(-> $b { $gui.exit } );
+#   my $VBox                    = GTK::Simple::VBox.new;
+#   $VBox.set-content:          $scrolled-grid;
+#   $VBox.set-content:          $exit-b;
+    $gui.border-width           = 20;
+#   $gui.set-content($VBox);
     $gui.set-content($scrolled-grid);
     $gui.run;
 }
