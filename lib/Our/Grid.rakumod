@@ -16,6 +16,9 @@ use Text::CSV;
 use Terminal::UI 'ui';
 use GTK::Simple;
 use GTK::Simple::App;
+use GTK::Simple::Frame;
+use GTK::Simple::TextView;
+use GTK::Simple::VBox;
 
 enum OUTPUTS (
     csv             => 'Text::CSV',
@@ -522,21 +525,55 @@ method TUI {
 }
 
 method GUI {
-    return                  unless $*IN.t;
-    return False            unless self!grid-check;
+    return                      unless $*IN.t;
+    return False                unless self!grid-check;
 
     my GTK::Simple::App $gui;
-    $gui               .= new(title => $!body.title);
+    $gui                       .= new(title => $!body.title, :720width, :600height);
+
+    my $grid                    = GTK::Simple::Grid.new;
+    loop (my $col = 0; $col < $!body.headings.elems; $col++) {
+        my $VBox                = GTK::Simple::VBox.new;
+        my $heading             = GTK::Simple::MarkUpLabel.new(text => '<span foreground="black" underline="single" weight="bold" size="large">' ~ $!body.headings[$col].TEXT ~ '</span>');
+        $grid.attach:           [$col, 0, 1, 1] => $heading;
+        for $!body.meta<sort-order>.list -> $row {
+            my $body            = ' ';
+            $body               = $!body.cells[$row][$col].TEXT when $!body.cells[$row][$col] ~~ Our::Grid::Cell:D;
+            my $obj             = GTK::Simple::TextView.new;
+            $obj.text           = $body;
+            $obj.editable       = False;
+            given $!body.cells[$row][$col].justification {
+                when 'left'     { $obj.alignment = LEFT;    }
+                when 'center'   { $obj.alignment = CENTER;  }
+                when 'right'    { $obj.alignment = RIGHT;   }
+                default         { $obj.alignment = FILL;    }
+            }
+            $obj.monospace      = True;
+            $VBox.set-content:  $obj;
+        }
+        $VBox.border-width      = 20;
+        $grid.attach:           [$col, 1, 1, 1] => $VBox;
+    }
+    $grid.baseline-row:         $!body.meta<sort-order>.elems;
+    my $scrolled-grid           = GTK::Simple::ScrolledWindow.new;
+    $scrolled-grid.set-content($grid);
+    $gui.border-width = 20;
+    $gui.set-content($scrolled-grid);
+    $gui.run;
+}
+
+=finish
 
     my @cells;
     loop (my $col = 0; $col < $!body.headings.elems; $col++) {
-        @cells.push: [$col, 0, 1, 1] => GTK::Simple::Button.new(label => $!body.headings[$col].TEXT);
+        @cells.push:    [$col, 0, 1, 1] => GTK::Simple::MarkUpLabel.new(text => '<span foreground="black" size="large">' ~ $!body.headings[$col].TEXT ~ '</span>');
     }
+    @cells.push:        [0, 1, $!body.headings.elems, 1] => GTK::Simple::Separator.new;
     for $!body.meta<sort-order>.list -> $row {
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             my $body    = ' ';
             $body       = $!body.cells[$row][$col].TEXT when $!body.cells[$row][$col] ~~ Our::Grid::Cell:D;
-            @cells.push: [$col, ($row + 1), 1, 1] => GTK::Simple::Button.new(label => $body);
+            @cells.push: [$col, ($row + 2), 1, 1] => GTK::Simple::Button.new(label => $body);
         }
     }
     my $grid            = GTK::Simple::Grid.new(@cells);
@@ -548,7 +585,8 @@ method GUI {
         [0, 1, 1, 1] => $exit-b,
     );
 #   $structure.column-spacing = 16;
-#   $grid.column-spacing = 16;
+#   $grid.row-spacing = 2;
+#   $grid.column-spacing = 4;
     $gui.set-content($structure);
 #   $gui.set-content($grid);
 #   $gui.border-width = 20;
