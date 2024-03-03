@@ -48,9 +48,15 @@ my class PS-actions {
     }
     method data ($/) {
         $grid.add-cell:     $/<d0>.Str;
-        $grid.add-cell:     $/<d1>.Str;
-        $grid.add-cell:     $/<d2>.Str;
-        $grid.add-cell:     $/<d3>.Str;
+        $grid.add-cell:     $/<d1>.Str, :foreground<yellow>, :background<green>, :italic, :faint;
+        $grid.add-cell:     $/<d2>.Str, :foreground<brown>;
+        my $proc-name       = $/<d3>.Str;
+        if $proc-name eq 'raku' {
+            $grid.add-cell: $proc-name, :bold, :blink;
+        }
+        else {
+            $grid.add-cell: $proc-name;
+        }
         $grid.current-row++;
     }
 }
