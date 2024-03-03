@@ -13,10 +13,10 @@ my grammar PS-grammar {
     token TOP       { <data> || <heading> }
     token heading   {
                         ^ \s*
-                        $<c0>=[\w+] \s+ 
-                        $<c1>=[\w+] \s+
-                        $<c2>=[\w+] \s+
-                        $<c3>=[\w+]
+                        $<h0>=[\w+] \s+ 
+                        $<h1>=[\w+] \s+
+                        $<h2>=[\w+] \s+
+                        $<h3>=[\w+]
                         $
                     }
     token data      {
@@ -31,10 +31,10 @@ my grammar PS-grammar {
 
 my class PS-actions {
     method heading ($/) {
-        $grid.add-heading:  $/<c0>.Str;
-        $grid.add-heading:  $/<c1>.Str;
-        $grid.add-heading:  $/<c2>.Str;
-        $grid.add-heading:  $/<c3>.Str;
+        $grid.add-heading:  $/<h0>.Str;
+        $grid.add-heading:  $/<h1>.Str;
+        $grid.add-heading:  $/<h2>.Str;
+        $grid.add-heading:  $/<h3>.Str;
     }
     method data ($/) {
         $grid.add-cell:     $/<d0>.Str;
