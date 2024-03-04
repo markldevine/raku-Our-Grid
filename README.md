@@ -86,6 +86,10 @@ sub MAIN (
 }
 ~~~
 
+NOTES
+=====
+All functionality works on xterm terminals (TERM=xterm | TERM=xterm-256color), but the ANSI escapes
+(notably 'blink') are hit or miss on other TERM types.
 
 AUTHOR
 ======

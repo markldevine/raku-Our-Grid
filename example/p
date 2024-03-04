@@ -1,5 +1,8 @@
 #!/usr/bin/env raku
 
+use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
+
 use Our::Grid;
 
 my Our::Grid $grid .= new;
@@ -42,7 +45,7 @@ my class PS-actions {
         $grid.add-cell:     $/<d2>.Str, :foreground<brown>;
         my $proc-name       = $/<d3>.Str;
         if $proc-name eq 'raku' {
-            $grid.add-cell: $proc-name, :bold, :blink;
+            $grid.add-cell: $proc-name, :foreground<red>, :background<yellow>, :bold, :blink;
         }
         else {
             $grid.add-cell: $proc-name;
