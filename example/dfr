@@ -9,6 +9,7 @@ use Our::Grid::Cell;
 use Our::Utilities;
 use Our::Cache;
 use JSON::Fast;
+#use Grammar::Debugger;
 
 my %server-results;
 
@@ -32,7 +33,7 @@ grammar df-Pk-grammar {
     token df-data-record {
         \n ^^ <filesystem> \s+ <total-KBs> \s+ <used-KBs> \s+ <available-KBs> \s+ <capacity> \s+ <mount-point> $$
     }
-    token filesystem        { <[-\.:/_\w]>+                 }
+    token filesystem        { <[-\\\.:/_\w]>+               }
     token total-KBs         { '-' || <total-KBs-num>        }
     token total-KBs-num     { \d+                           }
     token used-KBs          { '-' || <used-KBs-num>         }
