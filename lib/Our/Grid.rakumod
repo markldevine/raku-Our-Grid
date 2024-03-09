@@ -20,6 +20,8 @@ use GTK::Simple::Frame;
 use GTK::Simple::TextView;
 use GTK::Simple::VBox;
 
+subset Base64Str of Str where { $_ ~~ /^<[A..Za..z0..9+/=]>+$/ };
+
 enum OUTPUTS (
     csv             => 'Text::CSV',
     html            => '1',
@@ -33,16 +35,19 @@ my class Body {
     has @.cells;
     has @.headings;
     has %.meta;
-    has $.title                         is rw       = $*PROGRAM.Str;
+    has $.title                             is rw           = $*PROGRAM.Str;
 }
 
-has                 $.term-size;
-has Body            $!body;
-has Int             $.current-row       is rw       = 0;
-has Int             $.current-col       is rw       = 0;
+has                     $.term-size;
+has Body                $!body;
+has Int                 $.current-row       is rw       = 0;
+has Int                 $.current-col       is rw       = 0;
+has Cro::HTTP::Client   $.grid-proxy;
 
-has         $.title             is built    = '';
-has Bool    $!reverse-highlight is built    = False;
+has Str                 $.title             is built    = '';
+has Bool                $!reverse-highlight is built    = False;
+has Str                 $.mail-from;
+has Str                 $.mail-to;
 
 submethod TWEAK {
     $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
@@ -90,6 +95,7 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
 #   get-html -> SMTP
 }
 
+
 method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-port = 22151) {
     my $redis-key       = base64-encode($*PROGRAM ~ '_' ~ sprintf("%09d", $*PID) ~ '_' ~ DateTime.now.posix(:real)).decode.encode.Str;
     self.redis-set($redis-key);
@@ -99,12 +105,14 @@ method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-po
                         ~ ':'
                         ~ $cro-port
                         ~ '/proxy-mail-via-redis'
-                        ~ '/' ~ $redis-key
                         ;
-#put $Cro-URL;
-    my $response        = await Cro::HTTP::Client.get($Cro-URL);
+    my %query           = (
+                            :$redis-key,
+                            :$mail-from,
+                            :$mail-to,
+                        );
+    my $response        = await Cro::HTTP::Client.post($Cro-URL, :%query);
     my $body            = await $response.body;
-#say $body;
 }
 
 method redis-set (Str:D $redis-key!) {
