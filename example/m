@@ -1,0 +1,9 @@
+#!/usr/bin/env raku
+
+sub MAIN (
+    :@to,
+) {
+dd @to;
+}
+
+=finish

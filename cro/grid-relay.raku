@@ -1,12 +1,13 @@
 #!/usr/bin/env raku
 
-#use lib </home/mdevine/github.com/raku-Our-Grid/lib>;
-#use lib </home/mdevine/github.com/raku-Our-Redis/lib>;
+use lib </home/mdevine/github.com/raku-Our-Grid/lib>;
+use lib </home/mdevine/github.com/raku-Our-Redis/lib>;
 
 use Cro::HTTP::Router;
 use Cro::HTTP::Log::File;
 use Cro::HTTP::Server;
 use Our::Grid;
+use Our::Redis;
 
 #use Data::Dump::Tree;
 
@@ -18,12 +19,32 @@ $*OUT.out-buffer        = 0;
 %*ENV<REPOSITORY_HOST>  = <127.0.0.1>;
 %*ENV<REPOSITORY_PORT>  = 22151;
 
+#|  Get SMTP relay
+my $redis           = Our::Redis.new;
+my $smtp-relay-host = $redis.GET(:key<SMTP-RELAY-HOST>);
+my $smtp-relay-port = $redis.GET(:key<SMTP-RELAY-PORT>);
+
 my $application         = route {
 #   get     -> 'proxy-mail-via-redis', *%params,  {
 #   get     -> 'proxy-mail-via-redis', $redis-key {
-    get     -> 'proxy-mail-via-redis', *$redis-key {
+    get     -> 'proxy-mail-via-redis', :%params {
+dd %params;
+        my $redis-key       = %params<redis-key>;
+        my $mail-from       = %params<mail-from>;
+        my @mail-to         = %params<mail-to>.split(',');
+        my @mail-cc;
+        @mail-cc            = %params<mail-cc>.split(',')   if %params<mail-cc>:exists;
+        my @mail-bcc;
+        @mail-bcc           = %params<mail-bcc>.split(',')  if %params<mail-bcc>:exists;
+put 'From: ' ~ $mail-from;
+put '  To: ' ~ @mail-to.join(',');
+put '  Cc: ' ~ @mail-cc.join(',')   if @mail-cc.elems;
+put ' Bcc: ' ~ @mail-bcc.join(',')  if @mail-bcc.elems;
         my Our::Grid $grid .= new;
         $grid.receive-proxy-mail-via-redis(:$redis-key);
+
+put 'Subj: ' ~ $grid.body.title;
+
 $grid.ANSI-print;
 #$grid.html-print;
 #       content 'text/plain', $grid.html-print;
@@ -44,7 +65,6 @@ $grid-relay             = Cro::HTTP::Server.new(
 
 $grid-relay.start;
 
-#say "Listening at https://%*ENV<REPOSITORY_HOST>:%*ENV<REPOSITORY_PORT>";
 put 'Listening at http://' ~ %*ENV<REPOSITORY_HOST> ~ ':' ~ %*ENV<REPOSITORY_PORT>;
 
 react {

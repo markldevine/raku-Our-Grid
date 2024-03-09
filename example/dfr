@@ -1,13 +1,15 @@
 #!/usr/bin/env raku
 
+use lib '/home/mdevine/github.com/raku-Our-Utilities/lib';
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
-use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
 
+use Data::Dump::Tree;
 use Async::Command::Multi;
+use Our::Cache;
 use Our::Grid;
 use Our::Grid::Cell;
 use Our::Utilities;
-use Our::Cache;
 use JSON::Fast;
 #use Grammar::Debugger;
 
@@ -82,19 +84,31 @@ class df-Pk-actions {
 constant    $default-server = '127.0.0.1';
 
 sub MAIN (
-    Str     $servers        = $default-server,  #= server name(s) (comma separated list)
-    Int     :$percent-above = -1,               #= only display file systems above the percentage 
-    Bool    :$csv,                              #= dump CSV to STDOUT
-    Bool    :$gui,                              #= Graphical User Interface
-    Bool    :$html,                             #= dump HTML to STDOUT
-    Bool    :$json,                             #= dump JSON to STDOUT
-    Bool    :$text,                             #= TEXT print
-    Bool    :$tui,                              #= Terminal User Interface
-    Bool    :$xml,                              #= dump XML to STDOUT
-    Bool    :$light-mode,                       #= reverse header highlight for light-mode
-            :$sort-columns,                     #= sort by column number(s)
-    Bool    :$sort-descending,                  #= sort in descending order
+    Str         $servers        = $default-server,  #= server name(s) (comma separated list)
+    Int         :$percent-above = -1,               #= only display file systems above the percentage 
+    Bool        :$csv,                              #= dump CSV to STDOUT
+    Bool        :$gui,                              #= Graphical User Interface
+    Bool        :$html,                             #= dump HTML to STDOUT
+    Bool        :$json,                             #= dump JSON to STDOUT
+                :$mail-from,                        #= email 'From:' addressee
+                :@mail-to,                          #= accumulate email 'To:' addressees
+                :@mail-cc       = (),               #= accumulate email 'Cc:' addressees
+                :@mail-bcc      = (),               #= accumulate email 'Bcc:' addressees
+    Bool        :$text,                             #= TEXT print
+    Bool        :$tui,                              #= Terminal User Interface
+    Bool        :$xml,                              #= dump XML to STDOUT
+    Bool        :$light-mode,                       #= reverse header highlight for light-mode
+    Int         :$sort-columns,                     #= sort by column number(s)
+    Bool        :$sort-descending,                  #= sort in descending order
 ) {
+    my Bool $mailing;
+    my $from    = $mail-from;
+    if $mail-from && @mail-to.elems {
+        die '--mail-from=<email-address> required to send mail!' unless $mail-from;
+        die '--mail-to=<email-address[,email-address]> required to send mail!' unless @mail-to.elems;
+        $from    = $mail-from[0] if $mail-from ~~ Array;
+        $mailing = True;
+    }
     my $reverse-highlight   = $light-mode ?? True !! False;
     my $preferences-cache-file-name = cache-file-name(:meta<preferences>);
     my $preferences-cache   = cache(:cache-file-name($preferences-cache-file-name));
@@ -158,19 +172,26 @@ sub MAIN (
         my @sort-columns = $sort-columns.split: ',';
         $grid.sort-by-columns(:@sort-columns, :descending($sort-descending));
     }
-    if any($text.so, $csv.so, $html.so, $json.so, $xml.so, $tui.so, $gui.so) {
-        when $text  { $grid.TEXT-print; proceed;    }
-        when $html  { $grid.html-print; proceed;    }
-        when $csv   { $grid.csv-print;  proceed;    }
-        when $json  { $grid.json-print; proceed;    }
-        when $xml   { $grid.xml-print;  proceed;    }
-        when $tui   { $grid.TUI;                    }
-        when $gui   { $grid.GUI;                    }
+    {
+        when $text          {   $grid.TEXT-print; }
+        when $html          {   $grid.html-print; }
+        when $csv           {   $grid.csv-print;  }
+        when $json          {   $grid.json-print; }
+        when $mailing       {
+                                $grid.send-proxy-mail-via-redis(
+                                    :cro-host<127.0.0.1>,
+                                    :22151cro-port,
+                                    :mail-from($from),
+                                    :@mail-to,
+                                    :@mail-cc,
+                                    :@mail-bcc,
+                                );
+        }
+        when $xml           {   $grid.xml-print;  }
+        when $tui           {   $grid.TUI;        }
+        when $gui           { $grid.GUI;        }
+        default             { $grid.ANSI-print; }
     }
-    else {
-        $grid.ANSI-print;
-    }
-#$grid.send-proxy-mail-via-redis;
 }
 
 =finish

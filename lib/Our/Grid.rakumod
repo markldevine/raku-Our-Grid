@@ -39,15 +39,13 @@ my class Body {
 }
 
 has                     $.term-size;
-has Body                $!body;
+has Body                $.body;
 has Int                 $.current-row       is rw       = 0;
 has Int                 $.current-col       is rw       = 0;
 has Cro::HTTP::Client   $.grid-proxy;
 
 has Str                 $.title             is built    = '';
 has Bool                $!reverse-highlight is built    = False;
-has Str                 $.mail-from;
-has Str                 $.mail-to;
 
 submethod TWEAK {
     $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
@@ -92,26 +90,34 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
             $!body.cells[$row][$col] = unmarshal($!body.cells[$row][$col], Our::Grid::Cell);
         }
     }
-#   get-html -> SMTP
 }
 
 
-method send-proxy-mail-via-redis (Str:D :$cro-host = '127.0.0.1', Int:D :$cro-port = 22151) {
+method send-proxy-mail-via-redis (
+        Str:D       :$cro-host    = '127.0.0.1',
+        Int:D       :$cro-port    = 22151,
+        Str:D       :$mail-from!,
+                    :@mail-to!,
+                    :@mail-cc?,
+                    :@mail-bcc?,
+    ) {
+    die 'mail-from must be specified!'  without $mail-from;
+    die 'mail-to must be specified!'    without @mail-to;
     my $redis-key       = base64-encode($*PROGRAM ~ '_' ~ sprintf("%09d", $*PID) ~ '_' ~ DateTime.now.posix(:real)).decode.encode.Str;
     self.redis-set($redis-key);
-# add options like From:, To:, Cc:, Bcc:, Subj:
     my $Cro-URL         = 'http://'
                         ~ $cro-host
                         ~ ':'
                         ~ $cro-port
                         ~ '/proxy-mail-via-redis'
                         ;
-    my %query           = (
-                            :$redis-key,
-                            :$mail-from,
-                            :$mail-to,
-                        );
-    my $response        = await Cro::HTTP::Client.post($Cro-URL, :%query);
+    my %query;
+    %query<redis-key>   = $redis-key;
+    %query<mail-from>   = $mail-from;
+    %query<mail-to>     = @mail-to.join(',');
+    %query<mail-cc>     = @mail-cc.join(',')    if @mail-cc.elems;
+    %query<mail-bcc>    = @mail-bcc.join(',')   if @mail-bcc.elems;
+    my $response        = await Cro::HTTP::Client.get: $Cro-URL, :%query;
     my $body            = await $response.body;
 }
 
