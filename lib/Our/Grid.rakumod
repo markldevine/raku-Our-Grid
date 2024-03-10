@@ -22,11 +22,11 @@ use GTK::Simple::VBox;
 
 subset Base64Str of Str where { $_ ~~ /^<[A..Za..z0..9+/=]>+$/ };
 
-enum GridOutput is export (
+enum GridRemoteOutput is export (
     grid-csv            => 'CSV',
     grid-html           => 'HTML',
     grid-json           => 'JSON',
-    grid-tui            => 'TUI',
+    grid-text           => 'TEXT',
     grid-xml            => 'XML',
 );
 
@@ -92,13 +92,13 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
 }
 
 method send-proxy-mail-via-redis (
-        Str:D       :$cro-host      = '127.0.0.1',
-        Int:D       :$cro-port      = 22151,
-        Str:D       :$mail-from!,
-                    :@mail-to!,
-                    :@mail-cc?,
-                    :@mail-bcc?,
-        GridOutput  :$output-format = grid-html,
+        Str:D               :$cro-host      = '127.0.0.1',
+        Int:D               :$cro-port      = 22151,
+        Str:D               :$mail-from!,
+                            :@mail-to!,
+                            :@mail-cc?,
+                            :@mail-bcc?,
+        GridRemoteOutput    :$format        = grid-html,
     ) {
     die 'mail-from must be specified!'  without $mail-from;
     die 'mail-to must be specified!'    without @mail-to;
@@ -116,6 +116,7 @@ method send-proxy-mail-via-redis (
     %query<mail-to>     = @mail-to.join(',');
     %query<mail-cc>     = @mail-cc.join(',')    if @mail-cc.elems;
     %query<mail-bcc>    = @mail-bcc.join(',')   if @mail-bcc.elems;
+    %query<format>      = $format;
     my $response        = await Cro::HTTP::Client.get: $Cro-URL, :%query;
     my $body            = await $response.body;
 }
@@ -341,16 +342,16 @@ method to-html {
             </style>
         </head>
     ENDOFHTMLHEAD
-    $html ~= ' ' x 4 ~ '<body>';
-    $html ~= ' ' x 8 ~ '<h1>' ~ self.title ~ '</h1>' if self.title;
-    $html ~= ' ' x 8 ~ '<table>';
-    $html ~= ' ' x 12 ~ '<tr>';
+    $html ~= ' ' x 4 ~ '<body>' ~ "\n";
+    $html ~= ' ' x 8 ~ '<h1>' ~ self.title ~ '</h1>' ~ "\n" if self.title;
+    $html ~= ' ' x 8 ~ '<table>' ~ "\n";
+    $html ~= ' ' x 12 ~ '<tr>' ~ "\n";
     for $!body.headings.list -> $heading {
-        $html ~= ' ' x 16 ~ '<th>' ~ self!subst-ml-text($heading.TEXT) ~ '</th>';
+        $html ~= ' ' x 16 ~ '<th>' ~ self!subst-ml-text($heading.TEXT) ~ '</th>' ~ "\n";
     }
-    $html ~= ' ' x 12 ~ '</tr>';
+    $html ~= ' ' x 12 ~ '</tr>' ~ "\n";
     for $!body.meta<sort-order>.list -> $row {
-        $html ~= ' ' x 12 ~ '<tr>';
+        $html ~= ' ' x 12 ~ '<tr>' ~ "\n";
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             $html ~= ' ' x 16 ~ '<td style="';
             if $!body.cells[$row][$col] ~~ Our::Grid::Cell:D {
@@ -382,12 +383,12 @@ method to-html {
             else {
                 $html ~= '">';
             }
-            $html ~= '</td>';
+            $html ~= '</td>' ~ "\n";
         }
-        $html ~= ' ' x 12 ~ '</tr>';
+        $html ~= ' ' x 12 ~ '</tr>' ~ "\n";
     }
-    $html ~= ' ' x 8 ~ '</table>';
-    $html ~= ' ' x 4 ~ '</body>';
+    $html ~= ' ' x 8 ~ '</table>' ~ "\n";
+    $html ~= ' ' x 4 ~ '</body>' ~ "\n";
     $html ~= '</html>';
     return $html;
 }

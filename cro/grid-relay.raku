@@ -36,6 +36,7 @@ dd %params;
         @mail-cc            = %params<mail-cc>.split(',')   if %params<mail-cc>:exists;
         my @mail-bcc;
         @mail-bcc           = %params<mail-bcc>.split(',')  if %params<mail-bcc>:exists;
+        my $format          = %params<format>;
 put 'From: ' ~ $mail-from;
 put '  To: ' ~ @mail-to.join(',');
 put '  Cc: ' ~ @mail-cc.join(',')   if @mail-cc.elems;
@@ -45,9 +46,13 @@ put ' Bcc: ' ~ @mail-bcc.join(',')  if @mail-bcc.elems;
 
 put 'Subj: ' ~ $grid.body.title;
 
-#$grid.ANSI-print;
-$grid.HTML-print;
-#       content 'text/plain', $grid.html-print;
+        given $format {
+            when grid-csv   {   $grid.CSV-print;    }
+            when grid-json  {   $grid.JSON-print;   }
+            when grid-text  {   $grid.TEXT-print;   }
+            when grid-xml   {   $grid.XML-print;    }
+            default         {   $grid.HTML-print;   }
+        }
     },
 };
 
