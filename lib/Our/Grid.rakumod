@@ -22,13 +22,8 @@ use GTK::Simple::VBox;
 
 subset Base64Str of Str where { $_ ~~ /^<[A..Za..z0..9+/=]>+$/ };
 
-enum GridRemoteOutput is export (
-    grid-csv            => 'CSV',
-    grid-html           => 'HTML',
-    grid-json           => 'JSON',
-    grid-text           => 'TEXT',
-    grid-xml            => 'XML',
-);
+our $Grid-Email-Formats is export = set <CSV HTML JSON TEXT XML>;
+our subset Grid-Email-Formats is export of Str where { $_ (elem) $Grid-Email-Formats };
 
 my class Body {
     has @.cells;
@@ -98,7 +93,7 @@ method send-proxy-mail-via-redis (
                             :@mail-to!,
                             :@mail-cc?,
                             :@mail-bcc?,
-        GridRemoteOutput    :$format        = grid-html,
+        Grid-Email-Formats  :$format,
     ) {
     die 'mail-from must be specified!'  without $mail-from;
     die 'mail-to must be specified!'    without @mail-to;
@@ -297,8 +292,12 @@ method CSV-print {
 }
 
 method JSON-print {
+    put self.to-json;
+}
+
+method to-json {
     return False unless self!grid-check;
-    put to-json(self!datafy);
+    return to-json(self!datafy);
 }
 
 method HTML-print {
@@ -412,8 +411,8 @@ method to-xml {
     die '$!body.headings.elems <' ~ $!body.headings.elems ~ '> != <' ~ $!body.cells[0].elems ~ '> $!body.cells[0].elems' unless $!body.headings.elems == $!body.cells[0].elems;
     self!sort-order-check;
     my $xml;
-    $xml ~= '<?xml version="1.0" encoding="UTF-8"?>';
-    $xml ~= '<root>';
+    $xml ~= '<?xml version="1.0" encoding="UTF-8"?>' ~ "\n";
+    $xml ~= '<root>' ~ "\n";
     my @headers;
     loop (my $i = 0; $i < $!body.headings.elems; $i++) {
         @headers[$i] = $!body.headings[$i].TEXT;
@@ -421,13 +420,13 @@ method to-xml {
         @headers[$i] = @headers[$i].subst: '%', 'PCT';
     }
     for $!body.meta<sort-order>.list -> $row {
-        $xml ~= ' ' x 4 ~ '<row' ~ $row ~ '>';
+        $xml ~= ' ' x 4 ~ '<row' ~ $row ~ '>' ~ "\n";
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             if $!body.cells[$row][$col] ~~ Our::Grid::Cell:D {
-                $xml ~= ' ' x 8 ~ '<' ~ @headers[$col] ~ '>' ~ self!subst-ml-text($!body.cells[$row][$col].TEXT) ~ '</' ~ @headers[$col] ~ '>';
+                $xml ~= ' ' x 8 ~ '<' ~ @headers[$col] ~ '>' ~ self!subst-ml-text($!body.cells[$row][$col].TEXT) ~ '</' ~ @headers[$col] ~ '>' ~ "\n";
             }
         }
-        $xml ~= ' ' x 4 ~ '</row' ~ $row ~ '>';
+        $xml ~= ' ' x 4 ~ '</row' ~ $row ~ '>' ~ "\n";
     }
     $xml ~= '</root>';
     return $xml;
@@ -462,6 +461,10 @@ method TEXT-print {
 
 method ANSI-print {
     return False unless self!grid-check;
+    unless $*IN.t {
+        self.TEXT-print;
+        return;
+    }
     my $col-width-total = 0;
     for $!body.meta<col-width>.list -> $colw {
         $col-width-total += $colw;

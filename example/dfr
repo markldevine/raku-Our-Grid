@@ -84,29 +84,33 @@ class df-Pk-actions {
 constant    $default-server = '127.0.0.1';
 
 sub MAIN (
-    Str         $servers        = $default-server,  #= server name(s) (comma separated list)
-    Int         :$percent-above = -1,               #= only display file systems above the percentage 
-    Bool        :$csv,                              #= dump CSV to STDOUT
-    Bool        :$gui,                              #= Graphical User Interface
-    Bool        :$html,                             #= dump HTML to STDOUT
-    Bool        :$json,                             #= dump JSON to STDOUT
-                :$mail-from,                        #= email 'From:' addressee
-                :@mail-to,                          #= accumulate email 'To:' addressees
-                :@mail-cc       = (),               #= accumulate email 'Cc:' addressees
-                :@mail-bcc      = (),               #= accumulate email 'Bcc:' addressees
-    Bool        :$text,                             #= TEXT print
-    Bool        :$tui,                              #= Terminal User Interface
-    Bool        :$xml,                              #= dump XML to STDOUT
-    Bool        :$light-mode,                       #= reverse header highlight for light-mode
-    Int         :$sort-columns,                     #= sort by column number(s)
-    Bool        :$sort-descending,                  #= sort in descending order
+    Str                 $servers            = $default-server,  #= server name(s) (comma separated list)
+    Int                 :$percent-above     = -1,               #= only display file systems above the percentage 
+    Bool                :$csv,                                  #= dump CSV to STDOUT
+    Bool                :$gui,                                  #= Graphical User Interface
+    Bool                :$html,                                 #= dump HTML to STDOUT
+    Bool                :$json,                                 #= dump JSON to STDOUT
+#   Grid-Email-Formats  :$mail-body-format,                     #= email body format
+                        :$mail-body-format,                     #= email body format
+                        :$mail-from,                            #= email 'From:' addressee
+                        :@mail-to,                              #= accumulate email 'To:' addressees
+                        :@mail-cc           = (),               #= accumulate email 'Cc:' addressees
+                        :@mail-bcc          = (),               #= accumulate email 'Bcc:' addressees
+    Bool                :$text,                                 #= TEXT print
+    Bool                :$tui,                                  #= Terminal User Interface
+    Bool                :$xml,                                  #= dump XML to STDOUT
+    Bool                :$light-mode,                           #= reverse header highlight for light-mode
+    Int                 :$sort-columns,                         #= sort by column number(s)
+    Bool                :$sort-descending,                      #= sort in descending order
 ) {
     my Bool $mailing;
-    my $from    = $mail-from;
+    my $from                = $mail-from;
+    my $format              = $mail-body-format;
     if $mail-from && @mail-to.elems {
         die '--mail-from=<email-address> required to send mail!' unless $mail-from;
         die '--mail-to=<email-address[,email-address]> required to send mail!' unless @mail-to.elems;
-        $from    = $mail-from[0] if $mail-from ~~ Array;
+        $from               = $mail-from[0] if $mail-from ~~ Array;
+        $format             = $mail-body-format[0] if $mail-body-format ~~ Array;
         $mailing = True;
     }
     my $reverse-highlight   = $light-mode ?? True !! False;
@@ -185,6 +189,7 @@ sub MAIN (
                                     :@mail-to,
                                     :@mail-cc,
                                     :@mail-bcc,
+                                    :$format,
                                 );
         }
         when $xml           {   $grid.XML-print;  }

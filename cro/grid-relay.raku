@@ -47,11 +47,11 @@ put ' Bcc: ' ~ @mail-bcc.join(',')  if @mail-bcc.elems;
 put 'Subj: ' ~ $grid.body.title;
 
         given $format {
-            when grid-csv   {   $grid.CSV-print;    }
-            when grid-json  {   $grid.JSON-print;   }
-            when grid-text  {   $grid.TEXT-print;   }
-            when grid-xml   {   $grid.XML-print;    }
-            default         {   $grid.HTML-print;   }
+            when 'CSV'  {   $grid.CSV-print;    }
+            when 'JSON' {   $grid.JSON-print;   }
+            when 'TEXT' {   $grid.TEXT-print;   }
+            when 'XML'  {   $grid.XML-print;    }
+            default     {   $grid.HTML-print;   }
         }
     },
 };
