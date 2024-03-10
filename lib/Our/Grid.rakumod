@@ -22,13 +22,12 @@ use GTK::Simple::VBox;
 
 subset Base64Str of Str where { $_ ~~ /^<[A..Za..z0..9+/=]>+$/ };
 
-enum OUTPUTS (
-    csv             => 'Text::CSV',
-    html            => '1',
-    json            => 'JSON::Fast',
-    tui             => 'Terminal::UI',
-#   xlsl            => 'Spreadsheet::XLSX',
-    xml             => 'LibXML',
+enum GridOutput is export (
+    grid-csv            => 'CSV',
+    grid-html           => 'HTML',
+    grid-json           => 'JSON',
+    grid-tui            => 'TUI',
+    grid-xml            => 'XML',
 );
 
 my class Body {
@@ -92,14 +91,14 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
     }
 }
 
-
 method send-proxy-mail-via-redis (
-        Str:D       :$cro-host    = '127.0.0.1',
-        Int:D       :$cro-port    = 22151,
+        Str:D       :$cro-host      = '127.0.0.1',
+        Int:D       :$cro-port      = 22151,
         Str:D       :$mail-from!,
                     :@mail-to!,
                     :@mail-cc?,
                     :@mail-bcc?,
+        GridOutput  :$output-format = grid-html,
     ) {
     die 'mail-from must be specified!'  without $mail-from;
     die 'mail-to must be specified!'    without @mail-to;
@@ -291,19 +290,23 @@ method !datafy {
     @data;
 }
 
-method csv-print {
+method CSV-print {
     return False unless self!grid-check;
     csv(in => csv(in => self!datafy), out => $*OUT);
 }
 
-method json-print {
+method JSON-print {
     return False unless self!grid-check;
     put to-json(self!datafy);
 }
 
-method html-print {
+method HTML-print {
+    put self.to-html;
+}
+
+method to-html {
     return False unless self!grid-check;
-    print q:to/ENDOFHTMLHEAD/;
+    my $html = q:to/ENDOFHTMLHEAD/;
     <!DOCTYPE html>
     <html>
         <head>
@@ -338,28 +341,28 @@ method html-print {
             </style>
         </head>
     ENDOFHTMLHEAD
-    put ' ' x 4 ~ '<body>';
-    put ' ' x 8 ~ '<h1>' ~ self.title ~ '</h1>' if self.title;
-    put ' ' x 8 ~ '<table>';
-    put ' ' x 12 ~ '<tr>';
+    $html ~= ' ' x 4 ~ '<body>';
+    $html ~= ' ' x 8 ~ '<h1>' ~ self.title ~ '</h1>' if self.title;
+    $html ~= ' ' x 8 ~ '<table>';
+    $html ~= ' ' x 12 ~ '<tr>';
     for $!body.headings.list -> $heading {
-        put ' ' x 16 ~ '<th>' ~ self!subst-ml-text($heading.TEXT) ~ '</th>';
+        $html ~= ' ' x 16 ~ '<th>' ~ self!subst-ml-text($heading.TEXT) ~ '</th>';
     }
-    put ' ' x 12 ~ '</tr>';
+    $html ~= ' ' x 12 ~ '</tr>';
     for $!body.meta<sort-order>.list -> $row {
-        put ' ' x 12 ~ '<tr>';
+        $html ~= ' ' x 12 ~ '<tr>';
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
-            print ' ' x 16 ~ '<td style="';
+            $html ~= ' ' x 16 ~ '<td style="';
             if $!body.cells[$row][$col] ~~ Our::Grid::Cell:D {
                 given $!body.cells[$row][$col] {
                     if .justification {
-                        when 'left'     { print 'text-align: left;';    }
-                        when 'center'   { print 'text-align: center;';  }
-                        when 'right'    { print 'text-align: right;';   }
+                        when 'left'     { $html ~= 'text-align: left;';    }
+                        when 'center'   { $html ~= 'text-align: center;';  }
+                        when 'right'    { $html ~= 'text-align: right;';   }
                     }
                     loop (my $f = 0; $f < .fragments.elems; $f++) {
                         if .fragments[$f].foreground {
-                            print ' color:'     ~ .fragments[$f].foreground ~ ';';
+                            $html ~= ' color:'     ~ .fragments[$f].foreground ~ ';';
                             last;
                         }
                     }
@@ -367,25 +370,26 @@ method html-print {
                     loop ($f = 0; $f < .fragments.elems; $f++) {
                         if .fragments[$f].background {
                             $background = .fragments[$f].background;
-                            print ' background-color:' ~ $background   ~ ';';
+                            $html ~= ' background-color:' ~ $background   ~ ';';
                             last;
                         }
                     }
-                    print ' background-color:'  ~ .highlight    ~ ';'   if !$background && .highlight;
-                    print '"';
+                    $html ~= ' background-color:'  ~ .highlight    ~ ';'   if !$background && .highlight;
+                    $html ~= '"';
                 }
-                print '>' ~ self!subst-ml-text($!body.cells[$row][$col].TEXT);
+                $html ~= '>' ~ self!subst-ml-text($!body.cells[$row][$col].TEXT);
             }
             else {
-                print '">';
+                $html ~= '">';
             }
-            put '</td>';
+            $html ~= '</td>';
         }
-        put ' ' x 12 ~ '</tr>';
+        $html ~= ' ' x 12 ~ '</tr>';
     }
-    put ' ' x 8 ~ '</table>';
-    put ' ' x 4 ~ '</body>';
-    put '</html>';
+    $html ~= ' ' x 8 ~ '</table>';
+    $html ~= ' ' x 4 ~ '</body>';
+    $html ~= '</html>';
+    return $html;
 }
 
 method !subst-ml-text (Str:D $s) {
@@ -398,12 +402,17 @@ method !subst-ml-text (Str:D $s) {
     return $result;
 }
 
-method xml-print {
+method XML-print {
+    put self.to-xml;
+}
+
+method to-xml {
     die 'Cannot generate XML without column $!body.headings' unless $!body.headings.elems;
     die '$!body.headings.elems <' ~ $!body.headings.elems ~ '> != <' ~ $!body.cells[0].elems ~ '> $!body.cells[0].elems' unless $!body.headings.elems == $!body.cells[0].elems;
     self!sort-order-check;
-    put '<?xml version="1.0" encoding="UTF-8"?>';
-    put '<root>';
+    my $xml;
+    $xml ~= '<?xml version="1.0" encoding="UTF-8"?>';
+    $xml ~= '<root>';
     my @headers;
     loop (my $i = 0; $i < $!body.headings.elems; $i++) {
         @headers[$i] = $!body.headings[$i].TEXT;
@@ -411,15 +420,16 @@ method xml-print {
         @headers[$i] = @headers[$i].subst: '%', 'PCT';
     }
     for $!body.meta<sort-order>.list -> $row {
-        put ' ' x 4 ~ '<row' ~ $row ~ '>';
+        $xml ~= ' ' x 4 ~ '<row' ~ $row ~ '>';
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             if $!body.cells[$row][$col] ~~ Our::Grid::Cell:D {
-                put ' ' x 8 ~ '<' ~ @headers[$col] ~ '>' ~ self!subst-ml-text($!body.cells[$row][$col].TEXT) ~ '</' ~ @headers[$col] ~ '>';
+                $xml ~= ' ' x 8 ~ '<' ~ @headers[$col] ~ '>' ~ self!subst-ml-text($!body.cells[$row][$col].TEXT) ~ '</' ~ @headers[$col] ~ '>';
             }
         }
-        put ' ' x 4 ~ '</row' ~ $row ~ '>';
+        $xml ~= ' ' x 4 ~ '</row' ~ $row ~ '>';
     }
-    put '</root>';
+    $xml ~= '</root>';
+    return $xml;
 }
 
 method TEXT-print {

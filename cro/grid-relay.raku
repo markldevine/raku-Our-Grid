@@ -45,8 +45,8 @@ put ' Bcc: ' ~ @mail-bcc.join(',')  if @mail-bcc.elems;
 
 put 'Subj: ' ~ $grid.body.title;
 
-$grid.ANSI-print;
-#$grid.html-print;
+#$grid.ANSI-print;
+$grid.HTML-print;
 #       content 'text/plain', $grid.html-print;
     },
 };

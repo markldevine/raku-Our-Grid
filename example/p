@@ -68,13 +68,13 @@ sub MAIN (
     Bool    :$xml,  #= dump XML to STDOUT
 ) {
     $grid.sort-by-columns(:sort-columns([2,0]), :descending);
-    when    $csv    { $grid.csv-print   }
+    when    $csv    { $grid.CSV-print   }
     when    $gui    { $grid.GUI         }
-    when    $html   { $grid.html-print  }
-    when    $json   { $grid.json-print  }
+    when    $html   { $grid.HTML-print  }
+    when    $json   { $grid.JSON-print  }
     when    $text   { $grid.TEXT-print  }
     when    $tui    { $grid.TUI         }
-    when    $xml    { $grid.xml-print   }
+    when    $xml    { $grid.XML-print   }
     default         { $grid.ANSI-print  }
 }
 

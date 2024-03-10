@@ -174,9 +174,9 @@ sub MAIN (
     }
     {
         when $text          {   $grid.TEXT-print; }
-        when $html          {   $grid.html-print; }
-        when $csv           {   $grid.csv-print;  }
-        when $json          {   $grid.json-print; }
+        when $html          {   $grid.HTML-print; }
+        when $csv           {   $grid.CSV-print;  }
+        when $json          {   $grid.JSON-print; }
         when $mailing       {
                                 $grid.send-proxy-mail-via-redis(
                                     :cro-host<127.0.0.1>,
@@ -187,10 +187,10 @@ sub MAIN (
                                     :@mail-bcc,
                                 );
         }
-        when $xml           {   $grid.xml-print;  }
+        when $xml           {   $grid.XML-print;  }
         when $tui           {   $grid.TUI;        }
-        when $gui           { $grid.GUI;        }
-        default             { $grid.ANSI-print; }
+        when $gui           {   $grid.GUI;        }
+        default             {   $grid.ANSI-print; }
     }
 }
 
