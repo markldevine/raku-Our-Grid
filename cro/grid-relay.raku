@@ -39,22 +39,13 @@ my $application         = route {
         my @mail-bcc;
         @mail-bcc           = %params<mail-bcc>.split(',')  if %params<mail-bcc>:exists;
         my $format          = %params<format>;
-#put 'Redis: ' ~ $redis-key;
-#put ' FMT: ' ~ $format;
-#put 'From: ' ~ $mail-from;
-#put '  To: ' ~ @mail-to.join(',');
-#put '  Cc: ' ~ @mail-cc.join(',')   if @mail-cc.elems;
-#put ' Bcc: ' ~ @mail-bcc.join(',')  if @mail-bcc.elems;
         my Our::Grid $grid .= new;
         $grid.receive-proxy-mail-via-redis(:$redis-key);
-
-#put 'Subj: ' ~ $grid.body.title;
-
-my $email   = Email::MIME.create(
-                header-str  => [ from => $mail-from, subject => $grid.body.title ],
-                attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
-                body-str    => $grid.HTML-print,
-              );
+        my $email           = Email::MIME.create(
+                                header-str  => [ from => $mail-from, subject => $grid.body.title ],
+                                attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
+                                body-str    => $grid.HTML-print
+                              );
 dd $email;
 
 #       given $format {
