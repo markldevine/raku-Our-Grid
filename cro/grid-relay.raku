@@ -28,7 +28,7 @@ my $application         = route {
 #   get     -> 'proxy-mail-via-redis', *%params,  {
     get     -> 'ping'                           {
         content 'text/plain', 'pong';
-    },
+    }
     post    -> 'proxy-mail-via-redis', :%params {
         my $redis-key       = %params<redis-key>;
         my $mail-from       = %params<mail-from>;
@@ -54,7 +54,7 @@ put 'Subj: ' ~ $grid.body.title;
             when 'XML'  {   $grid.XML-print;    }
             default     {   $grid.HTML-print;   }
         }
-    },
+    }
 };
 
 $grid-relay             = Cro::HTTP::Server.new(
