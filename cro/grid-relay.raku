@@ -6,6 +6,7 @@ use lib </home/mdevine/github.com/raku-Our-Redis/lib>;
 use Cro::HTTP::Router;
 use Cro::HTTP::Log::File;
 use Cro::HTTP::Server;
+use Email::MIME;
 use Our::Grid;
 use Our::Redis;
 
