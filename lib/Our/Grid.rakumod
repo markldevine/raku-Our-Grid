@@ -116,7 +116,7 @@ method send-proxy-mail-via-redis (
 
 my $remote-host = 'jgstmgtgate1lpv.wmata.local';
 my @cmd         = 'ssh', $remote-host, '/bin/curl', '-G', '--silent';
-$Cro-URL       ~= '&';
+$Cro-URL       ~= '?';
 my @query;
 for %query.keys.sort -> $key {
     @query.push:    $key ~ '=' ~ %query{$key};
