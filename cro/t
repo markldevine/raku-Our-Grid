@@ -1,0 +1,53 @@
+#!/usr/bin/env raku
+
+my $local-host  = '127.0.0.1';
+my $local-port  = '22151';
+my $remote-host = 'jgstmgtgate1lpv.wmata.local';
+my $remote-port = '22151';
+
+my @cmd         = 'ssh', '-L', $local-port ~ ':' ~ $remote-host ~ ':' ~ $remote-port, $remote-host, '/bin/curl', '-s', '-L', 'http://127.0.0.1:22151/ping';
+my $proc        = run @cmd, :out, :err;
+say $proc.exitcode;
+my $out         = $proc.out.slurp(:close);
+my $err         = $proc.err.slurp(:close);
+note $err       if $err;
+say $out        if $out;
+
+
+=finish
+
+use Cro::HTTP::Client;
+use SSH::LibSSH::Tunnel;
+
+
+my SSH::LibSSH::Tunnel:D $ssh-tunnel .= new:
+#   :tunnel-host<jgstmgtgate1lpv.wmata.local>,
+    :tunnel-host<10.10.105.96>,
+#   :tunnel-host<127.0.0.1>,
+    :22tunnel-port,
+    :tunnel-user<A028441>,
+    :local-host<127.0.0.1>,
+#   :local-port<22151>,
+    :22151local-port,
+#   :remote-host<jgstmgtgate1lpv.wmata.local>,
+    :remote-host<10.10.105.96>,
+#   :remote-port<22151>,
+    :22151remote-port,
+    :private-key-file($*HOME.add: '.ssh/id_ecdsa',
+);
+
+dd $ssh-tunnel;
+
+# =finish
+
+my $connection = $ssh-tunnel.connect;
+
+
+
+=finish
+
+my $x = SSH::LibSSH::Tunnel.new(:tunnel-host<127.0.0.1>, :tunnel-user«$*USER», private-key-file => $*HOME.add('.sshd_ed25519'), :remote-host<jgstmgtgate1lpv.wmata.local>, :remote-port(22151)).connect;
+
+my $p = run «/bin/echo nc {$x.local-host} {$x.local-port}», :in, :out;
+$p.in.print: "GET / HTTP/1.1\r\nHost: host:port\r\nConnection: close\r\n\r\n";
+warn $p.out.slurp;

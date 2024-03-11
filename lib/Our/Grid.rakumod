@@ -112,8 +112,21 @@ method send-proxy-mail-via-redis (
     %query<mail-cc>     = @mail-cc.join(',')    if @mail-cc.elems;
     %query<mail-bcc>    = @mail-bcc.join(',')   if @mail-bcc.elems;
     %query<format>      = $format;
-    my $response        = await Cro::HTTP::Client.get: $Cro-URL, :%query;
-    my $body            = await $response.body;
+#   ?term=mountains&images=true
+
+my $remote-host = 'jgstmgtgate1lpv.wmata.local';
+my @cmd         = 'ssh', '-L', $cro-port ~ ':' ~ $remote-host ~ ':' ~ $cro-port, $remote-host, '/bin/curl', '-s', '-L', $Cro-URL ~ '?' ~ (%query.keys.sort.map: { "$_=" ~ %query{$_} }).join('&');
+die @cmd;
+my $proc        = run @cmd, :out, :err;
+say $proc.exitcode;
+my $out         = $proc.out.slurp(:close);
+my $err         = $proc.err.slurp(:close);
+note $err       if $err;
+say $out        if $out;
+
+
+#   my $response        = await Cro::HTTP::Client.get: $Cro-URL, :%query;
+#   my $body            = await $response.body;
 }
 
 method redis-set (Str:D $redis-key!) {
