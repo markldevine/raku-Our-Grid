@@ -29,7 +29,7 @@ my $application         = route {
     get     -> 'ping'                           {
         content 'text/plain', 'pong';
     },
-    get     -> 'proxy-mail-via-redis', :%params {
+    post    -> 'proxy-mail-via-redis', :%params {
         my $redis-key       = %params<redis-key>;
         my $mail-from       = %params<mail-from>;
         my @mail-to         = %params<mail-to>.split(',');
