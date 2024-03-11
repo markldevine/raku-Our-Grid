@@ -46,6 +46,11 @@ submethod TWEAK {
     $!body             .= new;
     self.title($!title) if $!title;
     self.reverse-highlight($!reverse-highlight);
+
+#say 'ver  = ' ~ $?DISTRIBUTION.meta<ver>;
+#say 'api  = ' ~ $?DISTRIBUTION.meta<api>;
+#say 'auth = ' ~ $?DISTRIBUTION.meta<auth>;
+
 }
 
 method reverse-highlight (Bool $reverse-highlight?) {
