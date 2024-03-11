@@ -115,13 +115,17 @@ method send-proxy-mail-via-redis (
 #   ?term=mountains&images=true
 
 my $remote-host = 'jgstmgtgate1lpv.wmata.local';
-my @cmd         = 'ssh', $remote-host, '/bin/curl', '--silent';
+my @cmd         = 'ssh', $remote-host, '/bin/curl', '-G', '--silent';
+$Cro-URL       ~= '&';
+my @query;
 for %query.keys.sort -> $key {
-    @cmd.push:  '--url-query', $key ~ '=' ~ %query{$key};
+    @query.push:    $key ~ '=' ~ %query{$key};
 }
-@cmd.push:      $Cro-URL;
+$Cro-URL       ~= @query.join('&');
+@cmd.push:      "'" ~ $Cro-URL ~ "'";
 
 dd @cmd;
+put @cmd;
 my $proc        = run @cmd, :out, :err;
 say $proc.exitcode;
 my $out         = $proc.out.slurp(:close);

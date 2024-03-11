@@ -29,7 +29,7 @@ my $application         = route {
     get     -> 'ping'                           {
         content 'text/plain', 'pong';
     }
-    post    -> 'proxy-mail-via-redis', :%params {
+    get     -> 'proxy-mail-via-redis', :%params {
         my $redis-key       = %params<redis-key>;
         my $mail-from       = %params<mail-from>;
         my @mail-to         = %params<mail-to>.split(',');
@@ -38,6 +38,8 @@ my $application         = route {
         my @mail-bcc;
         @mail-bcc           = %params<mail-bcc>.split(',')  if %params<mail-bcc>:exists;
         my $format          = %params<format>;
+put 'Redis: ' ~ $redis-key;
+put ' FMT: ' ~ $format;
 put 'From: ' ~ $mail-from;
 put '  To: ' ~ @mail-to.join(',');
 put '  Cc: ' ~ @mail-cc.join(',')   if @mail-cc.elems;
