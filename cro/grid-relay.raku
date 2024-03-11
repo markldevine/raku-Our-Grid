@@ -26,9 +26,10 @@ my $smtp-relay-port = $redis.GET(:key<SMTP-RELAY-PORT>);
 
 my $application         = route {
 #   get     -> 'proxy-mail-via-redis', *%params,  {
-#   get     -> 'proxy-mail-via-redis', $redis-key {
+    get     -> 'ping'                           {
+        content 'text/plain', 'pong';
+    },
     get     -> 'proxy-mail-via-redis', :%params {
-dd %params;
         my $redis-key       = %params<redis-key>;
         my $mail-from       = %params<mail-from>;
         my @mail-to         = %params<mail-to>.split(',');
