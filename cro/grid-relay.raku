@@ -45,9 +45,9 @@ my $application         = route {
         my $email           = Email::MIME.create(
                                 header-str  => [
                                     from    => $mail-from,
-                                    to      => @mail-to.join(','),
-                                    cc      => @mail-cc.join(','),
-                                    bcc     => @mail-bcc.join(','),
+                                    to      => @mail-to,
+                                    cc      => @mail-cc,
+                                    bcc     => @mail-bcc,
                                     subject => $grid.body.title,
                                 ],
 #                               header-str  => [ subject => $grid.body.title ],
