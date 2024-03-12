@@ -51,7 +51,8 @@ my $application         = route {
                                     subject => $grid.body.title,
                                 ],
 #                               header-str  => [ subject => $grid.body.title ],
-                                attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
+#                               attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
+                                attributes  => { content-type => 'text/html', charset => 'utf-8' },
                                 body-str    => $grid.to-html().Str
                               );
 say ~$email;
