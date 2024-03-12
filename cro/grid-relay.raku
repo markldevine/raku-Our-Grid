@@ -59,7 +59,7 @@ dd $email;
 #       }
 
 #my $smtp = Net::SMTP.new(:server('mailhost.wmata.com'), :port(587));
-my $smtp = Net::SMTP.new(:server<mailhost.wmata.com>);
+my $smtp = Net::SMTP.new(:server<mailhost.wmata.com>, :25port);
 $smtp.send($email);
 $smtp.quit;
 
