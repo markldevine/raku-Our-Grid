@@ -46,7 +46,7 @@ my $application         = route {
                                 attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
                                 body-str    => $grid.to-html().Str
                               );
-dd $email;
+say ~$email;
 
 #       given $format {
 #           when 'CSV'  {   $grid.CSV-print;    }
