@@ -43,12 +43,17 @@ my $application         = route {
         my Our::Grid $grid .= new;
         $grid.receive-proxy-mail-via-redis(:$redis-key);
         my $email           = Email::MIME.create(
-                                header-str  => [ from => $mail-from, subject => $grid.body.title ],
+                                header-str  => [
+                                    from    => $mail-from,
+                                    to      => @mail-to.join(','),
+                                    subject => $grid.body.title,
+                                ],
+#                               header-str  => [ subject => $grid.body.title ],
                                 attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
                                 body-str    => $grid.to-html().Str
                               );
-say ~$email;
-dd $email;
+#say ~$email;
+#dd $email;
 
 #       given $format {
 #           when 'CSV'  {   $grid.CSV-print;    }
@@ -61,6 +66,7 @@ dd $email;
 #my $smtp = Net::SMTP.new(:server('mailhost.wmata.com'), :port(587));
 #my $smtp = Net::SMTP.new(:server<mailhost.wmata.com>, :25port);
 my $smtp = Net::SMTP.new(:server<mailhost.wmata.com>);
+#$smtp.send($mail-from, @mail-to, $email);
 $smtp.send($email);
 $smtp.quit;
 
