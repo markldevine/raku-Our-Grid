@@ -46,13 +46,15 @@ my $application         = route {
                                 header-str  => [
                                     from    => $mail-from,
                                     to      => @mail-to.join(','),
+                                    cc      => @mail-cc.join(','),
+                                    bcc     => @mail-bcc.join(','),
                                     subject => $grid.body.title,
                                 ],
 #                               header-str  => [ subject => $grid.body.title ],
                                 attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
                                 body-str    => $grid.to-html().Str
                               );
-#say ~$email;
+say ~$email;
 #dd $email;
 
 #       given $format {
