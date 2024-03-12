@@ -57,8 +57,8 @@ my $application         = route {
 #       }
 
 my $smtp = Net::SMTP.new(:server('mailhost.wmata.com'), :port(587));
-$client.send($email);
-$client.quit;
+$smtp.send($email);
+$smtp.quit;
 
 
     }
