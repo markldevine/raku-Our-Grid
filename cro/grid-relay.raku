@@ -44,7 +44,7 @@ my $application         = route {
         my $email           = Email::MIME.create(
                                 header-str  => [ from => $mail-from, subject => $grid.body.title ],
                                 attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
-                                body-str    => $grid.HTML-print
+                                body-str    => $grid.HTML-print().Str
                               );
 dd $email;
 
