@@ -47,7 +47,8 @@ my $application         = route {
                                 attributes  => { content-type => 'text/html', charset => 'utf-8', encoding => 'quoted-printable' },
                                 body-str    => $grid.to-html().Str
                               );
-#say ~$email;
+say ~$email;
+dd $email;
 
 #       given $format {
 #           when 'CSV'  {   $grid.CSV-print;    }
@@ -59,7 +60,7 @@ my $application         = route {
 
 #my $smtp = Net::SMTP.new(:server('mailhost.wmata.com'), :port(587));
 my $smtp = Net::SMTP.new(:server<mailhost.wmata.com>);
-$smtp.send(~$email);
+$smtp.send($email);
 $smtp.quit;
 
 
