@@ -55,7 +55,7 @@ my $application         = route {
                                 attributes  => { content-type => 'text/html', charset => 'utf-8' },
                                 body-str    => $grid.to-html().Str
                               );
-say ~$email;
+#say ~$email;
 #dd $email;
 
 #       given $format {
