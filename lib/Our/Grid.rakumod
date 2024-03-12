@@ -129,10 +129,10 @@ for %query.keys.sort -> $key {
 $Cro-URL       ~= @query.join('&');
 @cmd.push:      "'" ~ $Cro-URL ~ "'";
 
-dd @cmd;
-put @cmd;
+#dd @cmd;
+#put @cmd;
 my $proc        = run @cmd, :out, :err;
-say $proc.exitcode;
+#say $proc.exitcode;
 my $out         = $proc.out.slurp(:close);
 my $err         = $proc.err.slurp(:close);
 note $err       if $err;
