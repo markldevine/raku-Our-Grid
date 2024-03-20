@@ -56,20 +56,14 @@ submethod BUILD(:$text,
 submethod TWEAK {
     $!text                      = '';
     $!TEXT                      = '';
-#%%%$!fragments[0].spacebefore  = 0;
-#%%%$!fragments[*-1].spaceafter = 0;
     loop (my $i = 0; $i < $!fragments.elems; $i++ ) {
 
-#%%%    $!text                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
-        $!text                 ~= ' ' x $!fragments[$i].spacebefore;
+        $!text                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
         $!text                 ~= $!fragments[$i].text;
-#%%%    $!text                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
-        $!text                 ~= ' ' x $!fragments[$i].spaceafter;
+        $!text                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
 
-#%%%    $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
         $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore;
         $!TEXT                 ~= $!fragments[$i].TEXT;
-#%%%    $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
         $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter;
     }
     given $!text {
@@ -92,7 +86,7 @@ method !calculate-pads {
     my $text-chars              = $!TEXT.Str.chars;
 
 #%%%
-#%%%    Time to make $!text the original, trimmed data & $!TEXT to be the padded data...
+#%%%    Time to make $!text the original, trimmed data & $!TEXT to be the marked-up data...
 #%%%
 
     die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width < $text-chars;
@@ -128,7 +122,7 @@ method ANSI-fmt (*%opts) {
     if %opts<justification>:exists {
         $!justification     = %opts<justification>;
     }
-    self!calculate-pads     if $!width;                                                                                     #%%% this is destroying $!spacebefore of [0].....
+    self!calculate-pads     if $!width;
     $!ANSI-spacebefore-pad  = '';
     $!ANSI-spacebefore-pad  = ' ' x $!spacebefore       if $!spacebefore;
     $!ANSI-spaceafter-pad   = '';
@@ -158,7 +152,7 @@ method ANSI-fmt (*%opts) {
     }
     $!ANSI                  = Nil;
     loop (my $i = 0; $i < $!fragments.elems; $i++ ) {
-#%%%    $!ANSI             ~= $!fragments[$i].ANSI-spacebefore-pad unless $i == 0;
+
         $!ANSI             ~= $!fragments[$i].ANSI-spacebefore-pad;
         if %opts.elems {
             $!ANSI         ~= $!fragments[$i].ANSI-fmt(|%opts);
@@ -166,7 +160,7 @@ method ANSI-fmt (*%opts) {
         else {
             $!ANSI         ~= $!fragments[$i].ANSI;
         }
-#%%%    $!ANSI             ~= $!fragments[$i].ANSI-spaceafter-pad  unless $i == ($!fragments.elems - 1);
+
         $!ANSI             ~= $!fragments[$i].ANSI-spaceafter-pad;
     }
     return self;
