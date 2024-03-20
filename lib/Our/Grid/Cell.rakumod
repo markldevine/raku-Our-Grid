@@ -158,14 +158,16 @@ method ANSI-fmt (*%opts) {
     }
     $!ANSI                  = Nil;
     loop (my $i = 0; $i < $!fragments.elems; $i++ ) {
-        $!ANSI             ~= $!fragments[$i].ANSI-spacebefore-pad unless $i == 0;
+#%%%    $!ANSI             ~= $!fragments[$i].ANSI-spacebefore-pad unless $i == 0;
+        $!ANSI             ~= $!fragments[$i].ANSI-spacebefore-pad;
         if %opts.elems {
             $!ANSI         ~= $!fragments[$i].ANSI-fmt(|%opts);
         }
         else {
             $!ANSI         ~= $!fragments[$i].ANSI;
         }
-        $!ANSI             ~= $!fragments[$i].ANSI-spaceafter-pad  unless $i == ($!fragments.elems - 1);
+#%%%    $!ANSI             ~= $!fragments[$i].ANSI-spaceafter-pad  unless $i == ($!fragments.elems - 1);
+        $!ANSI             ~= $!fragments[$i].ANSI-spaceafter-pad;
     }
     return self;
 }

@@ -1,79 +1,52 @@
 #!/usr/bin/env raku
 
-#use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 
 use Our::Grid;
 use Our::Grid::Cell;
+use Our::Grid::Cell::Fragment;
 
-my $grid        = Our::Grid.new;
+my Our::Grid                    $grid       .= new;
+$grid.add-heading:  'Column 1', :justification<center>;
 
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk0>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk3>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk6>));
-#$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk8>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk11>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk9>));
+my Our::Grid::Cell::Fragment    @f1;
+@f1.push:   Our::Grid::Cell::Fragment.new(
+                        :text('1234.6 K'),
+                        :foreground<white>,
+                        :background<gray244>,
+                        :0spacebefore,
+                        :1spaceafter,
+                    );
+@f1.push:   Our::Grid::Cell::Fragment.new(
+                        :text('1234.6 K'),
+                        :foreground<white>,
+                        :background<gray244>,
+                        :1spacebefore,
+                        :0spaceafter,
+                    );
+$grid.add-cell:     :cell(Our::Grid::Cell.new(:fragments(@f1)));
 
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk2>)), :row;
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk5>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk12>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk11>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk14>));
+$grid.current-row++;
 
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk1>)), :row;
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk7>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk10>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk4>));
-$grid.add-cell: :cell(Our::Grid::Cell.new(:text<hdisk13>));
+my Our::Grid::Cell::Fragment    @f2;
+@f2.push:           Our::Grid::Cell::Fragment.new(
+                        :text('123.5 K'),
+                        :foreground<white>,
+                        :background<gray244>,
+                        :1spacebefore,
+                        :1spaceafter,
+                        :bytes-to-bytes-unit,
+                    );
+@f2.push:           Our::Grid::Cell::Fragment.new(
+                        :text('123.5 K'),
+                        :foreground<white>,
+                        :background<gray244>,
+                        :2spacebefore,
+                        :0spaceafter,
+                    );
+$grid.add-cell:     :cell(Our::Grid::Cell.new(:fragments(@f2)));
 
-put 'As discovered:';
-$grid.TEXT-print;
-
-print "\n";
-put 'sort-by-columns(:columns([3,2])):';
-$grid.sort-by-columns(:columns([3,2]));
-$grid.TEXT-print;
-
-print "\n";
-put 'sort-by-columns(:columns([3,2]), :descending):';
-$grid.sort-by-columns(:columns([3,2]), :descending);
-$grid.TEXT-print;
-
-=finish
-
-my $max-rows    = 5;
-my $max-cols    = 3;
-
-my $day         = 1;
-my @dates-ordered;
-for ^($max-rows * $max-cols) {
-    @dates-ordered.push: DateTime.new(
-        year    => 2024,
-        month   => 2,
-        day     => $day++,
-    );
-}
-
-my @dates;
-for ^@dates-ordered.elems {
-    @dates.push: @dates-ordered.roll;
-}
-
-loop (my $row = 0; $row < $max-rows; $row++) {
-    loop (my $col = 0; $col < $max-cols; $col++) {
-        $grid.add-cell: :cell(Our::Grid::Cell.new(:text(@dates.pop)));
-    }
-    $grid.current-row++;
-}
-
-$grid.TEXT-print;
-
-put 'sort-by-column(2):';
-$grid.sort-by-column(2);
-$grid.TEXT-print;
-
-put 'sort-by-column(2, :descending):';
-$grid.sort-by-column(2, :descending);
-$grid.TEXT-print;
+#$grid.TEXT-print;
+$grid.ANSI-print;
 
 =finish
