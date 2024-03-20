@@ -580,7 +580,7 @@ method ANSI-print {
             print %box-char<side> ~ ' ';
             given $!body.cells[$row][$col] {
                 when Our::Grid::Cell:D  {
-                    print $!body.cells[$row][$col].ANSI-fmt(:width($!body.meta<col-width>[$col])).ANSI-padded;
+                    print $!body.cells[$row][$col].ANSI-fmt(:width($!body.meta<col-width>[$col])).ANSI-padded;          #%%% focus here to preserve $!spacebefore of [0]...
                 }
                 default                 { print ' ' x $!body.meta<col-width>[$col];                                    }
             }

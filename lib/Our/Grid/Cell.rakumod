@@ -73,13 +73,13 @@ submethod TWEAK {
         $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter;
     }
     given $!text {
-        when /^ <digit>+ $/                 { $!cell-sort-type = 'digits';  }
-        when /^ (<alpha>+) (<digit>+) $/    {
+        when /^ \s* <digit>+ \s* $/                 { $!cell-sort-type = 'digits';  }
+        when /^ \s* (<alpha>+) (<digit>+) \s* $/    {
             $!cell-sort-device-name     = $0.Str;
             $!cell-sort-device-number   = $1.Int;
             $!cell-sort-type            = 'name-number';
         }
-        default                             { $!cell-sort-type = 'string';  }
+        default                                     { $!cell-sort-type = 'string';  }
     }
     self.ANSI-fmt;
     return self;
@@ -90,6 +90,11 @@ method !calculate-pads {
     $!previous-width            = $!width;
     $!previous-justification    = $!justification;
     my $text-chars              = $!TEXT.Str.chars;
+
+#%%%
+#%%%    Time to make $!text the original, trimmed data & $!TEXT to be the padded data...
+#%%%
+
     die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width < $text-chars;
     if $!width != $text-chars {
         given $!justification {
@@ -123,7 +128,7 @@ method ANSI-fmt (*%opts) {
     if %opts<justification>:exists {
         $!justification     = %opts<justification>;
     }
-    self!calculate-pads     if $!width;
+    self!calculate-pads     if $!width;                                                                                     #%%% this is destroying $!spacebefore of [0].....
     $!ANSI-spacebefore-pad  = '';
     $!ANSI-spacebefore-pad  = ' ' x $!spacebefore       if $!spacebefore;
     $!ANSI-spaceafter-pad   = '';
