@@ -19,6 +19,7 @@ sub MAIN (
                         :@mail-to,                              #= accumulate email 'To:' addressees
                         :@mail-cc           = (),               #= accumulate email 'Cc:' addressees
                         :@mail-bcc          = (),               #= accumulate email 'Bcc:' addressees
+    Bool                :$tab,                                  #= TAB delimited text print
     Bool                :$text,                                 #= TEXT print
     Bool                :$tui,                                  #= Terminal User Interface
     Bool                :$xml,                                  #= dump XML to STDOUT
@@ -44,9 +45,9 @@ sub MAIN (
         $grid.sort-by-columns(:@sort-columns, :descending($sort-descending));
     }
     {
-        when $text          {   $grid.TEXT-print; }
-        when $html          {   $grid.HTML-print; }
         when $csv           {   $grid.CSV-print;  }
+        when $gui           {   $grid.GUI;        }
+        when $html          {   $grid.HTML-print; }
         when $json          {   $grid.JSON-print; }
         when $mailing       {
                                 $grid.send-proxy-mail-via-redis(
@@ -59,9 +60,10 @@ sub MAIN (
                                     :$format,
                                 );
         }
-        when $xml           {   $grid.XML-print;  }
+        when $tab           {   $grid.TAB-print; }
+        when $text          {   $grid.TEXT-print; }
         when $tui           {   $grid.TUI;        }
-        when $gui           {   $grid.GUI;        }
+        when $xml           {   $grid.XML-print;  }
         default             {   $grid.ANSI-print; }
     }
 }

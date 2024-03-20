@@ -25,9 +25,9 @@ subset Base64Str of Str where { $_ ~~ /^<[A..Za..z0..9+/=]>+$/ };
 our $Grid-Email-Formats is export = set <CSV HTML JSON TEXT XML>;
 our subset Grid-Email-Formats is export of Str where { $_ (elem) $Grid-Email-Formats };
 
-#       when $text          {   $grid.TEXT-print; }
-#       when $html          {   $grid.HTML-print; }
 #       when $csv           {   $grid.CSV-print;  }
+#       when $gui           {   $grid.GUI;        }
+#       when $html          {   $grid.HTML-print; }
 #       when $json          {   $grid.JSON-print; }
 #       when $mailing       {
 #                               $grid.send-proxy-mail-via-redis(
@@ -40,9 +40,10 @@ our subset Grid-Email-Formats is export of Str where { $_ (elem) $Grid-Email-For
 #                                   :$format,
 #                               );
 #       }
-#       when $xml           {   $grid.XML-print;  }
+#       when $tab           {   $grid.TAB-print; }
+#       when $text          {   $grid.TEXT-print; }
 #       when $tui           {   $grid.TUI;        }
-#       when $gui           {   $grid.GUI;        }
+#       when $xml           {   $grid.XML-print;  }
 #       default             {   $grid.ANSI-print; }
 
 my class Interfaces {
@@ -56,6 +57,7 @@ my class Interfaces {
     has Email-Address       @.mail-cc;
     has Email-Address       @.mail-bcc;
     has Int                 @.sort-columns      is built;
+    has Bool                $.tab;
     has Bool                $.text;
     has Bool                $.tui;
     has Bool                $.xml;
