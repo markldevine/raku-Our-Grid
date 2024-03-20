@@ -56,15 +56,21 @@ submethod BUILD(:$text,
 submethod TWEAK {
     $!text                      = '';
     $!TEXT                      = '';
-    $!fragments[0].spacebefore  = 0;
-    $!fragments[*-1].spaceafter = 0;
+#%%%$!fragments[0].spacebefore  = 0;
+#%%%$!fragments[*-1].spaceafter = 0;
     loop (my $i = 0; $i < $!fragments.elems; $i++ ) {
-        $!text                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
+
+#%%%    $!text                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
+        $!text                 ~= ' ' x $!fragments[$i].spacebefore;
         $!text                 ~= $!fragments[$i].text;
-        $!text                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
-        $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
+#%%%    $!text                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
+        $!text                 ~= ' ' x $!fragments[$i].spaceafter;
+
+#%%%    $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore unless $i == 0;
+        $!TEXT                 ~= ' ' x $!fragments[$i].spacebefore;
         $!TEXT                 ~= $!fragments[$i].TEXT;
-        $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
+#%%%    $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter  unless $i == ($!fragments.elems - 1);
+        $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter;
     }
     given $!text {
         when /^ <digit>+ $/                 { $!cell-sort-type = 'digits';  }

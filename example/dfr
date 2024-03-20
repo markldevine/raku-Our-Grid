@@ -1,8 +1,8 @@
 #!/usr/bin/env raku
 
-use lib '/home/mdevine/github.com/raku-Our-Utilities/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Utilities/lib';
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
-use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
 
 #use Data::Dump::Tree;
 use Async::Command::Multi;

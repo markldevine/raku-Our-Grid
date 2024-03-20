@@ -25,6 +25,49 @@ subset Base64Str of Str where { $_ ~~ /^<[A..Za..z0..9+/=]>+$/ };
 our $Grid-Email-Formats is export = set <CSV HTML JSON TEXT XML>;
 our subset Grid-Email-Formats is export of Str where { $_ (elem) $Grid-Email-Formats };
 
+#       when $text          {   $grid.TEXT-print; }
+#       when $html          {   $grid.HTML-print; }
+#       when $csv           {   $grid.CSV-print;  }
+#       when $json          {   $grid.JSON-print; }
+#       when $mailing       {
+#                               $grid.send-proxy-mail-via-redis(
+#                                   :cro-host<127.0.0.1>,
+#                                   :22151cro-port,
+#                                   :mail-from($from),
+#                                   :@mail-to,
+#                                   :@mail-cc,
+#                                   :@mail-bcc,
+#                                   :$format,
+#                               );
+#       }
+#       when $xml           {   $grid.XML-print;  }
+#       when $tui           {   $grid.TUI;        }
+#       when $gui           {   $grid.GUI;        }
+#       default             {   $grid.ANSI-print; }
+
+my class Interfaces {
+    has Bool                $.csv;
+    has Bool                $.gui;
+    has Bool                $.html;
+    has Bool                $.json;
+    has Grid-Email-Formats  $.mail-body-format  is built;
+    has Str                 $.mail-from         is built;
+    has Email-Address       @.mail-to;
+    has Email-Address       @.mail-cc;
+    has Email-Address       @.mail-bcc;
+    has Int                 @.sort-columns      is built;
+    has Bool                $.text;
+    has Bool                $.tui;
+    has Bool                $.xml;
+
+    submethod BUILD (
+                        :$mail-body-format,
+                        :$mail-from,
+                        :$sort-columns,
+                    ) {
+    }
+}
+
 my class Body {
     has @.cells;
     has @.headings;
@@ -159,6 +202,10 @@ multi method add-heading (Our::Grid::Cell:D :$cell, *%opts) {
     $!body.headings.append:         $cell;
     $!body.meta<col-width>[$column] = 0                     without $!body.meta<col-width>[$column];
     $!body.meta<col-width>[$column] = $cell.TEXT.Str.chars  if $cell.TEXT.Str.chars > $!body.meta<col-width>[$column];
+}
+
+multi method add-cell (Int:D $int!, *%opts) {
+    self.add-cell(:cell(Our::Grid::Cell.new(:text($int.Str), |%opts)));
 }
 
 multi method add-cell (Str:D $text!, *%opts) {

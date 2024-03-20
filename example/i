@@ -1,0 +1,69 @@
+#!/usr/bin/env raku
+
+#use lib '/home/mdevine/github.com/raku-Our-Utilities/lib';
+use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
+
+#use Data::Dump::Tree;
+use Our::Grid;
+use Our::Utilities;
+
+sub MAIN (
+    Bool                :$csv,                                  #= dump CSV to STDOUT
+    Bool                :$gui,                                  #= Graphical User Interface
+    Bool                :$html,                                 #= dump HTML to STDOUT
+    Bool                :$json,                                 #= dump JSON to STDOUT
+#   Grid-Email-Formats  :$mail-body-format,                     #= email body format
+                        :$mail-body-format,                     #= email body format
+                        :$mail-from,                            #= email 'From:' addressee
+                        :@mail-to,                              #= accumulate email 'To:' addressees
+                        :@mail-cc           = (),               #= accumulate email 'Cc:' addressees
+                        :@mail-bcc          = (),               #= accumulate email 'Bcc:' addressees
+    Bool                :$text,                                 #= TEXT print
+    Bool                :$tui,                                  #= Terminal User Interface
+    Bool                :$xml,                                  #= dump XML to STDOUT
+    Bool                :$light-mode,                           #= reverse header highlight for light-mode
+    Int                 :$sort-columns,                         #= sort by column number(s)
+    Bool                :$sort-descending,                      #= sort in descending order
+) {
+    my Bool $mailing;
+    my $from                = $mail-from;
+    my $format              = $mail-body-format;
+    if $mail-from && @mail-to.elems {
+        die '--mail-from=<email-address> required to send mail!' unless $mail-from;
+        die '--mail-to=<email-address[,email-address]> required to send mail!' unless @mail-to.elems;
+        $from               = $mail-from[0] if $mail-from ~~ Array;
+        $format             = $mail-body-format[0] if $mail-body-format ~~ Array;
+        $mailing = True;
+    }
+
+    my Our::Grid    $grid  .= new;
+
+    if $sort-columns {
+        my @sort-columns = $sort-columns.split: ',';
+        $grid.sort-by-columns(:@sort-columns, :descending($sort-descending));
+    }
+    {
+        when $text          {   $grid.TEXT-print; }
+        when $html          {   $grid.HTML-print; }
+        when $csv           {   $grid.CSV-print;  }
+        when $json          {   $grid.JSON-print; }
+        when $mailing       {
+                                $grid.send-proxy-mail-via-redis(
+                                    :cro-host<127.0.0.1>,
+                                    :22151cro-port,
+                                    :mail-from($from),
+                                    :@mail-to,
+                                    :@mail-cc,
+                                    :@mail-bcc,
+                                    :$format,
+                                );
+        }
+        when $xml           {   $grid.XML-print;  }
+        when $tui           {   $grid.TUI;        }
+        when $gui           {   $grid.GUI;        }
+        default             {   $grid.ANSI-print; }
+    }
+}
+
+=finish
