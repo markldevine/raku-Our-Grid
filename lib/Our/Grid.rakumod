@@ -698,76 +698,98 @@ method GUI {
 
 =finish
 
-    my @cells;
-    loop (my $col = 0; $col < $!body.headings.elems; $col++) {
-        @cells.push:    [$col, 0, 1, 1] => GTK::Simple::MarkUpLabel.new(text => '<span foreground="black" size="large">' ~ $!body.headings[$col].TEXT ~ '</span>');
-    }
-    @cells.push:        [0, 1, $!body.headings.elems, 1] => GTK::Simple::Separator.new;
-    for $!body.meta<sort-order>.list -> $row {
-        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
-            my $body    = ' ';
-            $body       = $!body.cells[$row][$col].TEXT when $!body.cells[$row][$col] ~~ Our::Grid::Cell:D;
-            @cells.push: [$col, ($row + 2), 1, 1] => GTK::Simple::Button.new(label => $body);
-        }
-    }
-    my $grid            = GTK::Simple::Grid.new(@cells);
-    my $exit-b          = GTK::Simple::ToggleButton.new(label=>'Exit');
-    $exit-b.toggled.tap(-> $b { $gui.exit } );
-
-    my $structure = GTK::Simple::Grid.new(
-        [0, 0, 1, 1] => $grid,
-        [0, 1, 1, 1] => $exit-b,
-    );
-#   $structure.column-spacing = 16;
-#   $grid.row-spacing = 2;
-#   $grid.column-spacing = 4;
-    $gui.set-content($structure);
-#   $gui.set-content($grid);
-#   $gui.border-width = 20;
-#   $grid.baseline-row: 4;
-    $gui.run;
-}
-
-=finish
-
-my $app = GTK::Simple::App.new(title => 'Calendar', height => 300, width => 600);
-my $calendar = GTK::Simple::Calendar.new;
-
-my $month-entry = GTK::Simple::Entry.new(text => ~$calendar.month);
-my $year-entry  = GTK::Simple::Entry.new(text => ~$calendar.year);
-my $day-entry   = GTK::Simple::Entry.new(text => ~$calendar.day);
-
-$calendar.day-selected.tap: {
-    $year-entry.text    = .year.Str;
-    $month-entry.text   = .month.Str;
-    $day-entry.text     = .day.Str;
-};
-
-my $date-view = GTK::Simple::Grid.new(
-    [0, 0, 1, 1] => GTK::Simple::Label.new(text => "Day"),
-    [1, 0, 1, 1] => $day-entry,
-    [2, 0, 1, 1] => GTK::Simple::Label.new(text => "Month"),
-    [3, 0, 1, 1] => $month-entry,
-    [4, 0, 1, 1] => GTK::Simple::Label.new(text => "Year"),
-    [5, 0, 1, 1] => $year-entry
-);
-
-$date-view.column-spacing = 8;
-
-my $structure = GTK::Simple::Grid.new(
-    [0, 0, 1, 1] => $calendar,
-    [1, 0, 1, 1] => $date-view
-);
-
-$structure.column-spacing = 16;
-
-$app.set-content($structure);
-
-($day-entry, $month-entry).map: { .width-chars = 2 };
-$year-entry.width-chars = 4;
-
-$date-view.size-request(300, 120);
-$calendar.size-request(300,300);
-
-$app.run;
-
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+        <title>ISP Sessions</title>
+        <style>.paragraph-heading   { font-size: 12pt; font-family: arial, verdana, sans-serif; background-color:#009CDE; font-weight: bold; border: 1px solid #9fabbb; margin-bottom: 5px; padding-left: 9px; padding-right: 10px; padding-top: 1px; padding-bottom: 1px }</style>
+        <style>.tabhead     { font-size: 11pt; color: #000000; font-family: arial, verdana, sans-serif; background-color: #d0d0d0; font-weight: bold; border-left: 0px solid #cccccc; border-right: 1px solid #cccccc; border-top: 0px solid #cccccc; border-bottom: 1px solid #cccccc; margin: 0px; padding-left: 5px; padding-right: 5px; padding-top: 0px; padding-bottom: 1px }</style>
+        <style>.tabeven     { font-size: 9pt; color: #000000; font-family: arial, verdana, sans-serif; background-color: #f0f0f0; border-left: 0px solid #cccccc; border-right: 1px solid #cccccc; border-top: 0px solid #cccccc; border-bottom: 1px solid #cccccc; margin: 0px; padding-left: 5px; padding-right: 5px; padding-top: 0px; padding-bottom: 1px }</style>
+        <style>.tabodd      { font-size: 9pt; color: #000000; font-family: arial, verdana, sans-serif; background-color: white; border-left: 0px solid #cccccc; border-right: 1px solid #cccccc; border-top: 0px solid #cccccc; border-bottom: 1px solid #cccccc; margin: 0px; padding-left: 5px; padding-right: 5px; padding-top: 0px; padding-bottom: 1px }</style>
+    </head>
+    <body style="font-size: 8pt">
+        <br>
+        <div class="paragraph-heading">ISPLC01 : 7 Day Summary</div>
+        <br>
+        <table cellspacing="0" cellpadding="3" bgcolor="#FFFFFF" border="1" width="100%">
+            <tr>
+                <td class="tabhead"></td>
+                <td class="tabhead">5 Mar 24</td>
+                <td class="tabhead">6 Mar 24</td>
+                <td class="tabhead">7 Mar 24</td>
+                <td class="tabhead">8 Mar 24</td>
+                <td class="tabhead">9 Mar 24</td>
+                <td class="tabhead">10 Mar 24</td>
+                <td class="tabhead">11 Mar 24</td>
+            </tr>
+            <tr>
+                <td class="tabeven">ISPLC01  - Number of nodes</td>
+                <td class="tabeven">237</td>
+                <td class="tabeven">237</td>
+                <td class="tabeven">237</td>
+                <td class="tabeven">237</td>
+                <td class="tabeven">237</td>
+                <td class="tabeven">237</td>
+                <td class="tabeven"></td>
+            </tr>
+            <tr>
+                <td class="tabodd">ISPLC01  - Total daily backup amount (GB)</td>
+                <td class="tabodd">3.1 TB</td>
+                <td class="tabodd">2.5 TB</td>
+                <td class="tabodd">2.7 TB</td>
+                <td class="tabodd">2.7 TB</td>
+                <td class="tabodd">2.4 TB</td>
+                <td class="tabodd">725.7 GB</td>
+                <td class="tabodd"></td>
+            </tr>
+            <tr>
+                <td class="tabeven">ISPLC01  - Total daily restore amount (GB)</td>
+                <td class="tabeven">0.0 B</td>
+                <td class="tabeven">0.0 B</td>
+                <td class="tabeven">0.0 B</td>
+                <td class="tabeven">0.0 B</td>
+                <td class="tabeven">0.0 B</td>
+                <td class="tabeven">0.0 B</td>
+                <td class="tabeven"></td>
+            </tr>
+            <tr>
+                <td class="tabodd">ISPLC01  - Total files stored</td>
+                <td class="tabodd">471230128</td>
+                <td class="tabodd">470920826</td>
+                <td class="tabodd">470075221</td>
+                <td class="tabodd">469786464</td>
+                <td class="tabodd">469895972</td>
+                <td class="tabodd">469579526</td>
+                <td class="tabodd"></td>
+            </tr>
+            <tr>
+                <td class="tabeven"> ISPLC01  - Total node disk capacity (GB)</td>
+                <td class="tabeven"> 12307690</td>
+                <td class="tabeven"> 12307690</td>
+                <td class="tabeven"> 12307690</td>
+                <td class="tabeven"> 12307690</td>
+                <td class="tabeven"> 12307690</td>
+                <td class="tabeven"> 12307690</td>
+                <td class="tabeven"> </td></tr>
+            <tr>
+                <td class="tabodd"> ISPLC01  - Total rep. ISP space used (GB)</td>
+                <td class="tabodd"> 677499</td>
+                <td class="tabodd"> 678520</td>
+                <td class="tabodd"> 678489</td>
+                <td class="tabodd"> 679681</td>
+                <td class="tabodd"> 676890</td>
+                <td class="tabodd"> 677855</td>
+                <td class="tabodd"> </td></tr>
+            <tr>
+                <td class="tabeven"> ISPLC01  - Total schedule success rate</td>
+                <td class="tabeven"> 93</td>
+                <td class="tabeven"> 93</td>
+                <td class="tabeven"> 91</td>
+                <td class="tabeven"> 91</td>
+                <td class="tabeven"> 91</td>
+                <td class="tabeven"> 85</td>
+                <td class="tabeven"></td>
+            </tr>
+        </table>
+    </body>
+</html>
