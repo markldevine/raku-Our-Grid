@@ -377,10 +377,10 @@ method to-json {
 }
 
 method HTML-print {
-    put self.to-html;
+    put self.to-browser-html;
 }
 
-method to-html {
+method to-browser-html {
     return False unless self!grid-check;
     my $html = q:to/ENDOFHTMLHEAD/;
     <!DOCTYPE html>
@@ -706,8 +706,25 @@ method GUI {
         <style>.tabhead     { font-size: 11pt; color: #000000; font-family: arial, verdana, sans-serif; background-color: #d0d0d0; font-weight: bold; border-left: 0px solid #cccccc; border-right: 1px solid #cccccc; border-top: 0px solid #cccccc; border-bottom: 1px solid #cccccc; margin: 0px; padding-left: 5px; padding-right: 5px; padding-top: 0px; padding-bottom: 1px }</style>
         <style>.tabeven     { font-size: 9pt; color: #000000; font-family: arial, verdana, sans-serif; background-color: #f0f0f0; border-left: 0px solid #cccccc; border-right: 1px solid #cccccc; border-top: 0px solid #cccccc; border-bottom: 1px solid #cccccc; margin: 0px; padding-left: 5px; padding-right: 5px; padding-top: 0px; padding-bottom: 1px }</style>
         <style>.tabodd      { font-size: 9pt; color: #000000; font-family: arial, verdana, sans-serif; background-color: white; border-left: 0px solid #cccccc; border-right: 1px solid #cccccc; border-top: 0px solid #cccccc; border-bottom: 1px solid #cccccc; margin: 0px; padding-left: 5px; padding-right: 5px; padding-top: 0px; padding-bottom: 1px }</style>
+        <style>.button      { font-size: 10pt; color: #000000; font-family: arial, verdana, sans-serif; background-color: #009CDE; border-left: 1px solid #000000; border-right: 1px solid #000000; border-top: 1px solid #000000; border-bottom: 1px solid #000000; margin: 0px; padding-left: 0px; padding-right: 0px; padding-top: 0px; padding-bottom: 0px } </style>
+
+        <script type="text/javascript">
+            function toggleall(parm){ var x = document.getElementsByName('togsection'); var i;for (i = 0; i < x.length; i++) { x[i].style.display =  parm;}}
+            function toggle(id){ var n = document.getElementById(id); n.style.display =  (n.style.display!='none' ? 'none' : '' ); }
+        </script>
     </head>
     <body style="font-size: 8pt">
+
+
+<p align="center"><font size="4"><b>ISP status for ISPLC01 at 3/21/2024 8:05:51 AM</b></font></p>
+<button class=but onclick="toggleall('');"> Show all </button>   <button class=but onclick="toggleall('none');"> Hide all </button>
+
+<div class=parahead><button class=button onclick="toggle('3');">Show/Hide</button>The following filespaces have not completed their backup within the last 3 days :</div>
+
+<div id="3" name="togsection">
+
+
+
         <br>
         <div class="paragraph-heading">ISPLC01 : 7 Day Summary</div>
         <br>
@@ -791,5 +808,6 @@ method GUI {
                 <td class="tabeven"></td>
             </tr>
         </table>
+      </div>
     </body>
 </html>
