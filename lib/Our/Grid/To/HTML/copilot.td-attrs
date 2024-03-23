@@ -1,0 +1,4 @@
+abbr: Specifies a short version of the content in a header cell.
+colspan: Number of columns a cell should span.
+headers: IDs of the header cells associated with the cell.
+rowspan: Number of rows a cell should span.

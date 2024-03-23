@@ -153,8 +153,8 @@ sub MAIN (
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.total-bytes),     :justification<right>,  :bytes-to-bytes-unit)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.used-bytes),      :justification<right>,  :bytes-to-bytes-unit)));
             $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.available-bytes), :justification<right>,  :bytes-to-bytes-unit)));
-            if 70 <= $df-record.cap-percent-num < 80 {
-                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>,  :foreground<yellow>)));
+            if 60 <= $df-record.cap-percent-num < 80 {
+                $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>,  :foreground<yellow>, :background<red>)));
             }
             elsif 80 <= $df-record.cap-percent-num < 90 {
                 $grid.add-cell(:cell(Our::Grid::Cell.new(:text($df-record.capacity),    :justification<right>,  :foreground<orange>)));

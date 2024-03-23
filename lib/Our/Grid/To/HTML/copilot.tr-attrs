@@ -1,0 +1,5 @@
+abbr: Provides a short description of the header cell’s content1.
+colspan: Indicates how many columns the header cell spans.
+headers: Lists the IDs of <th> elements that provide headers for this cell.
+rowspan: Indicates how many rows the header cell spans.
+scope: Defines the cells that the header cell relates to.

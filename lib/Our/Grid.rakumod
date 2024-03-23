@@ -377,92 +377,222 @@ method to-json {
 }
 
 method HTML-print {
-    put self.to-browser-html;
+    put self.to-html;
 }
 
-method to-browser-html {
+method to-html {
     return False unless self!grid-check;
-    my $html = q:to/ENDOFHTMLHEAD/;
-    <!DOCTYPE html>
-    <html>
-        <head>
+    my $html;
+    $html   = '<!DOCTYPE html>' ~ "\n";
+    $html  ~= '<html>' ~ "\n";
+    $html  ~= ' ' x 4 ~ '<head>' ~ "\n";
+    $html  ~= ' ' x 8 ~ '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' ~ "\n";
+    $html  ~= ' ' x 8 ~ '<title>' ~ self.title ~ '</title>' ~ "\n" if self.title;
+
+#           <style>
+#               th, td {
+#                   border-bottom: 1px solid #ddd;
+#               }
+#               body {
+#                   color: #000000;
+#                   background: #fff;
+#                   font: 100% system-ui;
+#               }
+#               a {
+#                   color: #0033cc;
+#               }
+#               @media (prefers-color-scheme: dark) {
+#                   body {
+#                       color: #eee;
+#                       background: #121212;
+#                   }
+#                   body a {
+#                       color: #809fff;
+#                   }
+#               }
+#           </style>
+
+#   cellSpacing="0"; cellPadding="3" bgColor="#282c34" border="1" width="100%">' ~ "\n";
+
+    $html  ~= q:to/ENDOFHTMLHEAD/;
             <style>
                 table, h1, th, td {
-                    margin-left: auto; 
-                    margin-right: auto;
-                    padding: 5px;
-                    text-align: center;
+                    margin-left:        auto; 
+                    margin-right:       auto;
+                    padding:            3px;
+                    text-align:         center;
                 }
-                th, td {
-                    border-bottom: 1px solid #ddd;
-                }
-                tr:hover {background-color: coral; }
                 body {
-                    color: #222;
-                    background: #fff;
-                    font: 100% system-ui;
+                    background-color:   #282c34;
                 }
-                a {
-                    color: #0033cc;
-                }
-                @media (prefers-color-scheme: dark) {
-                    body {
-                        color: #eee;
-                        background: #121212;
-                    }
-                    body a {
-                        color: #809fff;
-                    }
+                tr:hover {
+                    background-color: coral;
                 }
             </style>
+            <style>
+                .pheading {
+                    background-color:   #009cde;
+                    border:             1px solid #9fabbb;
+                    font-family:        arial, verdana, sans-serif;
+                    font-size:          10pt;
+                    font-weight:        bold;
+                    margin-bottom:      5px;
+                    padding-bottom:     1px;
+                    padding-left:       9px;
+                    padding-right:      10px;
+                    padding-top:        1px;
+            }
+            </style>
+            <style>
+                .theading {
+                    background-color:   #d0d0d0;
+                    border-bottom:      1px solid #cccccc;
+                    border-left:        0px solid #cccccc;
+                    border-right:       1px solid #cccccc;
+                    border-top:         0px solid #cccccc;
+                    color:              #000000;
+                    font-family:        arial, verdana, sans-serif;
+                    font-size:          12pt;
+                    font-weight:        bold;
+                    margin:             0px;
+                    padding-bottom:     1px;
+                    padding-left:       5px;
+                    padding-right:      5px;
+                    padding-top:        0px;
+            }
+            </style>
+            <style>
+                .trow-even {
+                    background-color:   #f0f0f0;
+                    border-bottom:      1px solid #cccccc;
+                    border-left:        0px solid #cccccc;
+                    border-right:       1px solid #cccccc;
+                    border-top:         0px solid #cccccc;
+                    color:              #000000;
+                    font-family:        arial, verdana, sans-serif;
+                    font-size:          9pt;
+                    margin:             0px;
+                    padding-left:       5px;
+                    padding-right:      5px;
+                    padding-top:        0px;
+                    padding-bottom:     1px;
+            }
+            </style>
+            <style>
+                .trow-odd {
+                    background-color:   #ffffff;
+                    border-bottom:      1px solid #cccccc;
+                    border-left:        0px solid #cccccc;
+                    border-right:       1px solid #cccccc;
+                    border-top:         0px solid #cccccc;
+                    color:              #000000;
+                    font-family:        arial, verdana, sans-serif;
+                    font-size:          9pt;
+                    margin:             0px;
+                    padding-bottom:     1px;
+                    padding-left:       5px;
+                    padding-right:      5px;
+                    padding-top:        0px;
+            }
+            </style>
+            <style>
+                .button {
+                    background-color:   #80ff80;
+                    border-bottom:      1px solid #000000;
+                    border-left:        1px solid #000000;
+                    border-right:       1px solid #000000;
+                    border-top:         1px solid #000000;
+                    color:              #000000;
+                    font-family:        arial, verdana, sans-serif;
+                    font-size:          10pt;
+                    margin:             0px;
+                    padding-bottom:     0px;
+                    padding-left:       0px;
+                    padding-right:      0px;
+                    padding-top:        0px;
+            }
+            </style>
+            <script type="text/javascript">
+                function toggle-all(param) {
+                    var x = document.getElementsByName('collapse-expand');
+                    var i;
+                    for (i = 0; i < x.length; i++) {
+                        x[i].style.display = param;
+                    }
+                }
+                function toggle(id) {
+                    var n = document.getElementById(id);
+                    n.style.display = (n.style.display!='none' ? 'none' : '' );
+                }
+            </script>
         </head>
     ENDOFHTMLHEAD
-    $html ~= ' ' x 4 ~ '<body>' ~ "\n";
-    $html ~= ' ' x 8 ~ '<h1>' ~ self.title ~ '</h1>' ~ "\n" if self.title;
-    $html ~= ' ' x 8 ~ '<table>' ~ "\n";
-    $html ~= ' ' x 12 ~ '<tr>' ~ "\n";
+    $html                              ~= ' ' x 4 ~ '<body>' ~ "\n";
+    $html                              ~= ' ' x 8 ~ '<div id="1" name="collapse-expand">' ~ "\n";
+#   $html                              ~= ' ' x 12 ~ '<table cellSpacing="0" cellPadding="3" bgColor="#FFFFFF" border="1" width="100%">' ~ "\n";
+    $html                              ~= ' ' x 12 ~ '<table cellSpacing="0" bgColor="#FFFFFF" border="1">' ~ "\n";
+    $html                              ~= ' ' x 16 ~ '<thead>' ~ "\n";
+    $html                              ~= ' ' x 20 ~ '<tr>' ~ "\n";
     for $!body.headings.list -> $heading {
-        $html ~= ' ' x 16 ~ '<th>' ~ self!subst-ml-text($heading.TEXT) ~ '</th>' ~ "\n";
+        $html                          ~= ' ' x 24 ~ '<td class="theading"; style="text-align: left;">' ~ self!subst-ml-text($heading.TEXT) ~ '</td>' ~ "\n";
     }
-    $html ~= ' ' x 12 ~ '</tr>' ~ "\n";
+    $html                              ~= ' ' x 20 ~ '</tr>' ~ "\n";
+    $html                              ~= ' ' x 16 ~ '</thead>' ~ "\n";
+    $html                              ~= ' ' x 16 ~ '<tbody>' ~ "\n";
     for $!body.meta<sort-order>.list -> $row {
-        $html ~= ' ' x 12 ~ '<tr>' ~ "\n";
+        $html                          ~= ' ' x 20 ~ '<tr>' ~ "\n";
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
-            $html ~= ' ' x 16 ~ '<td style="';
-            if $!body.cells[$row][$col] ~~ Our::Grid::Cell:D {
-                given $!body.cells[$row][$col] {
-                    if .justification {
-                        when 'left'     { $html ~= 'text-align: left;';    }
-                        when 'center'   { $html ~= 'text-align: center;';  }
-                        when 'right'    { $html ~= 'text-align: right;';   }
-                    }
-                    loop (my $f = 0; $f < .fragments.elems; $f++) {
-                        if .fragments[$f].foreground {
-                            $html ~= ' color:'     ~ .fragments[$f].foreground ~ ';';
-                            last;
-                        }
-                    }
-                    my $background = '';
-                    loop ($f = 0; $f < .fragments.elems; $f++) {
-                        if .fragments[$f].background {
-                            $background = .fragments[$f].background;
-                            $html ~= ' background-color:' ~ $background   ~ ';';
-                            last;
-                        }
-                    }
-                    $html ~= ' background-color:'  ~ .highlight    ~ ';'   if !$background && .highlight;
-                    $html ~= '"';
-                }
-                $html ~= '>' ~ self!subst-ml-text($!body.cells[$row][$col].TEXT);
+            if $row %% 2 {
+                $html                  ~= ' ' x 24 ~ '<td class="trow-odd" ';
             }
             else {
-                $html ~= '">';
+                $html                  ~= ' ' x 24 ~ '<td class="trow-even" ';
+            }
+            if $!body.cells[$row][$col] ~~ Our::Grid::Cell:D {
+                given $!body.cells[$row][$col] {
+                    my @style;
+                    if .justification {
+                        when .justification eq 'left'   { @style.push:  'text-align: left;';    }
+                        when .justification eq 'center' { @style.push:  'text-align: center;';  }
+                        when .justification eq 'right'  { @style.push:  'text-align: right;';   }
+                    }
+                    $html              ~= 'style="' ~ @style.join(' ') ~ '"' if @style;
+                    $html              ~= '>';
+                    my @span;
+                    loop (my $f = 0; $f < .fragments.elems; $f++) {
+                        @span[$f]       = '';
+                        if .fragments[$f].foreground {
+                            @span[$f]  ~= 'color: ' ~ .fragments[$f].foreground ~ ';';
+                        }
+                        if .fragments[$f].background {
+                            @span[$f]  ~= 'background-color: ' ~ .fragments[$f].background   ~ ';';
+                        }
+                    }
+                    if @span.elems {
+                        loop (my $f = 0; $f < .fragments.elems; $f++) {
+                            if @span[$f] {
+                                $html  ~= '<span style="' ~ @span[$f].join(' ') ~ '">' ~ .fragments[$f].TEXT ~ '</span>';
+                            }
+                            else {
+                                $html  ~= '<span>' ~ .fragments[$f].TEXT ~ '</span>';
+                            }
+                        }
+                    }
+                    else {
+                        $html          ~= self!subst-ml-text($!body.cells[$row][$col].TEXT);
+                    }
+                }
+            }
+            else {
+                $html ~= '>';
             }
             $html ~= '</td>' ~ "\n";
         }
-        $html ~= ' ' x 12 ~ '</tr>' ~ "\n";
+        $html ~= ' ' x 20 ~ '</tr>' ~ "\n";
     }
-    $html ~= ' ' x 8 ~ '</table>' ~ "\n";
+    $html ~= ' ' x 16 ~ '</tbody>' ~ "\n";
+    $html ~= ' ' x 12 ~ '</table>' ~ "\n";
+    $html ~= ' ' x 8 ~ '</div>' ~ "\n";
     $html ~= ' ' x 4 ~ '</body>' ~ "\n";
     $html ~= '</html>';
     return $html;
