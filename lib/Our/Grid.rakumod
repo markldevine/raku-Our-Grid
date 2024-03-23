@@ -388,32 +388,6 @@ method to-html {
     $html  ~= ' ' x 4 ~ '<head>' ~ "\n";
     $html  ~= ' ' x 8 ~ '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' ~ "\n";
     $html  ~= ' ' x 8 ~ '<title>' ~ self.title ~ '</title>' ~ "\n" if self.title;
-
-#           <style>
-#               th, td {
-#                   border-bottom: 1px solid #ddd;
-#               }
-#               body {
-#                   color: #000000;
-#                   background: #fff;
-#                   font: 100% system-ui;
-#               }
-#               a {
-#                   color: #0033cc;
-#               }
-#               @media (prefers-color-scheme: dark) {
-#                   body {
-#                       color: #eee;
-#                       background: #121212;
-#                   }
-#                   body a {
-#                       color: #809fff;
-#                   }
-#               }
-#           </style>
-
-#   cellSpacing="0"; cellPadding="3" bgColor="#282c34" border="1" width="100%">' ~ "\n";
-
     $html  ~= q:to/ENDOFHTMLHEAD/;
             <style>
                 table, h1, th, td {
@@ -425,7 +399,7 @@ method to-html {
                 body {
                     background-color:   #282c34;
                 }
-                tr:hover {
+                td:hover {
                     background-color: coral;
                 }
             </style>
@@ -452,7 +426,7 @@ method to-html {
                     border-top:         0px solid #cccccc;
                     color:              #000000;
                     font-family:        arial, verdana, sans-serif;
-                    font-size:          12pt;
+                    font-size:          11pt;
                     font-weight:        bold;
                     margin:             0px;
                     padding-bottom:     1px;
@@ -470,7 +444,7 @@ method to-html {
                     border-top:         0px solid #cccccc;
                     color:              #000000;
                     font-family:        arial, verdana, sans-serif;
-                    font-size:          9pt;
+                    font-size:          10pt;
                     margin:             0px;
                     padding-left:       5px;
                     padding-right:      5px;
@@ -487,7 +461,7 @@ method to-html {
                     border-top:         0px solid #cccccc;
                     color:              #000000;
                     font-family:        arial, verdana, sans-serif;
-                    font-size:          9pt;
+                    font-size:          10pt;
                     margin:             0px;
                     padding-bottom:     1px;
                     padding-left:       5px;
