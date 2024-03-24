@@ -158,9 +158,9 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col, Bool :$noteworthi
 
 #   group-by-column
 
-    if $!group-by-column >= 0 && $!current-col == $!group-by-column {
+    if $!body.group-by-column >= 0 && $!current-col == $!body.group-by-column {
         $!body.groups{$cell.text}   = Groups.new unless $!body.groups{$cell.text} ~~ Groups:D;
-        $!body.groups{$cell.text}.rows{$!current-row}   = $!group-by-column;
+        $!body.groups{$cell.text}.rows{$!current-row}   = $!body.group-by-column;
         $!body.groups{$cell.text}.noteworthiness        = True if $noteworthiness;
     }
 
@@ -289,11 +289,13 @@ method !grid-check {
 
 method !TEXT-print-headings {
     loop (my $col = 0; $col < $!body.headings.elems; $col++) {
+        next if $col == $!body.group-by-column;
         print ' ' ~ $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]));
         print ' ' unless $col == ($!body.headings.elems - 1);
     }
     print "\n"  if $!body.headings.elems;
     loop ($col = 0; $col < $!body.headings.elems; $col++) {
+        next if $col == $!body.group-by-column;
         print ' ' ~ '-' x $!body.meta<col-width>[$col];
         print ' ' unless $col == ($!body.headings.elems - 1);
     }
@@ -305,10 +307,10 @@ method TEXT-print {
     my Bool $print-headings = True;
     my $current-group       = '';
     for $!body.meta<sort-order>.list -> $row {
-        if $!group-by-column >= 0 {
-            if $current-group ne $!body.cells[$row][$!group-by-column].TEXT {
-                $current-group = $!body.cells[$row][$!group-by-column].TEXT;
-                put $!body.cells[$row][$!group-by-column].TEXT;
+        if $!body.group-by-column >= 0 {
+            if $current-group ne $!body.cells[$row][$!body.group-by-column].TEXT {
+                $current-group = $!body.cells[$row][$!body.group-by-column].TEXT;
+                put "\n" ~ '[>>> ' ~ $!body.cells[$row][$!body.group-by-column].TEXT ~ ' <<<]';
                 self!TEXT-print-headings;
             }
         }
@@ -317,6 +319,7 @@ method TEXT-print {
             $print-headings = False;
         }
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
+            next if $col == $!body.group-by-column;
             print ' ';
             given $!body.cells[$row][$col] {
                 when Our::Grid::Cell:D  { print $!body.cells[$row][$col].TEXT-padded(:width($!body.meta<col-width>[$col]));  }
