@@ -70,23 +70,29 @@ my class Interfaces {
     }
 }
 
+my class Groups {
+    has Int     $.first-row                                 = -1;
+    has Int     $.last-row                                  = -1;
+    has Bool    $.noteworthy;                                                   # hint for interfaces that can hide/collapse or display/expand
+}
+
 my class Body {
     has @.cells;
-    has $.group-by-column                                   = -1;               # don't display the column number (always the same value in the column per group of cells), but rather make it available as a group designator/paragraph heading
+    has $.group-by-column                                   = -1;
+    has %.groups;
     has @.headings;
     has %.meta;
-    has %.noteworthy-groups;                                                    # hint to display or hide, when the opportunity is available
     has $.title                             is rw           = $*PROGRAM.Str;
 }
 
 has                     $.term-size;
 has Body                $.body;
-has Int                 $.current-row       is rw       = 0;
-has Int                 $.current-col       is rw       = 0;
+has Int                 $.current-row       is rw           = 0;
+has Int                 $.current-col       is rw           = 0;
 has Cro::HTTP::Client   $.grid-proxy;
-has Int                 $.group-by-column               = -1;
-has Str                 $.title             is built    = '';
-has Bool                $!reverse-highlight is built    = False;
+has Int                 $.group-by-column   is built        = -1;
+has Str                 $.title             is built        = '';
+has Bool                $!reverse-highlight is built        = False;
 
 submethod TWEAK {
     $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
@@ -113,90 +119,6 @@ method title (Str $title?) {
     return $!body.title;
 }
 
-method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
-    my $redis           = Our::Redis.new;
-    $!body              = unmarshal($redis.GET(:key($redis-key)), Body);
-    loop (my $heading = 0; $heading < $!body.headings.elems; $heading++) {
-        loop (my $fragment = 0; $fragment < $!body.headings[$heading]<fragments>.elems; $fragment++) {
-            $!body.headings[$heading]<fragments>[$fragment] = unmarshal($!body.headings[$heading]<fragments>[$fragment], Our::Grid::Cell::Fragment);
-        }
-    }
-    loop ($heading = 0; $heading < $!body.headings.elems; $heading++) {
-         $!body.headings[$heading] = unmarshal($!body.headings[$heading], Our::Grid::Cell);
-    }
-    loop (my $row = 0; $row < $!body.cells.elems; $row++) {
-        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
-            loop (my $fragment = 0; $fragment < $!body.cells[$row][$col]<fragments>.elems; $fragment++) {
-                $!body.cells[$row][$col]<fragments>[$fragment] = unmarshal($!body.cells[$row][$col]<fragments>[$fragment], Our::Grid::Cell::Fragment);
-            }
-        }
-    }
-    loop ($row = 0; $row < $!body.cells.elems; $row++) {
-        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
-            $!body.cells[$row][$col] = unmarshal($!body.cells[$row][$col], Our::Grid::Cell);
-        }
-    }
-}
-
-method send-proxy-mail-via-redis (
-        Str:D               :$cro-host      = '127.0.0.1',
-        Int:D               :$cro-port      = 22151,
-        Str:D               :$mail-from!,
-                            :@mail-to!,
-                            :@mail-cc?,
-                            :@mail-bcc?,
-        Grid-Email-Formats  :$format,
-    ) {
-    die 'mail-from must be specified!'  without $mail-from;
-    die 'mail-to must be specified!'    without @mail-to;
-    my $redis-key       = base64-encode($*PROGRAM ~ '_' ~ sprintf("%09d", $*PID) ~ '_' ~ DateTime.now.posix(:real)).decode.encode.Str;
-    self.redis-set($redis-key);
-    my $Cro-URL         = 'http://'
-                        ~ $cro-host
-                        ~ ':'
-                        ~ $cro-port
-                        ~ '/proxy-mail-via-redis'
-                        ;
-    my %query;
-    %query<redis-key>   = $redis-key;
-    %query<mail-from>   = $mail-from;
-    %query<mail-to>     = @mail-to.join(',');
-    %query<mail-cc>     = @mail-cc.join(',')    if @mail-cc.elems;
-    %query<mail-bcc>    = @mail-bcc.join(',')   if @mail-bcc.elems;
-    %query<format>      = $format;
-#   ?term=mountains&images=true
-
-my $remote-host = 'jgstmgtgate1lpv.wmata.local';
-my @cmd         = 'ssh', $remote-host, '/bin/curl', '-G', '--silent';
-$Cro-URL       ~= '?';
-my @query;
-for %query.keys.sort -> $key {
-    @query.push:    $key ~ '=' ~ %query{$key};
-}
-$Cro-URL       ~= @query.join('&');
-@cmd.push:      "'" ~ $Cro-URL ~ "'";
-
-#dd @cmd;
-#put @cmd;
-my $proc        = run @cmd, :out, :err;
-#say $proc.exitcode;
-my $out         = $proc.out.slurp(:close);
-my $err         = $proc.err.slurp(:close);
-note $err       if $err;
-say $out        if $out;
-
-
-#   my $response        = await Cro::HTTP::Client.get: $Cro-URL, :%query;
-#   my $body            = await $response.body;
-}
-
-method redis-set (Str:D $redis-key!) {
-    my $redis   = Our::Redis.new;
-    my $status  = $redis.SET(:key($redis-key), :value(marshal($!body)));
-    die 'Redis SET failed with status <' ~ $status ~ '>' if $status;
-    $redis.EXPIRE(:key($redis-key), :60seconds) or die 'Redis EXPIRE failed!';
-}
-
 multi method add-heading (Str:D $text!, *%opts) {
     self.add-heading(:cell(Our::Grid::Cell.new(:$text, |%opts)));
 }
@@ -219,9 +141,9 @@ multi method add-cell (Str:D $text!, *%opts) {
 multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     with $row {
         given $row {
-            when Bool   { ++$!current-row if $!body.cells.elems > 0;          }
+            when Bool   { ++$!current-row if $!body.cells.elems > 0;    }
             when Int    { $!current-row = $row;                         }
-            }
+        }
     }
     if $!body.cells[$!current-row]:!exists {
         $!body.cells[$!current-row]   = Array.new();
@@ -234,6 +156,13 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
             default     { $!current-col = $!body.cells[$!current-row].elems;  }
         }
     }
+
+#   group-by-column
+
+    if self.group-by-column {
+        
+    }
+
 #   sort inferences
 
     unless $!body.meta<column-sort-types>[$!current-col]:exists && $!body.meta<column-sort-types>[$!current-col] ~~ 'string' {
@@ -821,6 +750,90 @@ method GUI {
 #   $gui.set-content($VBox);
     $gui.set-content($scrolled-grid);
     $gui.run;
+}
+
+method redis-set (Str:D $redis-key!) {
+    my $redis   = Our::Redis.new;
+    my $status  = $redis.SET(:key($redis-key), :value(marshal($!body)));
+    die 'Redis SET failed with status <' ~ $status ~ '>' if $status;
+    $redis.EXPIRE(:key($redis-key), :60seconds) or die 'Redis EXPIRE failed!';
+}
+
+method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
+    my $redis           = Our::Redis.new;
+    $!body              = unmarshal($redis.GET(:key($redis-key)), Body);
+    loop (my $heading = 0; $heading < $!body.headings.elems; $heading++) {
+        loop (my $fragment = 0; $fragment < $!body.headings[$heading]<fragments>.elems; $fragment++) {
+            $!body.headings[$heading]<fragments>[$fragment] = unmarshal($!body.headings[$heading]<fragments>[$fragment], Our::Grid::Cell::Fragment);
+        }
+    }
+    loop ($heading = 0; $heading < $!body.headings.elems; $heading++) {
+         $!body.headings[$heading] = unmarshal($!body.headings[$heading], Our::Grid::Cell);
+    }
+    loop (my $row = 0; $row < $!body.cells.elems; $row++) {
+        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
+            loop (my $fragment = 0; $fragment < $!body.cells[$row][$col]<fragments>.elems; $fragment++) {
+                $!body.cells[$row][$col]<fragments>[$fragment] = unmarshal($!body.cells[$row][$col]<fragments>[$fragment], Our::Grid::Cell::Fragment);
+            }
+        }
+    }
+    loop ($row = 0; $row < $!body.cells.elems; $row++) {
+        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
+            $!body.cells[$row][$col] = unmarshal($!body.cells[$row][$col], Our::Grid::Cell);
+        }
+    }
+}
+
+method send-proxy-mail-via-redis (
+        Str:D               :$cro-host      = '127.0.0.1',
+        Int:D               :$cro-port      = 22151,
+        Str:D               :$mail-from!,
+                            :@mail-to!,
+                            :@mail-cc?,
+                            :@mail-bcc?,
+        Grid-Email-Formats  :$format,
+    ) {
+    die 'mail-from must be specified!'  without $mail-from;
+    die 'mail-to must be specified!'    without @mail-to;
+    my $redis-key       = base64-encode($*PROGRAM ~ '_' ~ sprintf("%09d", $*PID) ~ '_' ~ DateTime.now.posix(:real)).decode.encode.Str;
+    self.redis-set($redis-key);
+    my $Cro-URL         = 'http://'
+                        ~ $cro-host
+                        ~ ':'
+                        ~ $cro-port
+                        ~ '/proxy-mail-via-redis'
+                        ;
+    my %query;
+    %query<redis-key>   = $redis-key;
+    %query<mail-from>   = $mail-from;
+    %query<mail-to>     = @mail-to.join(',');
+    %query<mail-cc>     = @mail-cc.join(',')    if @mail-cc.elems;
+    %query<mail-bcc>    = @mail-bcc.join(',')   if @mail-bcc.elems;
+    %query<format>      = $format;
+#   ?term=mountains&images=true
+
+my $remote-host = 'jgstmgtgate1lpv.wmata.local';
+my @cmd         = 'ssh', $remote-host, '/bin/curl', '-G', '--silent';
+$Cro-URL       ~= '?';
+my @query;
+for %query.keys.sort -> $key {
+    @query.push:    $key ~ '=' ~ %query{$key};
+}
+$Cro-URL       ~= @query.join('&');
+@cmd.push:      "'" ~ $Cro-URL ~ "'";
+
+#dd @cmd;
+#put @cmd;
+my $proc        = run @cmd, :out, :err;
+#say $proc.exitcode;
+my $out         = $proc.out.slurp(:close);
+my $err         = $proc.err.slurp(:close);
+note $err       if $err;
+say $out        if $out;
+
+
+#   my $response        = await Cro::HTTP::Client.get: $Cro-URL, :%query;
+#   my $body            = await $response.body;
 }
 
 =finish
