@@ -214,7 +214,7 @@ method sort-by-columns (:@sort-columns!, :$descending) {
     my %sortable-rows;
     my $sort-string;
     loop (my $row = 0; $row < $!body.cells.elems; $row++) {
-        if $!body.group-by-column {
+        if $!body.group-by-column >= 0 {
             @vetted-sort-columns[0] = $!body.group-by-column;
             for @sort-columns -> $col {
                 @vetted-sort-columns.push: $col unless $col == $!body.group-by-column;
@@ -303,7 +303,7 @@ method !TEXT-print-headings {
 method TEXT-print {
     return False unless self!grid-check;
     my Bool $print-headings = True;
-    my $current-group;
+    my $current-group       = '';
     for $!body.meta<sort-order>.list -> $row {
         if $!group-by-column >= 0 {
             if $current-group ne $!body.cells[$row][$!group-by-column].TEXT {
