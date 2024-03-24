@@ -302,23 +302,20 @@ method !TEXT-print-headings {
 
 method TEXT-print {
     return False unless self!grid-check;
-
-
-
-#   if $!group-by-column >= 0 {
-#       put 
-#   }
-
-
-
     my Bool $print-headings = True;
+    my $current-group;
     for $!body.meta<sort-order>.list -> $row {
-
-        if $print-headings {
+        if $!group-by-column >= 0 {
+            if $current-group ne $!body.cells[$row][$!group-by-column].TEXT {
+                $current-group = $!body.cells[$row][$!group-by-column].TEXT;
+                put $!body.cells[$row][$!group-by-column].TEXT;
+                self!TEXT-print-headings;
+            }
+        }
+        elsif $print-headings {
             self!TEXT-print-headings;
             $print-headings = False;
         }
-
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             print ' ';
             given $!body.cells[$row][$col] {
