@@ -388,12 +388,27 @@ method to-html {
     $html  ~= ' ' x 4 ~ '<head>' ~ "\n";
     $html  ~= ' ' x 8 ~ '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' ~ "\n";
     $html  ~= ' ' x 8 ~ '<title>' ~ self.title ~ '</title>' ~ "\n" if self.title;
+
+
+
+#   '<table cellSpacing="0" cellPadding="3" bgColor="#FFFFFF" border="1" width="100%">' ~ "\n";
+#               table, h1, th, td {
+#                   font-family: sans-serif;
+#                   font-size: 0.8rem;
+
+
     $html  ~= q:to/ENDOFHTMLHEAD/;
             <style>
+                table {
+                    border-collapse:    collapse;
+                    border:             2px solid rgb(140 140 140);
+                    font-family:        arial, verdana, sans-serif;
+                    letter-spacing:     1px;
+                }
                 table, h1, th, td {
                     margin-left:        auto; 
                     margin-right:       auto;
-                    padding:            3px;
+                    padding:            10px;
                     text-align:         center;
                 }
                 body {
@@ -401,6 +416,12 @@ method to-html {
                 }
                 td:hover {
                     background-color: coral;
+                }
+                tbody > tr:nth-of-type(even) {
+                    background-color:   #f0f0f0;
+                }
+                tbody > tr:nth-of-type(odd) {
+                    background-color:   #ffffff;
                 }
             </style>
             <style>
@@ -439,12 +460,12 @@ method to-html {
                 .trow-even {
                     background-color:   #f0f0f0;
                     border-bottom:      1px solid #cccccc;
-                    border-left:        0px solid #cccccc;
+                    border-left:        1px solid #cccccc;
                     border-right:       1px solid #cccccc;
-                    border-top:         0px solid #cccccc;
+                    border-top:         1px solid #cccccc;
                     color:              #000000;
                     font-family:        arial, verdana, sans-serif;
-                    font-size:          10pt;
+                    font-size:          9pt;
                     margin:             0px;
                     padding-left:       5px;
                     padding-right:      5px;
@@ -456,12 +477,12 @@ method to-html {
                 .trow-odd {
                     background-color:   #ffffff;
                     border-bottom:      1px solid #cccccc;
-                    border-left:        0px solid #cccccc;
+                    border-left:        1px solid #cccccc;
                     border-right:       1px solid #cccccc;
-                    border-top:         0px solid #cccccc;
+                    border-top:         1px solid #cccccc;
                     color:              #000000;
                     font-family:        arial, verdana, sans-serif;
-                    font-size:          10pt;
+                    font-size:          9pt;
                     margin:             0px;
                     padding-bottom:     1px;
                     padding-left:       5px;
@@ -504,11 +525,11 @@ method to-html {
     $html                              ~= ' ' x 4 ~ '<body>' ~ "\n";
     $html                              ~= ' ' x 8 ~ '<div id="1" name="collapse-expand">' ~ "\n";
 #   $html                              ~= ' ' x 12 ~ '<table cellSpacing="0" cellPadding="3" bgColor="#FFFFFF" border="1" width="100%">' ~ "\n";
-    $html                              ~= ' ' x 12 ~ '<table cellSpacing="0" bgColor="#FFFFFF" border="1">' ~ "\n";
+    $html                              ~= ' ' x 12 ~ '<table>' ~ "\n";
     $html                              ~= ' ' x 16 ~ '<thead>' ~ "\n";
     $html                              ~= ' ' x 20 ~ '<tr>' ~ "\n";
     for $!body.headings.list -> $heading {
-        $html                          ~= ' ' x 24 ~ '<td class="theading"; style="text-align: left;">' ~ self!subst-ml-text($heading.TEXT) ~ '</td>' ~ "\n";
+        $html                          ~= ' ' x 24 ~ '<td class="theading"; style="text-align: ' ~ $heading.justification ~ ';">' ~ self!subst-ml-text($heading.TEXT) ~ '</td>' ~ "\n";
     }
     $html                              ~= ' ' x 20 ~ '</tr>' ~ "\n";
     $html                              ~= ' ' x 16 ~ '</thead>' ~ "\n";
