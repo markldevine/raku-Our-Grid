@@ -72,7 +72,7 @@ my class Interfaces {
 
 my class Groups {
     has                 %.rows;
-    has Bool            $.noteworthiness;
+    has Bool            $.noteworthiness    is rw;
 }
 
 my class Body {
@@ -137,7 +137,7 @@ multi method add-cell (Str:D $text!, *%opts) {
     self.add-cell(:cell(Our::Grid::Cell.new(:$text, |%opts)));
 }
 
-multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
+multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col, Bool :$noteworthiness) {
     with $row {
         given $row {
             when Bool   { ++$!current-row if $!body.cells.elems > 0;    }
@@ -160,7 +160,8 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
 
     if $!group-by-column >= 0 && $!current-col == $!group-by-column {
         $!body.groups{$cell.text}   = Groups.new unless $!body.groups{$cell.text} ~~ Groups:D;
-        $!body.groups{$cell.text}.rows{$!current-row} = $!group-by-column;
+        $!body.groups{$cell.text}.rows{$!current-row}   = $!group-by-column;
+        $!body.groups{$cell.text}.noteworthiness        = True if $noteworthiness;
     }
 
 #   sort inferences
@@ -205,15 +206,25 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
     $!body.cells[$!current-row][$!current-col++] = $cell;
 }
 
-multi method sort-by-columns (:@sort-columns!, :$descending) {
+method sort-by-columns (:@sort-columns!, :$descending) {
     return False unless self!grid-check;
+    my @vetted-sort-columns = ();
     my $row-digits          = $!body.cells.elems;
     $row-digits             = "$row-digits".chars;
     my %sortable-rows;
     my $sort-string;
     loop (my $row = 0; $row < $!body.cells.elems; $row++) {
+        if $!body.group-by-column {
+            @vetted-sort-columns[0] = $!body.group-by-column;
+            for @sort-columns -> $col {
+                @vetted-sort-columns.push: $col unless $col == $!body.group-by-column;
+            }
+        }
+        else {
+            @vetted-sort-columns = @sort-columns;
+        }
         $sort-string        = '';
-        for @sort-columns -> $col {
+        for @vetted-sort-columns -> $col {
             die '$col (' ~ $col ~ ') out of range for grid! (0 <= col <= ' ~ $!body.meta<col-width>.elems - 1 ~ ')' unless 0 <= $col < $!body.meta<col-width>.elems;
             given $!body.meta<column-sort-types>[$col] {
                 when 'string'       { $sort-string ~= $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text ~ '_' !! ' _';                                                               }
@@ -276,13 +287,9 @@ method !grid-check {
     return True;
 }
 
-method TEXT-print {
-    return False unless self!grid-check;
-ddt $!body.groups;
+method !TEXT-print-headings {
     loop (my $col = 0; $col < $!body.headings.elems; $col++) {
-        my $justification   = 'center';
-        $justification      = $!body.headings[$col].justification;
-        print ' ' ~ $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]), :$justification);
+        print ' ' ~ $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]));
         print ' ' unless $col == ($!body.headings.elems - 1);
     }
     print "\n"  if $!body.headings.elems;
@@ -291,7 +298,27 @@ ddt $!body.groups;
         print ' ' unless $col == ($!body.headings.elems - 1);
     }
     print "\n"  if $!body.headings.elems;
+}
+
+method TEXT-print {
+    return False unless self!grid-check;
+
+
+
+#   if $!group-by-column >= 0 {
+#       put 
+#   }
+
+
+
+    my Bool $print-headings = True;
     for $!body.meta<sort-order>.list -> $row {
+
+        if $print-headings {
+            self!TEXT-print-headings;
+            $print-headings = False;
+        }
+
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             print ' ';
             given $!body.cells[$row][$col] {
