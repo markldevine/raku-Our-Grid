@@ -71,18 +71,17 @@ my class Interfaces {
 }
 
 my class Groups {
-    has Int     $.first-row                                 = -1;
-    has Int     $.last-row                                  = -1;
-    has Bool    $.noteworthy;                                                   # hint for interfaces that can hide/collapse or display/expand
+    has                 %.rows;
+    has Bool            $.noteworthiness;
 }
 
 my class Body {
-    has @.cells;
-    has $.group-by-column                                   = -1;
-    has %.groups;
-    has @.headings;
-    has %.meta;
-    has $.title                             is rw           = $*PROGRAM.Str;
+    has                 @.cells;
+    has Int             $.group-by-column                   = -1;
+    has Groups          %.groups;
+    has                 @.headings;
+    has                 %.meta;
+    has Str             $.title             is rw           = $*PROGRAM.Str;
 }
 
 has                     $.term-size;
@@ -159,8 +158,9 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
 
 #   group-by-column
 
-    if self.group-by-column {
-        
+    if $!group-by-column >= 0 && $!current-col == $!group-by-column {
+        $!body.groups{$cell.text}   = Groups.new unless $!body.groups{$cell.text} ~~ Groups:D;
+        $!body.groups{$cell.text}.rows{$!current-row} = 1;
     }
 
 #   sort inferences
@@ -274,6 +274,34 @@ method !grid-check {
 #   die '$!body.headings.elems <' ~ $!body.headings.elems ~ '> != <' ~ $!body.cells[0].elems ~ '> $!body.cells[0].elems' if $!body.headings.elems && $!body.headings.elems != $!body.cells[0].elems;
     self!sort-order-check;
     return True;
+}
+
+method TEXT-print {
+    return False unless self!grid-check;
+ddt $!body.groups;
+    loop (my $col = 0; $col < $!body.headings.elems; $col++) {
+        my $justification   = 'center';
+        $justification      = $!body.headings[$col].justification;
+        print ' ' ~ $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]), :$justification);
+        print ' ' unless $col == ($!body.headings.elems - 1);
+    }
+    print "\n"  if $!body.headings.elems;
+    loop ($col = 0; $col < $!body.headings.elems; $col++) {
+        print ' ' ~ '-' x $!body.meta<col-width>[$col];
+        print ' ' unless $col == ($!body.headings.elems - 1);
+    }
+    print "\n"  if $!body.headings.elems;
+    for $!body.meta<sort-order>.list -> $row {
+        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
+            print ' ';
+            given $!body.cells[$row][$col] {
+                when Our::Grid::Cell:D  { print $!body.cells[$row][$col].TEXT-padded(:width($!body.meta<col-width>[$col]));  }
+                default                 { print ' ' x $!body.meta<col-width>[$col];                                    }
+            }
+            print ' ' unless $col == ($!body.cells[$row].elems - 1);
+        }
+        print " \n";
+    }
 }
 
 method !datafy {
@@ -564,33 +592,6 @@ method to-xml {
     return $xml;
 }
 
-method TEXT-print {
-    return False unless self!grid-check;
-    loop (my $col = 0; $col < $!body.headings.elems; $col++) {
-        my $justification   = 'center';
-        $justification      = $!body.headings[$col].justification;
-        print ' ' ~ $!body.headings[$col].TEXT-padded(:width($!body.meta<col-width>[$col]), :$justification);
-        print ' ' unless $col == ($!body.headings.elems - 1);
-    }
-    print "\n"  if $!body.headings.elems;
-    loop ($col = 0; $col < $!body.headings.elems; $col++) {
-        print ' ' ~ '-' x $!body.meta<col-width>[$col];
-        print ' ' unless $col == ($!body.headings.elems - 1);
-    }
-    print "\n"  if $!body.headings.elems;
-    for $!body.meta<sort-order>.list -> $row {
-        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
-            print ' ';
-            given $!body.cells[$row][$col] {
-                when Our::Grid::Cell:D  { print $!body.cells[$row][$col].TEXT-padded(:width($!body.meta<col-width>[$col]));  }
-                default                 { print ' ' x $!body.meta<col-width>[$col];                                    }
-            }
-            print ' ' unless $col == ($!body.cells[$row].elems - 1);
-        }
-        print " \n";
-    }
-}
-
 method ANSI-print {
     return False unless self!grid-check;
     unless $*IN.t {
@@ -762,6 +763,10 @@ method redis-set (Str:D $redis-key!) {
 method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
     my $redis           = Our::Redis.new;
     $!body              = unmarshal($redis.GET(:key($redis-key)), Body);
+
+ddt $!body;
+die 'unmarshal groups...';
+
     loop (my $heading = 0; $heading < $!body.headings.elems; $heading++) {
         loop (my $fragment = 0; $fragment < $!body.headings[$heading]<fragments>.elems; $fragment++) {
             $!body.headings[$heading]<fragments>[$fragment] = unmarshal($!body.headings[$heading]<fragments>[$fragment], Our::Grid::Cell::Fragment);
