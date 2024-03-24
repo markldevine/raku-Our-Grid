@@ -137,7 +137,7 @@ sub MAIN (
     for %results.keys.sort -> $server {
         df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || warn "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
-    my Our::Grid    $grid  .= new: :$reverse-highlight;
+    my Our::Grid    $grid  .= new: :title('df Report'), :$reverse-highlight;
     $grid.add-heading('System',         :justification<left>),
     $grid.add-heading('Filesystem',     :justification<left>);
     $grid.add-heading('Total',          :justification<right>);

@@ -72,8 +72,10 @@ my class Interfaces {
 
 my class Body {
     has @.cells;
+    has $.group-by-column;                                                      # don't display the column # (always the same value in the column per group of cells), but rather make it available as a paragraph heading
     has @.headings;
     has %.meta;
+    has %.noteworthy-groups;                                                    # hint to display or hide, when the opportunity is available
     has $.title                             is rw           = $*PROGRAM.Str;
 }
 
@@ -546,7 +548,7 @@ method to-html {
             if $!body.cells[$row][$col] ~~ Our::Grid::Cell:D {
                 given $!body.cells[$row][$col] {
                     my @style;
-                    if .justification {
+                    {
                         when .justification eq 'left'   { @style.push:  'text-align: left;';    }
                         when .justification eq 'center' { @style.push:  'text-align: center;';  }
                         when .justification eq 'right'  { @style.push:  'text-align: right;';   }
