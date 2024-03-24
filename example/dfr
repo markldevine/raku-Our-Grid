@@ -102,6 +102,7 @@ sub MAIN (
     Bool                :$light-mode,                           #= reverse header highlight for light-mode
     Str                 :$sort-columns,                         #= sort by column number(s)
     Bool                :$sort-descending,                      #= sort in descending order
+    Bool                :$group-by-system,                      #= group data around systems
 ) {
     my Bool $mailing;
     my $from                = $mail-from;
@@ -137,7 +138,13 @@ sub MAIN (
     for %results.keys.sort -> $server {
         df-Pk-grammar.parse(%results{$server}.stdout-results.trim, :actions(df-Pk-actions.new(:$server))) || warn "Failed parsing of ($server): \n\n|" ~ %results{$server}.stdout-results ~ '|';
     }
-    my Our::Grid    $grid  .= new: :title('df Report'), :$reverse-highlight, :0group-by-column;
+    my Our::Grid $grid;
+    if $group-by-system {
+        $grid  .= new: :title('df Report'), :$reverse-highlight, :0group-by-column;
+    }
+    else {
+        $grid  .= new: :title('df Report'), :$reverse-highlight;
+    }
     $grid.add-heading('System',         :justification<left>),
     $grid.add-heading('Filesystem',     :justification<left>);
     $grid.add-heading('Total',          :justification<right>);
