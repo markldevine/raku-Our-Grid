@@ -100,7 +100,7 @@ sub MAIN (
     Bool                :$tui,                                  #= Terminal User Interface
     Bool                :$xml,                                  #= dump XML to STDOUT
     Bool                :$light-mode,                           #= reverse header highlight for light-mode
-    Int                 :$sort-columns,                         #= sort by column number(s)
+    Str                 :$sort-columns,                         #= sort by column number(s)
     Bool                :$sort-descending,                      #= sort in descending order
 ) {
     my Bool $mailing;
