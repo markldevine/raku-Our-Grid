@@ -160,7 +160,7 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col) {
 
     if $!group-by-column >= 0 && $!current-col == $!group-by-column {
         $!body.groups{$cell.text}   = Groups.new unless $!body.groups{$cell.text} ~~ Groups:D;
-        $!body.groups{$cell.text}.rows{$!current-row} = 1;
+        $!body.groups{$cell.text}.rows{$!current-row} = $!group-by-column;
     }
 
 #   sort inferences
