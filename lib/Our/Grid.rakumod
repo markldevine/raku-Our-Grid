@@ -72,7 +72,7 @@ my class Interfaces {
 
 my class Body {
     has @.cells;
-    has $.group-by-column;                                                      # don't display the column # (always the same value in the column per group of cells), but rather make it available as a paragraph heading
+    has $.group-by-column                                   = -1;               # don't display the column number (always the same value in the column per group of cells), but rather make it available as a group designator/paragraph heading
     has @.headings;
     has %.meta;
     has %.noteworthy-groups;                                                    # hint to display or hide, when the opportunity is available
@@ -84,13 +84,13 @@ has Body                $.body;
 has Int                 $.current-row       is rw       = 0;
 has Int                 $.current-col       is rw       = 0;
 has Cro::HTTP::Client   $.grid-proxy;
-
+has Int                 $.group-by-column               = -1;
 has Str                 $.title             is built    = '';
 has Bool                $!reverse-highlight is built    = False;
 
 submethod TWEAK {
     $!term-size         = term-size;                                            # $!term-size.rows $!term-size.cols
-    $!body             .= new;
+    $!body             .= new(:$!group-by-column);
     self.title($!title) if $!title;
     self.reverse-highlight($!reverse-highlight);
 

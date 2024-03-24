@@ -19,6 +19,7 @@ has Int             $.width                                         = 0;
 has Int             $!previous-width                                = 0;
 has Int             $!spacebefore                                   = 0;
 has Int             $!spaceafter                                    = 0;
+has                 $.supplemental-data;                                                # additional information for interfaces with the capability
 has Str             $!ANSI-spacebefore-pad                          = '';
 has Str             $!ANSI-spaceafter-pad                           = '';
 
