@@ -412,7 +412,6 @@ method to-html {
     $html  ~= ' ' x 8 ~ '<title>' ~ self.title ~ '</title>' ~ "\n" if self.title;
 
 
-
 #   '<table cellSpacing="0" cellPadding="3" bgColor="#FFFFFF" border="1" width="100%">' ~ "\n";
 #               table, h1, th, td {
 #                   font-family: sans-serif;
