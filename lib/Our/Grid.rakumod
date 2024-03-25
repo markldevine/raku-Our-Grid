@@ -166,28 +166,49 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col, Bool :$noteworthi
 
 #   sort inferences
 
-    unless $!body.meta<column-sort-types>[$!current-col]:exists && $!body.meta<column-sort-types>[$!current-col] ~~ 'string' {
+    unless ($!body.meta<column-sort-types>[$!current-col]:exists && $!body.meta<column-sort-types>[$!current-col] ~~ 'string') {
         my $proposed-sort-type;
         given $cell.cell-sort-type {
-            when 'digits'           { $proposed-sort-type   = 'digits';     }
+            when 'digits'           {
+                $proposed-sort-type   = 'digits';
+            }
+            when 'digits-string'    {
+                $!body.meta<column-sort-digits-max>[$!current-col] = 0 without $!body.meta<column-sort-digits-max>[$!current-col];
+                if $!body.meta<column-sort-string-portions>[$!current-col] {
+                    if $!body.meta<column-sort-string-portions>[$!current-col] ne $cell.cell-sort-string-portion {
+                        $proposed-sort-type     = 'string';
+                    }
+                    else {
+                        $proposed-sort-type     = 'digits-string';
+                        $!body.meta<column-sort-digits-max>[$!current-col] = $cell.cell-sort-digits-portion if $cell.cell-sort-digits-portion > $!body.meta<column-sort-digits-max>[$!current-col];
+                    }
+                }
+                else {
+                    $proposed-sort-type         = 'digits-string';
+                    $!body.meta<column-sort-string-portions>[$!current-col] = $cell.cell-sort-string-portion;
+                    $!body.meta<column-sort-digits-max>[$!current-col] = $cell.cell-sort-digits-portion if $cell.cell-sort-digits-portion > $!body.meta<column-sort-digits-max>[$!current-col];
+                }
+            }
             when 'string-digits'    {
-                $!body.meta<column-sort-device-max>[$!current-col] = 0 without $!body.meta<column-sort-device-max>[$!current-col];
+                $!body.meta<column-sort-digits-max>[$!current-col] = 0 without $!body.meta<column-sort-digits-max>[$!current-col];
                 if $!body.meta<column-sort-string-portions>[$!current-col] {
                     if $!body.meta<column-sort-string-portions>[$!current-col] ne $cell.cell-sort-string-portion {
                         $proposed-sort-type     = 'string';
                     }
                     else {
                         $proposed-sort-type     = 'string-digits';
-                        $!body.meta<column-sort-device-max>[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > $!body.meta<column-sort-device-max>[$!current-col];
+                        $!body.meta<column-sort-digits-max>[$!current-col] = $cell.cell-sort-digits-portion if $cell.cell-sort-digits-portion > $!body.meta<column-sort-digits-max>[$!current-col];
                     }
                 }
                 else {
                     $proposed-sort-type         = 'string-digits';
                     $!body.meta<column-sort-string-portions>[$!current-col] = $cell.cell-sort-string-portion;
-                    $!body.meta<column-sort-device-max>[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > $!body.meta<column-sort-device-max>[$!current-col];   #%%%%% not cell-sort-device-number...
+                    $!body.meta<column-sort-digits-max>[$!current-col] = $cell.cell-sort-digits-portion if $cell.cell-sort-digits-portion > $!body.meta<column-sort-digits-max>[$!current-col];
                 }
             }
-            default                 { $proposed-sort-type = 'string';       }
+            default                 {
+                $proposed-sort-type = 'string';
+            }
         }
         $!body.meta<column-sort-types>[$!current-col]  = $proposed-sort-type   without $!body.meta<column-sort-types>[$!current-col];
         $!body.meta<column-sort-types>[$!current-col]  = 'string'              if $proposed-sort-type !~~ $!body.meta<column-sort-types>[$!current-col];
@@ -208,9 +229,6 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col, Bool :$noteworthi
 
 method sort-by-columns (:@sort-columns!, :$descending) {
     return False unless self!grid-check;
-
-put '@sort-columns = <' ~ @sort-columns.join(' ') ~ '>';
-
     my @vetted-sort-columns = ();
     if $!body.group-by-column >= 0 {
         @vetted-sort-columns[0] = $!body.group-by-column;
@@ -221,8 +239,6 @@ put '@sort-columns = <' ~ @sort-columns.join(' ') ~ '>';
     else {
         @vetted-sort-columns = @sort-columns;
     }
-put '@vetted-sort-columns = <' ~ @vetted-sort-columns.join(' ') ~ '>';
-
     my $row-digits          = $!body.cells.elems;
     $row-digits             = "$row-digits".chars;
     my %sortable-rows;
@@ -234,10 +250,23 @@ put '@vetted-sort-columns = <' ~ @vetted-sort-columns.join(' ') ~ '>';
             given $!body.meta<column-sort-types>[$col] {
                 when 'string'           { $sort-string ~= $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text ~ '_' !! ' _';                                                               }
                 when 'digits'           { $sort-string ~= sprintf('%0' ~ $!body.meta<col-raw-text-width>[$col] ~ 'd', $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text !! "0") ~ '_';   }
-                when 'string-digits'    {
-                    $sort-string ~= $!body.cells[$row][$col].text.chars ?? sprintf('%0' ~  "$!body.meta<column-sort-device-max>[$col]".chars ~ 'd', $!body.cells[$row][$col].text.substr($!body.meta<column-sort-string-portions>[$col].chars).Int) ~ '_' !! ' _';
+                when 'digits-string'    {
+                    if $!body.cells[$row][$col].text.chars {
+                        if $!body.cells[$row][$col].text ~~ /^ (\d+)(\D+) $/ {
+                            $sort-string ~= sprintf('%0' ~  $!body.meta<column-sort-digits-max>[$col].Str.chars ~ 'd%s_', $0.Str, $1.Str);
+                        }
+                        else {
+                            die 'Misinformed about digits-string cell [' ~ $row ~ '][' ~ $col ~ '] |' ~ $!body.cells[$row][$col].text ~ '|';
+                        }
+                    }
+                    else {
+                        $sort-string ~= '_';
+                    }
                 }
-                default                 { die 'unidentified input type in sorting analysis';                                                                                                                }
+                when 'string-digits'    {
+                    $sort-string ~= $!body.cells[$row][$col].text.chars ?? sprintf('%0' ~  $!body.meta<column-sort-digits-max>[$col].Str.chars ~ 'd', $!body.cells[$row][$col].text.substr($!body.meta<column-sort-string-portions>[$col].chars).Int) ~ '_' !! ' _';
+                }
+                default                 { die 'Unidentified input type in sorting analysis: ' ~ $!body.meta<column-sort-types>[$col];                                                                                                                }
             }
         }
         $sort-string       ~= sprintf("%0" ~ $row-digits ~ "d", $row);

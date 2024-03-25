@@ -26,7 +26,7 @@ has Str             $!ANSI-spaceafter-pad                           = '';
 my  subset          Sort-Type                   where * (elem) $Sort-Type;
 has Sort-Type       $.cell-sort-type;
 has Str             $.cell-sort-string-portion;
-has Int             $.cell-sort-device-number;
+has Int             $.cell-sort-digits-portion;
 
 submethod BUILD(:$text,
                 :$fragments,
@@ -71,11 +71,11 @@ submethod TWEAK {
         when /^ \s* \d+ \s* $/          { $!cell-sort-type = 'digits';  }
         when /^ \s* (\D+) (\d+) \s* $/  {
             $!cell-sort-string-portion  = $0.Str;
-            $!cell-sort-device-number   = $1.Int;
+            $!cell-sort-digits-portion  = $1.Int;
             $!cell-sort-type            = 'string-digits';
         }
         when /^ \s* (\d+) (\D+) \s* $/  {
-            $!cell-sort-device-number   = $0.Int;
+            $!cell-sort-digits-portion  = $0.Int;
             $!cell-sort-string-portion  = $1.Str;
             $!cell-sort-type            = 'digits-string';
         }
