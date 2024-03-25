@@ -169,25 +169,25 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col, Bool :$noteworthi
     unless $!body.meta<column-sort-types>[$!current-col]:exists && $!body.meta<column-sort-types>[$!current-col] ~~ 'string' {
         my $proposed-sort-type;
         given $cell.cell-sort-type {
-            when 'digits'       { $proposed-sort-type   = 'digits';     }
-            when 'name-number'  {
+            when 'digits'           { $proposed-sort-type   = 'digits';     }
+            when 'string-digits'    {
                 $!body.meta<column-sort-device-max>[$!current-col] = 0 without $!body.meta<column-sort-device-max>[$!current-col];
-                if $!body.meta<column-sort-device-names>[$!current-col] {
-                    if $!body.meta<column-sort-device-names>[$!current-col] ne $cell.cell-sort-device-name {
+                if $!body.meta<column-sort-string-portions>[$!current-col] {
+                    if $!body.meta<column-sort-string-portions>[$!current-col] ne $cell.cell-sort-string-portion {
                         $proposed-sort-type     = 'string';
                     }
                     else {
-                        $proposed-sort-type     = 'name-number';
+                        $proposed-sort-type     = 'string-digits';
                         $!body.meta<column-sort-device-max>[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > $!body.meta<column-sort-device-max>[$!current-col];
                     }
                 }
                 else {
-                    $proposed-sort-type         = 'name-number';
-                    $!body.meta<column-sort-device-names>[$!current-col] = $cell.cell-sort-device-name;
-                    $!body.meta<column-sort-device-max>[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > $!body.meta<column-sort-device-max>[$!current-col];
+                    $proposed-sort-type         = 'string-digits';
+                    $!body.meta<column-sort-string-portions>[$!current-col] = $cell.cell-sort-string-portion;
+                    $!body.meta<column-sort-device-max>[$!current-col] = $cell.cell-sort-device-number if $cell.cell-sort-device-number > $!body.meta<column-sort-device-max>[$!current-col];   #%%%%% not cell-sort-device-number...
                 }
             }
-            default             { $proposed-sort-type = 'string';       }
+            default                 { $proposed-sort-type = 'string';       }
         }
         $!body.meta<column-sort-types>[$!current-col]  = $proposed-sort-type   without $!body.meta<column-sort-types>[$!current-col];
         $!body.meta<column-sort-types>[$!current-col]  = 'string'              if $proposed-sort-type !~~ $!body.meta<column-sort-types>[$!current-col];
@@ -208,29 +208,36 @@ multi method add-cell (Our::Grid::Cell:D :$cell, :$row, :$col, Bool :$noteworthi
 
 method sort-by-columns (:@sort-columns!, :$descending) {
     return False unless self!grid-check;
+
+put '@sort-columns = <' ~ @sort-columns.join(' ') ~ '>';
+
     my @vetted-sort-columns = ();
+    if $!body.group-by-column >= 0 {
+        @vetted-sort-columns[0] = $!body.group-by-column;
+        for @sort-columns -> $col {
+            @vetted-sort-columns.push: $col unless $col == $!body.group-by-column;
+        }
+    }
+    else {
+        @vetted-sort-columns = @sort-columns;
+    }
+put '@vetted-sort-columns = <' ~ @vetted-sort-columns.join(' ') ~ '>';
+
     my $row-digits          = $!body.cells.elems;
     $row-digits             = "$row-digits".chars;
     my %sortable-rows;
     my $sort-string;
     loop (my $row = 0; $row < $!body.cells.elems; $row++) {
-        if $!body.group-by-column >= 0 {
-            @vetted-sort-columns[0] = $!body.group-by-column;
-            for @sort-columns -> $col {
-                @vetted-sort-columns.push: $col unless $col == $!body.group-by-column;
-            }
-        }
-        else {
-            @vetted-sort-columns = @sort-columns;
-        }
         $sort-string        = '';
         for @vetted-sort-columns -> $col {
             die '$col (' ~ $col ~ ') out of range for grid! (0 <= col <= ' ~ $!body.meta<col-width>.elems - 1 ~ ')' unless 0 <= $col < $!body.meta<col-width>.elems;
             given $!body.meta<column-sort-types>[$col] {
-                when 'string'       { $sort-string ~= $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text ~ '_' !! ' _';                                                               }
-                when 'digits'       { $sort-string ~= sprintf('%0' ~ $!body.meta<col-raw-text-width>[$col] ~ 'd', $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text !! "0") ~ '_';   }
-                when 'name-number'  { $sort-string ~= $!body.cells[$row][$col].text.chars ?? sprintf('%0' ~  "$!body.meta<column-sort-device-max>[$col]".chars ~ 'd',
-                                                        $!body.cells[$row][$col].text.substr($!body.meta<column-sort-device-names>[$col].chars).Int) ~ '_' !! ' _';                                     }
+                when 'string'           { $sort-string ~= $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text ~ '_' !! ' _';                                                               }
+                when 'digits'           { $sort-string ~= sprintf('%0' ~ $!body.meta<col-raw-text-width>[$col] ~ 'd', $!body.cells[$row][$col].text.chars ?? $!body.cells[$row][$col].text !! "0") ~ '_';   }
+                when 'string-digits'    {
+                    $sort-string ~= $!body.cells[$row][$col].text.chars ?? sprintf('%0' ~  "$!body.meta<column-sort-device-max>[$col]".chars ~ 'd', $!body.cells[$row][$col].text.substr($!body.meta<column-sort-string-portions>[$col].chars).Int) ~ '_' !! ' _';
+                }
+                default                 { die 'unidentified input type in sorting analysis';                                                                                                                }
             }
         }
         $sort-string       ~= sprintf("%0" ~ $row-digits ~ "d", $row);
@@ -238,7 +245,7 @@ method sort-by-columns (:@sort-columns!, :$descending) {
     }
     $!body.meta<sort-order>    = Array.new;
 
-### The below incantation sorts name_number & string & digit all together, magically.
+### The below incantation sorts digita_string & string_digits & string & digit all together, magically.
 ### Since we need to sort by multiple columns (normalizing data by their peculiarity),
 ### I'll stick with the current ham-handed implementation for now.  Maybe I'll see a
 ### way to benefit from this magic spell and change it at some future date.

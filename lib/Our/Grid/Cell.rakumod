@@ -25,7 +25,7 @@ has Str             $!ANSI-spaceafter-pad                           = '';
 
 my  subset          Sort-Type                   where * (elem) $Sort-Type;
 has Sort-Type       $.cell-sort-type;
-has Str             $.cell-sort-device-name;
+has Str             $.cell-sort-string-portion;
 has Int             $.cell-sort-device-number;
 
 submethod BUILD(:$text,
@@ -68,13 +68,18 @@ submethod TWEAK {
         $!TEXT                 ~= ' ' x $!fragments[$i].spaceafter;
     }
     given $!text {
-        when /^ \s* <digit>+ \s* $/                 { $!cell-sort-type = 'digits';  }
-        when /^ \s* (<alpha>+) (<digit>+) \s* $/    {
-            $!cell-sort-device-name     = $0.Str;
+        when /^ \s* \d+ \s* $/          { $!cell-sort-type = 'digits';  }
+        when /^ \s* (\D+) (\d+) \s* $/  {
+            $!cell-sort-string-portion  = $0.Str;
             $!cell-sort-device-number   = $1.Int;
-            $!cell-sort-type            = 'name-number';
+            $!cell-sort-type            = 'string-digits';
         }
-        default                                     { $!cell-sort-type = 'string';  }
+        when /^ \s* (\d+) (\D+) \s* $/  {
+            $!cell-sort-device-number   = $0.Int;
+            $!cell-sort-string-portion  = $1.Str;
+            $!cell-sort-type            = 'digits-string';
+        }
+        default                         { $!cell-sort-type = 'string';  }
     }
     self.ANSI-fmt;
     return self;
@@ -85,10 +90,6 @@ method !calculate-pads {
     $!previous-width            = $!width;
     $!previous-justification    = $!justification;
     my $text-chars              = $!TEXT.Str.chars;
-
-#%%%
-#%%%    Time to make $!text the original, trimmed data & $!TEXT to be the marked-up data...
-#%%%
 
     die 'Unable to fit all data into a ' ~ $!width ~ ' character-wide cell!' if $!width < $text-chars;
     if $!width != $text-chars {

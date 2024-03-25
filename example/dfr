@@ -180,7 +180,7 @@ sub MAIN (
         }
     }
     if $sort-columns {
-        my @sort-columns = $sort-columns.split: ',';
+        my Int @sort-columns = $sort-columns.split(',').map({ $_.Int });
         $grid.sort-by-columns(:@sort-columns, :descending($sort-descending));
     }
     {
