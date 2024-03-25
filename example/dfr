@@ -83,6 +83,16 @@ class df-Pk-actions {
 
 constant    $default-server = '127.0.0.1';
 
+enum Headings (
+    System          => 0,
+    Filesystem      => 1,
+    Total           => 2,
+    Used            => 3,
+    Available       => 4,
+    '% Used'        => 5,
+    'Mount Point'   => 6,
+);
+
 sub MAIN (
     Str                 $servers            = $default-server,  #= server name(s) (comma separated list)
     Int                 :$percent-above     = -1,               #= only display file systems above the percentage 
@@ -100,7 +110,7 @@ sub MAIN (
     Bool                :$tui,                                  #= Terminal User Interface
     Bool                :$xml,                                  #= dump XML to STDOUT
     Bool                :$light-mode,                           #= reverse header highlight for light-mode
-    Str                 :$sort-columns,                         #= sort by column number(s)
+    Str                 :$sort-columns,                         #= sort by column numbers
     Bool                :$sort-descending,                      #= sort in descending order
     Bool                :$group-by-system,                      #= group data around systems
 ) {
