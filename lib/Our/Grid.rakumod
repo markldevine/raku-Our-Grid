@@ -270,6 +270,7 @@ method sort-by-columns (:@sort-columns!, :$descending) {
             }
         }
         $sort-string       ~= sprintf("%0" ~ $row-digits ~ "d", $row);
+put $sort-string;
         %sortable-rows{$sort-string} = $row;
     }
     $!body.meta<sort-order>    = Array.new;
