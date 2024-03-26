@@ -1,9 +1,10 @@
 #!/usr/bin/env raku
 
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
-use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
+#use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
 
 use Our::Grid;
+use Getopt::Long;
 
 my Our::Grid $grid .= new;
 
@@ -58,6 +59,9 @@ for qx|/usr/bin/ps -e|.lines -> $ps {
     PS-grammar.parse($ps, :actions(PS-actions.new)) or warn;
 }
 
+our %*SUB-MAIN-OPTS = (
+                        auto-help   => True,
+                      );
 sub MAIN (
     Bool    :$csv,  #= dump CSV to STDOUT
     Bool    :$gui,  #= Graphical User Interface

@@ -1,0 +1,45 @@
+#!/usr/bin/env raku
+
+use lib '.';
+
+use Getopt::Long;
+use C 'MAIN-switches';
+
+#my role Switchable {
+#    has $.s;
+#}
+
+#my class C {
+#    has $.a1    = 'default a1' does Switchable(:s(12));
+#    has $.a2    = 'default a2';
+#    has $.a3    = 'default a3' but Switchable(:s(24));
+#
+#    submethod TWEAK { put 'In class C...'; }
+#    method rpt-a1 {
+#        put '$!a1 is Switchable' if $!a1 ~~ Switchable;
+#        say $!a1.^name;
+#    }
+#}
+
+
+sub MAIN () {
+put $a1;
+    put 'In Main()...';
+
+    my C $c    .= new: :a1<switch1>;
+
+    $c.rpt-a1;
+
+    for $c.^attributes(:local) -> $attr {
+        put $attr ~ ' is Switchable' if $attr ~~ Switchable;
+#       say $attr ~ ' is ' ~ $attr.^name ~ ' with package ' ~ $attr.package;
+        say $attr.raku;
+    }
+
+#say (.name, .package, .has_accessor) for C.new.^attributes;
+#say (.name, .package, .has_accessor) for C.^attributes;
+
+#   my C $c .= new;
+#   put $c.fields;
+#   put $c.values;
+}

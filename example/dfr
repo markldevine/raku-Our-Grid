@@ -7,10 +7,10 @@ use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 #use Data::Dump::Tree;
 use Async::Command::Multi;
 use Our::Cache;
+use Getopt::Long;
 use Our::Grid;
 use Our::Grid::Cell;
 use Our::Utilities;
-use JSON::Fast;
 #use Grammar::Debugger;
 
 my %server-results;
@@ -104,8 +104,8 @@ sub MAIN (
                         :$mail-body-format,                     #= email body format
                         :$mail-from,                            #= email 'From:' addressee
                         :@mail-to,                              #= accumulate email 'To:' addressees
-                        :@mail-cc           = (),               #= accumulate email 'Cc:' addressees
-                        :@mail-bcc          = (),               #= accumulate email 'Bcc:' addressees
+                        :@mail-cc,                              #= accumulate email 'Cc:' addressees
+                        :@mail-bcc,                             #= accumulate email 'Bcc:' addressees
     Bool                :$text,                                 #= TEXT print
     Bool                :$tui,                                  #= Terminal User Interface
     Bool                :$xml,                                  #= dump XML to STDOUT
