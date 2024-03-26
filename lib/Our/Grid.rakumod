@@ -401,7 +401,22 @@ method ANSI-print {
     for $!body.meta<sort-order>.list -> $row {
         if $!body.group-by-column >= 0 {
             if $current-group ne $!body.cells[$row][$!body.group-by-column].TEXT {
+                my Bool $first;
+                $first  = True unless $current-group.chars;
                 $current-group = $!body.cells[$row][$!body.group-by-column].TEXT;
+
+#%%%
+                # print a closing line (up) for the last group unless $first;
+                unless $first {
+                    print ' ' x $margin ~ %box-char<side-row-left-sep>;
+                    loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
+                        next if $i == $!body.group-by-column;
+                        print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<up-and-horizontal>;
+                    }
+                    put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<side-row-right-sep>;
+                }
+#%%%
+
                 self!ANSI-print-headings(:$col-width-total, :$margin, :group($current-group));
             }
         }
