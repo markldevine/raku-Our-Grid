@@ -72,7 +72,8 @@ my $smtp = Net::SMTP.new(:server<mailhost.wmata.com>);
 #$smtp.send($mail-from, @mail-to, $email);
 $smtp.send($email);
 $smtp.quit;
-$grid.ANSI-print;
+$grid.TEXT-print;
+$grid.HTML-print;
 
 
     }
