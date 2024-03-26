@@ -826,11 +826,9 @@ method receive-proxy-mail-via-redis (Str:D :$redis-key!) {
     my $redis           = Our::Redis.new;
     $!body              = unmarshal($redis.GET(:key($redis-key)), Body);
 
-ddt $!body.groups;
-
-    for $!body.groups.keys -> $key {
-        $!body.groups{$key} = unmarshal($!body.groups{$key}, Groups);
-    }
+#   for $!body.groups.keys -> $key {
+#       $!body.groups{$key} = unmarshal($!body.groups{$key}, Groups);
+#   }
 
     loop (my $heading = 0; $heading < $!body.headings.elems; $heading++) {
         loop (my $fragment = 0; $fragment < $!body.headings[$heading]<fragments>.elems; $fragment++) {
