@@ -270,7 +270,6 @@ method sort-by-columns (:@sort-columns!, :$descending) {
             }
         }
         $sort-string       ~= sprintf("%0" ~ $row-digits ~ "d", $row);
-put $sort-string;
         %sortable-rows{$sort-string} = $row;
     }
     $!body.meta<sort-order>    = Array.new;
@@ -413,7 +412,7 @@ method to-html {
     $html  ~= ' ' x 8 ~ '<title>' ~ self.title ~ '</title>' ~ "\n" if self.title;
 
 
-#   '<table cellSpacing="0" cellPadding="3" bgColor="#FFFFFF" border="1" width="100%">' ~ "\n";
+#   '<table cellSpacing="0" cellPadding="3" bgColor="#FFFFFF" border="1" width="80%">' ~ "\n";
 #               table, h1, th, td {
 #                   font-family: sans-serif;
 #                   font-size: 0.8rem;
