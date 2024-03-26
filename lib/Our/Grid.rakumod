@@ -654,6 +654,35 @@ method to-xml {
     return $xml;
 }
 
+method !ANSI-print-headings (Int:D :$col-width-total, Int:D :$margin, Str :$group?) {
+    if $group {
+
+#   | g1                |
+        put ' ' x $margin ~ %box-char<side> ~ ' ' ~ $group ~ ' ' x ($col-width-total - $group.chars - 1) ~ %box-char<side>;
+
+#   +---+---+---+---+---+
+
+        print ' ' x $margin ~ %box-char<side-row-left-sep>;
+        loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
+            print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<down-and-horizontal>;
+        }
+        put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<side-row-right-sep>;
+    }
+
+
+#   | h | h | h | h | h |
+#   +---+---+---+---+---+
+
+    if $!body.headings.elems {
+        print ' ' x $margin ~ %box-char<side>;
+        loop (my $col = 0; $col < $!body.headings.elems; $col++) {
+            print ' ' ~ $!body.headings[$col].ANSI-fmt(:width($!body.meta<col-width>[$col]), :bold, :reverse($!body.meta<reverse-highlight>), :highlight<white>, :foreground<black>).ANSI-padded;
+            print ' ' ~ %box-char<side>;
+        }
+        print "\n";
+    }
+}
+
 method ANSI-print {
     return False unless self!grid-check;
     unless $*IN.t {
@@ -666,47 +695,60 @@ method ANSI-print {
     }
     $col-width-total   += ($!body.meta<col-width>.elems * 3) - 1;
     my $margin          = ($!term-size.cols - ($col-width-total + 2)) div 2;
-    if self.title {
-        my $left-pad    = ($col-width-total - self.title.chars) div 2;
-        my $right-pad   = $col-width-total - self.title.chars - $left-pad;
-        put ' ' x $margin ~ %box-char<top-left-corner> ~ %box-char<horizontal> x $col-width-total ~ %box-char<top-right-corner>;
-        put ' ' x $margin ~ %box-char<side> ~ ' ' x $left-pad ~ self.title ~ ' ' x $right-pad ~ %box-char<side>;
+    if self.body.title {
 
-        print ' ' x $margin ~ %box-char<side-row-left-sep>;
-        loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
-            print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<down-and-horizontal>;
+#       +-------------------+
+#       |       TITLE       |
+
+        my $left-pad    = ($col-width-total - self.body.title.chars) div 2;
+        my $right-pad   = $col-width-total - self.body.title.chars - $left-pad;
+
+        put ' ' x $margin ~ %box-char<top-left-corner> ~ %box-char<horizontal> x $col-width-total ~ %box-char<top-right-corner>;
+        put ' ' x $margin ~ %box-char<side> ~ ' ' x $left-pad ~ self.body.title ~ ' ' x $right-pad ~ %box-char<side>;
+
+        if $!body.group-by-column >= 0 {
+
+#       +-------------------+
+
+            put ' ' x $margin ~ %box-char<side-row-left-sep> ~ %box-char<horizontal> x $col-width-total ~ %box-char<side-row-right-sep>;
         }
-        put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<side-row-right-sep>;
-    }
-    else {
-        print ' ' x $margin ~ %box-char<top-left-corner>;
-        loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
-            print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<down-and-horizontal>;
+        else {
+
+#       +---+---+---+---+---+
+
+            print ' ' x $margin ~ %box-char<side-row-left-sep>;
+            loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
+                print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<down-and-horizontal>;
+            }
+            put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<side-row-right-sep>;
         }
-        put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<top-right-corner>;
     }
-    if $!body.headings.elems {
-        print ' ' x $margin ~ %box-char<side>;
-        loop (my $col = 0; $col < $!body.headings.elems; $col++) {
-            print ' ' ~ $!body.headings[$col].ANSI-fmt(:width($!body.meta<col-width>[$col]), :bold, :reverse($!body.meta<reverse-highlight>), :highlight<white>, :foreground<black>).ANSI-padded;
-            print ' ' ~ %box-char<side>;
-        }
-        print "\n";
-    }
+
+    self!ANSI-print-headings(:$col-width-total, :$margin)  unless $!body.group-by-column >= 0;
+    my $current-group       = '';
     for $!body.meta<sort-order>.list -> $row {
+        if $!body.group-by-column >= 0 {
+            if $current-group ne $!body.cells[$row][$!body.group-by-column].TEXT {
+                $current-group = $!body.cells[$row][$!body.group-by-column].TEXT;
+                self!ANSI-print-headings(:$col-width-total, :$margin, :group($current-group));
+            }
+        }
         print ' ' x $margin;
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             print %box-char<side> ~ ' ';
             given $!body.cells[$row][$col] {
                 when Our::Grid::Cell:D  {
-                    print $!body.cells[$row][$col].ANSI-fmt(:width($!body.meta<col-width>[$col])).ANSI-padded;          #%%% focus here to preserve $!spacebefore of [0]...
+                    print $!body.cells[$row][$col].ANSI-fmt(:width($!body.meta<col-width>[$col])).ANSI-padded;
                 }
-                default                 { print ' ' x $!body.meta<col-width>[$col];                                    }
+                default                 {
+                    print ' ' x $!body.meta<col-width>[$col];
+                }
             }
-            print ' ' unless $col == ($!body.cells[$row].elems - 1);
+            print ' ';
         }
-        put ' ' ~ %box-char<side>;
+        put %box-char<side>;
     }
+
     print ' ' x $margin ~ %box-char<bottom-left-corner>;
     loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
         print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<up-and-horizontal>;
@@ -905,3 +947,68 @@ say $out        if $out;
 }
 
 =finish
+
+
+
+
+
+method ANSI-print {
+    return False unless self!grid-check;
+    unless $*IN.t {
+        self.TEXT-print;
+        return;
+    }
+    my $col-width-total = 0;
+    for $!body.meta<col-width>.list -> $colw {
+        $col-width-total += $colw;
+    }
+    $col-width-total   += ($!body.meta<col-width>.elems * 3) - 1;
+    my $margin          = ($!term-size.cols - ($col-width-total + 2)) div 2;
+    if self.title {
+        my $left-pad    = ($col-width-total - self.title.chars) div 2;
+        my $right-pad   = $col-width-total - self.title.chars - $left-pad;
+        put ' ' x $margin ~ %box-char<top-left-corner> ~ %box-char<horizontal> x $col-width-total ~ %box-char<top-right-corner>;
+        put ' ' x $margin ~ %box-char<side> ~ ' ' x $left-pad ~ self.title ~ ' ' x $right-pad ~ %box-char<side>;
+
+        print ' ' x $margin ~ %box-char<side-row-left-sep>;
+        loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
+            print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<down-and-horizontal>;
+        }
+        put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<side-row-right-sep>;
+    }
+    else {
+        print ' ' x $margin ~ %box-char<top-left-corner>;
+        loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
+            print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<down-and-horizontal>;
+        }
+        put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<top-right-corner>;
+    }
+    if $!body.headings.elems {
+        print ' ' x $margin ~ %box-char<side>;
+        loop (my $col = 0; $col < $!body.headings.elems; $col++) {
+            print ' ' ~ $!body.headings[$col].ANSI-fmt(:width($!body.meta<col-width>[$col]), :bold, :reverse($!body.meta<reverse-highlight>), :highlight<white>, :foreground<black>).ANSI-padded;
+            print ' ' ~ %box-char<side>;
+        }
+        print "\n";
+    }
+    for $!body.meta<sort-order>.list -> $row {
+        print ' ' x $margin;
+        loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
+            print %box-char<side> ~ ' ';
+            given $!body.cells[$row][$col] {
+                when Our::Grid::Cell:D  {
+                    print $!body.cells[$row][$col].ANSI-fmt(:width($!body.meta<col-width>[$col])).ANSI-padded;          #%%% focus here to preserve $!spacebefore of [0]...
+                }
+                default                 { print ' ' x $!body.meta<col-width>[$col];                                    }
+            }
+            print ' ' unless $col == ($!body.cells[$row].elems - 1);
+        }
+        put ' ' ~ %box-char<side>;
+    }
+    print ' ' x $margin ~ %box-char<bottom-left-corner>;
+    loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
+        print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<up-and-horizontal>;
+    }
+    put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<bottom-right-corner>;
+}
+

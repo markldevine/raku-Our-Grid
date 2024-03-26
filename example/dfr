@@ -4,7 +4,6 @@
 use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 #use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
 
-#use Data::Dump::Tree;
 use Async::Command::Multi;
 use Our::Cache;
 use Getopt::Long;
@@ -12,7 +11,6 @@ use Our::Grid;
 use Our::Grid::Cell;
 use JSON::Fast;
 use Our::Utilities;
-#use Grammar::Debugger;
 
 my %server-results;
 
@@ -111,7 +109,7 @@ sub MAIN (
     Bool                :$tui,                                  #= Terminal User Interface
     Bool                :$xml,                                  #= dump XML to STDOUT
     Bool                :$light-mode,                           #= reverse header highlight for light-mode
-    Str                 :$sort-columns,                         #= sort by column numbers
+    Int                 :@sort-columns,                         #= accumulate column numbers to sort by
     Bool                :$sort-descending,                      #= sort in descending order
     Bool                :$group-by-system,                      #= group data around systems
 ) {
@@ -190,8 +188,8 @@ sub MAIN (
             $grid.current-row++;
         }
     }
-    if $sort-columns {
-        my Int @sort-columns = $sort-columns.split(',').map({ $_.Int });
+    if @sort-columns.elems {
+#       my Int @sort-columns = $sort-columns.split(',').map({ $_.Int });
         $grid.sort-by-columns(:@sort-columns, :descending($sort-descending));
     }
     {
