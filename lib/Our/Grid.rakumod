@@ -323,15 +323,26 @@ method !grid-check {
     return True;
 }
 
+my $white-rgb = Color::Names.color-data(<CSS3>).&find-color('white', :exact).values.first<rgb>;
+my $background-set = "\o33[48;2;" ~ $white-rgb.list.join(';') ~ 'm';
+my $background-unset = "\o33[49m";
+my $black-rgb = Color::Names.color-data(<CSS3>).&find-color('black', :exact).values.first<rgb>;
+my $foreground-set = "\o33[38;2;" ~ $black-rgb.list.join(';') ~ 'm';
+my $foreground-unset = "\o33[39m";
+
 method !ANSI-print-headings (Int:D :$col-width-total, Int:D :$margin, Str :$group?) {
     if $group {
-
-#   | g1                |
-
-        put ' ' x $margin ~ %box-char<side> ~ ' ' ~ $group ~ ' ' x ($col-width-total - $group.chars - 1) ~ %box-char<side>;
-
-#   +---+---+---+---+---+
-
+        put ' ' x $margin
+            ~ %box-char<side> ~ ' '
+            ~ "\o33[1m\o33[3m"
+#           ~ $foreground-set
+#           ~ $background-set
+            ~ $group
+#           ~ $background-unset
+#           ~ $foreground-unset
+            ~ "\o33[22m\o33[23m"
+            ~ ' ' x ($col-width-total - $group.chars - 1)
+            ~ %box-char<side>;
         print ' ' x $margin ~ %box-char<side-row-left-sep>;
         loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
             next if $i == $!body.group-by-column;
@@ -339,10 +350,6 @@ method !ANSI-print-headings (Int:D :$col-width-total, Int:D :$margin, Str :$grou
         }
         put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<side-row-right-sep>;
     }
-
-#   | h | h | h | h | h |
-#   +---+---+---+---+---+
-
     if $!body.headings.elems {
         print ' ' x $margin ~ %box-char<side>;
         loop (my $col = 0; $col < $!body.headings.elems; $col++) {
@@ -368,26 +375,25 @@ method ANSI-print {
     $col-width-total -= ($!body.meta<col-width>[$!body.group-by-column] + 3) if $!body.group-by-column >= 0;
     my $margin          = ($!term-size.cols - ($col-width-total + 2)) div 2;
     if self.body.title {
-
-#       +-------------------+
-#       |       TITLE       |
-
         my $left-pad    = ($col-width-total - self.body.title.chars) div 2;
         my $right-pad   = $col-width-total - self.body.title.chars - $left-pad;
-
         put ' ' x $margin ~ %box-char<top-left-corner> ~ %box-char<horizontal> x $col-width-total ~ %box-char<top-right-corner>;
-        put ' ' x $margin ~ %box-char<side> ~ ' ' x $left-pad ~ self.body.title ~ ' ' x $right-pad ~ %box-char<side>;
-
+        put ' ' x $margin
+            ~ %box-char<side>
+            ~ ' ' x $left-pad
+            ~ "\o33[1m"
+            ~ $foreground-set
+            ~ $background-set
+            ~ self.body.title
+            ~ $background-unset
+            ~ $foreground-unset
+            ~ "\o33[22m"
+            ~ ' ' x $right-pad
+            ~ %box-char<side>;
         if $!body.group-by-column >= 0 {
-
-#       +-------------------+
-
             put ' ' x $margin ~ %box-char<side-row-left-sep> ~ %box-char<horizontal> x $col-width-total ~ %box-char<side-row-right-sep>;
         }
         else {
-
-#       +---+---+---+---+---+
-
             print ' ' x $margin ~ %box-char<side-row-left-sep>;
             loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
                 print %box-char<horizontal> x ($!body.meta<col-width>[$i] + 2) ~ %box-char<down-and-horizontal>;
@@ -395,7 +401,6 @@ method ANSI-print {
             put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<side-row-right-sep>;
         }
     }
-
     self!ANSI-print-headings(:$col-width-total, :$margin)  unless $!body.group-by-column >= 0;
     my $current-group       = '';
     for $!body.meta<sort-order>.list -> $row {
@@ -404,9 +409,6 @@ method ANSI-print {
                 my Bool $first;
                 $first  = True unless $current-group.chars;
                 $current-group = $!body.cells[$row][$!body.group-by-column].TEXT;
-
-#%%%
-                # print a closing line (up) for the last group unless $first;
                 unless $first {
                     print ' ' x $margin ~ %box-char<side-row-left-sep>;
                     loop (my $i = 0; $i < ($!body.meta<col-width>.elems - 1); $i++) {
@@ -415,8 +417,6 @@ method ANSI-print {
                     }
                     put %box-char<horizontal> x ($!body.meta<col-width>[*-1] + 2) ~ %box-char<side-row-right-sep>;
                 }
-#%%%
-
                 self!ANSI-print-headings(:$col-width-total, :$margin, :group($current-group));
             }
         }
