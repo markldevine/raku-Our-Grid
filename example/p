@@ -6,7 +6,7 @@ use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 use Our::Grid;
 use Getopt::Long;
 
-my Our::Grid $grid .= new;
+my Our::Grid $grid .= new: :title('Processes');
 
 =comment
   PID TTY          TIME CMD
