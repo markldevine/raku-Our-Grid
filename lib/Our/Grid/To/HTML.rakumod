@@ -1,128 +1,127 @@
 unit class Our::Grid::To::HTML:api<1>:auth<Mark Devine (mark@markdevine.com)>;
 
-use Data::Dump::Tree;
-use Base64::Native;
 use Color::Names:api<2>;
-use Our::Cache;
 use Our::Grid::Cell;
 use Our::Grid::Cell::Fragment;
 use Our::Redis;
 use Our::Utilities;
 
-role Table-Properties {
-background-color
-border
-border-collapse
-border-spacing
-caption-side
-color
-empty-cells
-font-family
-font-size
-font-style
-font-variant
-font-weight
-letter-spacing
-line-height
-list-style
-list-style-image
-list-style-position
-list-style-type
-padding
-text-align
-text-decoration
-text-indent
-text-shadow
-text-transform
-vertical-align
-white-space
-word-spacing
-}
+#role Table-Properties {
+#background-color
+#border
+#border-collapse
+#border-spacing
+#caption-side
+#color
+#empty-cells
+#font-family
+#font-size
+#font-style
+#font-variant
+#font-weight
+#letter-spacing
+#line-height
+#list-style
+#list-style-image
+#list-style-position
+#list-style-type
+#padding
+#text-align
+#text-decoration
+#text-indent
+#text-shadow
+#text-transform
+#vertical-align
+#white-space
+#word-spacing
+#}
 
-role Table-Row-Properties {
-background-color
-border
-color
-font-family
-font-size
-font-style
-font-variant
-font-weight
-height
-line-height
-list-style
-list-style-image
-list-style-position
-list-style-type
-padding
-text-align
-text-decoration
-text-indent
-text-shadow
-text-transform
-vertical-align
-white-space
-width
-word-spacing
-}
+#role Table-Row-Properties {
+#background-color
+#border
+#color
+#font-family
+#font-size
+#font-style
+#font-variant
+#font-weight
+#height
+#line-height
+#list-style
+#list-style-image
+#list-style-position
+#list-style-type
+#padding
+#text-align
+#text-decoration
+#text-indent
+#text-shadow
+#text-transform
+#vertical-align
+#white-space
+#width
+#word-spacing
+#}
 
-role Table-TD-Properties {
-align
-background-color
-background-image
-background-position
-background-repeat
-border
-border-collapse
-border-spacing
-bottom
-box-shadow
-caption-side
-clear
-color
-content
-cursor
-display
-empty-cells
-filter
-float
-font-family
-font-size
-font-style
-font-variant
-font-weight
-height
-left
-letter-spacing
-line-height
-list-style
-list-style-image
-list-style-position
-list-style-type
-margin
-max-height
-max-width
-min-height
-min-width
-opacity
-outline
-overflow
-padding
-position
-right
-text-align
-text-decoration
-text-indent
-text-shadow
-text-transform
-top
-vertical-align
-visibility
-white-space
-width
-word-spacing
-z-index
-}
+#role Table-TD-Properties {
+#align
+#background-color
+#background-image
+#background-position
+#background-repeat
+#border
+#border-collapse
+#border-spacing
+#bottom
+#box-shadow
+#caption-side
+#clear
+#color
+#content
+#cursor
+#display
+#empty-cells
+#filter
+#float
+#font-family
+#font-size
+#font-style
+#font-variant
+#font-weight
+#height
+#left
+#letter-spacing
+#line-height
+#list-style
+#list-style-image
+#list-style-position
+#list-style-type
+#margin
+#max-height
+#max-width
+#min-height
+#min-width
+#opacity
+#outline
+#overflow
+#padding
+#position
+#right
+#text-align
+#text-decoration
+#text-indent
+#text-shadow
+#text-transform
+#top
+#vertical-align
+#visibility
+#white-space
+#width
+#word-spacing
+#z-index
+#}
+
+has $.body;
 
 #   redis the organization's color scheme...
 

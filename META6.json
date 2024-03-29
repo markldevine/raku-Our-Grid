@@ -2,10 +2,22 @@
   "auth": "zef:markldevine",
   "authors": [ "Mark Devine <mark@markdevine.com>" ],
   "depends": [
-    "Our::Utilities",
-    "Text::CSV",
+    "Base64::Native",
+    "Color::Names:api<2>",
+    "Cro::HTTP::Client",
+    "GTK::Simple",
+    "GTK::Simple::App",
+    "GTK::Simple::Frame",
+    "GTK::Simple::TextView",
+    "GTK::Simple::VBox",
     "JSON::Fast",
-    "Color::Names:api<2>"
+    "JSON::Marshal",
+    "JSON::Unmarshal",
+    "Our::Cache",
+    "Our::Redis",
+    "Our::Utilities",
+    "Terminal::UI",
+    "Text::CSV"
   ],
   "description": "Generic Grid of Rows of Cells -- used for manipulating tabular data",
   "license": "Artistic-2.0",
@@ -15,7 +27,12 @@
   "provides": {
     "Our::Grid": "lib/Our/Grid.rakumod",
     "Our::Grid::Cell": "lib/Our/Grid/Cell.rakumod",
-    "Our::Grid::Cell::Fragment": "lib/Our/Grid/Cell/Fragment.rakumod"
+    "Our::Grid::Cell::Fragment": "lib/Our/Grid/Cell/Fragment.rakumod",
+    "Our::Grid::To::ANSI": "lib/Our/Grid/To/ANSI.rakumod",
+    "Our::Grid::To::GUI": "lib/Our/Grid/To/GUI.rakumod",
+    "Our::Grid::To::HTML": "lib/Our/Grid/To/HTML.rakumod",
+    "Our::Grid::To::TEXT": "lib/Our/Grid/To/TEXT.rakumod",
+    "Our::Grid::To::TUI": "lib/Our/Grid/To/TUI.rakumod"
   },
   "resources": [],
   "source-url": "https://github.com/markldevine/rake-Our-Grid.git",
