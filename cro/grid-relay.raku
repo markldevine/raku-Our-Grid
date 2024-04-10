@@ -66,9 +66,7 @@ my $application         = route {
 #           default     {   $grid.HTML-print;   }
 #       }
 
-#my $smtp = Net::SMTP.new(:server('mailhost.wmata.com'), :port(587));
-#my $smtp = Net::SMTP.new(:server<mailhost.wmata.com>, :25port);
-my $smtp = Net::SMTP.new(:server<mailhost.wmata.com>);
+my $smtp = Net::SMTP.new(:server($smtp-relay-host), :port($smtp-relay-port));
 #$smtp.send($mail-from, @mail-to, $email);
 $smtp.send($email);
 $smtp.quit;

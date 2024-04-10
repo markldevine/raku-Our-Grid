@@ -96,7 +96,9 @@ enum Headings (
 sub MAIN (
     Str                 $servers            = $default-server,  #= server name(s) (comma separated list)
     Int                 :$percent-above     = -1,               #= only display file systems above the percentage 
+    Bool                :$group-by-system,                      #= group data around systems
     Bool                :$csv,                                  #= dump CSV to STDOUT
+    Str                 :$grid-proxy-host   = '127.0.0.1',      #= hostname of grid proxy for remote services
     Bool                :$gui,                                  #= Graphical User Interface
     Bool                :$html,                                 #= dump HTML to STDOUT
     Bool                :$json,                                 #= dump JSON to STDOUT
@@ -112,7 +114,6 @@ sub MAIN (
     Bool                :$light-mode,                           #= reverse header highlight for light-mode
     Int                 :@sort-columns,                         #= accumulate column numbers to sort by
     Bool                :$sort-descending,                      #= sort in descending order
-    Bool                :$group-by-system,                      #= group data around systems
 ) {
     my Bool $mailing;
     my $from                = $mail-from;
@@ -150,10 +151,10 @@ sub MAIN (
     }
     my Our::Grid $grid;
     if $group-by-system {
-        $grid  .= new: :title('df Report'), :$reverse-highlight, :0group-by-column;
+        $grid  .= new: :title('df Report'), :$grid-proxy-host, :$reverse-highlight, :0group-by-column;
     }
     else {
-        $grid  .= new: :title('df Report'), :$reverse-highlight;
+        $grid  .= new: :title('df Report'), :$grid-proxy-host, :$reverse-highlight;
     }
     $grid.add-heading('System',         :justification<left>),
     $grid.add-heading('Filesystem',     :justification<left>);

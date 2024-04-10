@@ -85,7 +85,8 @@ has                     $.term-size;
 has Body                $.body;
 has Int                 $.current-row       is rw           = 0;
 has Int                 $.current-col       is rw           = 0;
-has Cro::HTTP::Client   $.grid-proxy;
+#has Cro::HTTP::Client   $.grid-proxy;
+has                     $.grid-proxy-host;
 has Int                 $.group-by-column   is built        = -1;
 has Str                 $.title             is built        = '';
 has Bool                $!reverse-highlight is built        = False;
@@ -696,10 +697,9 @@ method send-proxy-mail-via-redis (
     %query<mail-cc>     = @mail-cc.join(',')    if @mail-cc.elems;
     %query<mail-bcc>    = @mail-bcc.join(',')   if @mail-bcc.elems;
     %query<format>      = $format;
-#   ?term=mountains&images=true
 
-my $remote-host = 'jgstmgtgate1lpv.wmata.local';
-my @cmd         = 'ssh', $remote-host, '/bin/curl', '-G', '--silent';
+die 'No grid-proxy-host!' unless self.grid-proxy-host;
+my @cmd         = 'ssh', self.grid-proxy-host, '/bin/curl', '-G', '--silent';
 $Cro-URL       ~= '?';
 my @query;
 for %query.keys.sort -> $key {
