@@ -49,8 +49,11 @@ submethod BUILD(:$text,
     if $fragments {
         $!fragments     = $fragments;
     }
-    else {
+    elsif $!text {
         $!fragments[0]  = Our::Grid::Cell::Fragment.new(:$!text, |%fragment-options);
+    }
+    else {
+        $!fragments[0]  = Our::Grid::Cell::Fragment.new(:text(''), |%fragment-options);
     }
 }
 
