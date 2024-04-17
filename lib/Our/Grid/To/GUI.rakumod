@@ -26,11 +26,13 @@ method GUI {
             my $obj             = GTK::Simple::TextView.new;
             $obj.text           = $body;
             $obj.editable       = False;
-            given $!body.cells[$row][$col].justification {
-                when 'left'     { $obj.alignment = LEFT;    }
-                when 'center'   { $obj.alignment = CENTER;  }
-                when 'right'    { $obj.alignment = RIGHT;   }
-                default         { $obj.alignment = FILL;    }
+            $obj.alignment      = FILL;
+            if $!body.cells[$row][$col] ~~ Our::Grid::Cell:D {
+                given $!body.cells[$row][$col].justification {
+                    when 'left'     { $obj.alignment = LEFT;    }
+                    when 'center'   { $obj.alignment = CENTER;  }
+                    when 'right'    { $obj.alignment = RIGHT;   }
+                }
             }
             $obj.monospace      = True;
             $VBox.set-content:  $obj;

@@ -25,10 +25,12 @@ method TEXT-print {
     my $current-group       = '';
     for $!body.meta<sort-order>.list -> $row {
         if $!body.group-by-column >= 0 {
-            if $current-group ne $!body.cells[$row][$!body.group-by-column].TEXT {
-                $current-group = $!body.cells[$row][$!body.group-by-column].TEXT;
-                put "\n" ~ '[>>> ' ~ $!body.cells[$row][$!body.group-by-column].TEXT ~ ' <<<]';
-                self!TEXT-print-headings;
+            if $!body.cells[$row][$!body.group-by-column] ~~ Our::Grid::Cell:D {
+                if $current-group ne $!body.cells[$row][$!body.group-by-column].TEXT {
+                    $current-group = $!body.cells[$row][$!body.group-by-column].TEXT;
+                    put "\n" ~ '[>>> ' ~ $!body.cells[$row][$!body.group-by-column].TEXT ~ ' <<<]';
+                    self!TEXT-print-headings;
+                }
             }
         }
         elsif $print-headings {
