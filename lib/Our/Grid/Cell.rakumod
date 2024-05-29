@@ -134,7 +134,6 @@ method ANSI-fmt (*%opts) {
     $!ANSI-spaceafter-pad   = ' ' x $!spaceafter        if $!spaceafter;
     my $highlight-rgb;
     if $!highlight {
-
         if $!highlight ~~ Positional {
             if $!highlight.elems == 3 {
                 $highlight-rgb = $!highlight;
@@ -144,7 +143,7 @@ method ANSI-fmt (*%opts) {
             }
         }
         else {
-            $highlight-rgb = Color::Names.color-data(<CSS3>).&find-color($!highlight, :exact).values.first<rgb> {
+            $highlight-rgb = Color::Names.color-data(<CSS3>).&find-color($!highlight, :exact).values.first<rgb>;
         }
 
         if $highlight-rgb {
