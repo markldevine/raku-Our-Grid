@@ -5,9 +5,9 @@ use Our::Utilities;
 
 has Str     $.foreground                        is rw;
 has         $!foreground-rgb;
-has Any     $.background                        is rw;
+has         $.background                        is rw;
 has         $!background-rgb;
-has Any     $.highlight                         is rw;
+has         $.highlight                         is rw;
 has         $!highlight-rgb;
 has Bool    $.bold                              is rw;
 has Bool    $.faint                             is rw;
@@ -134,18 +134,29 @@ method ANSI-fmt (*%options) {
     my $foreground;
     $foreground         = $!foreground                  if $!foreground;
     $foreground         = %options<foreground>          if %options<foreground>:exists;
-    $!foreground-rgb    = Color::Names.color-data(<CSS3>).&find-color($foreground,  :exact).values.first<rgb>   if $foreground;
+    $!foreground-rgb    = Color::Names.color-data(<CSS3>).&find-color($foreground,  :exact).values.first<rgb>   if $foreground && $foreground !~~ Positional;
 
     my $background;
     $background         = $!background                  if $!background;
     $background         = %options<background>          if %options<background>:exists;
     my $highlight       = $!highlight;
     $highlight          = %options<highlight>           if %options<highlight>:exists;
+
     unless $background {
         $background     = $highlight                    if $highlight;
     }
-    $!background-rgb    = Color::Names.color-data(<CSS3>).&find-color($background,  :exact).values.first<rgb>   if $background && $background !~~ Positional;
-    $!highlight-rgb     = Color::Names.color-data(<CSS3>).&find-color($highlight,   :exact).values.first<rgb>   if $highlight  && $highlight  !~~ Positional;
+    if $background && $background ~~ Positional {
+        $!background-rgb = $background;
+    }
+    else {
+        $!background-rgb = Color::Names.color-data(<CSS3>).&find-color($background,  :exact).values.first<rgb>;
+    }
+    if $highlight  && $highlight ~~ Positional {
+        $!highlight-rgb = $highlight;
+    }
+    else {
+        $!highlight-rgb = Color::Names.color-data(<CSS3>).&find-color($highlight,   :exact).values.first<rgb>;
+    }
 
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;

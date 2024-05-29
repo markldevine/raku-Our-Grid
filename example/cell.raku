@@ -9,8 +9,9 @@ use Data::Dump::Tree;
 
 my Our::Grid::Cell $c;
 
+my $background = [226, 254, 226];
 my $highlight = [226, 254, 226];
-$c .= new(:text(' 12345     '), :trim-input(True), :foreground<yellow>, :$highlight, :18width, :justification<left>,); put '|' ~ $c.ANSI-padded ~ '|';
+$c .= new(:text(' 12345     '), :trim-input(True), :foreground<black>, :$background, :$highlight, :18width, :justification<left>,); put '|' ~ $c.ANSI-padded ~ '|';
 
 =finish
 
