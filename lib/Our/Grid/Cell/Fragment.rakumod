@@ -3,11 +3,11 @@ unit class Our::Grid::Cell::Fragment:api<1>:auth<Mark Devine (mark@markdevine.co
 use Color::Names:api<2>;
 use Our::Utilities;
 
-has Str     $.foreground                        is rw;
+has Mu      $.foreground                        is rw;
 has         $!foreground-rgb;
-has         $.background                        is rw;
+has Mu      $.background                        is rw;
 has         $!background-rgb;
-has         $.highlight                         is rw;
+has Mu      $.highlight                         is rw;
 has         $!highlight-rgb;
 has Bool    $.bold                              is rw;
 has Bool    $.faint                             is rw;
@@ -145,17 +145,21 @@ method ANSI-fmt (*%options) {
     unless $background {
         $background     = $highlight                    if $highlight;
     }
-    if $background && $background ~~ Positional {
-        $!background-rgb = $background;
+    if $background {
+        if $background ~~ Positional {
+            $!background-rgb = $background;
+        }
+        else {
+            $!background-rgb = Color::Names.color-data(<CSS3>).&find-color($background,  :exact).values.first<rgb>;
+        }
     }
-    else {
-        $!background-rgb = Color::Names.color-data(<CSS3>).&find-color($background,  :exact).values.first<rgb>;
-    }
-    if $highlight  && $highlight ~~ Positional {
-        $!highlight-rgb = $highlight;
-    }
-    else {
-        $!highlight-rgb = Color::Names.color-data(<CSS3>).&find-color($highlight,   :exact).values.first<rgb>;
+    if $highlight {
+        if $highlight ~~ Positional {
+            $!highlight-rgb = $highlight;
+        }
+        else {
+            $!highlight-rgb = Color::Names.color-data(<CSS3>).&find-color($highlight,   :exact).values.first<rgb>;
+        }
     }
 
     my $bold            = $!bold;
