@@ -5,9 +5,9 @@ use Our::Utilities;
 
 has Str     $.foreground                        is rw;
 has         $!foreground-rgb;
-has Str     $.background                        is rw;
+has Any     $.background                        is rw;
 has         $!background-rgb;
-has Str     $.highlight                         is rw;
+has Any     $.highlight                         is rw;
 has         $!highlight-rgb;
 has Bool    $.bold                              is rw;
 has Bool    $.faint                             is rw;
@@ -134,7 +134,7 @@ method ANSI-fmt (*%options) {
     my $foreground;
     $foreground         = $!foreground                  if $!foreground;
     $foreground         = %options<foreground>          if %options<foreground>:exists;
-    $!foreground-rgb    = Color::Names.color-data(<CSS3>).&find-color($foreground,  :exact).values.first<rgb>    if $foreground;
+    $!foreground-rgb    = Color::Names.color-data(<CSS3>).&find-color($foreground,  :exact).values.first<rgb>   if $foreground;
 
     my $background;
     $background         = $!background                  if $!background;
@@ -144,8 +144,8 @@ method ANSI-fmt (*%options) {
     unless $background {
         $background     = $highlight                    if $highlight;
     }
-    $!background-rgb    = Color::Names.color-data(<CSS3>).&find-color($background,  :exact).values.first<rgb>    if $background;
-    $!highlight-rgb     = Color::Names.color-data(<CSS3>).&find-color($highlight,   :exact).values.first<rgb>     if $highlight;
+    $!background-rgb    = Color::Names.color-data(<CSS3>).&find-color($background,  :exact).values.first<rgb>   if $background && $background !~~ Positional;
+    $!highlight-rgb     = Color::Names.color-data(<CSS3>).&find-color($highlight,   :exact).values.first<rgb>   if $highlight  && $highlight  !~~ Positional;
 
     my $bold            = $!bold;
     $bold               = %options<bold>                if %options<bold>:exists;
