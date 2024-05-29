@@ -134,7 +134,20 @@ method ANSI-fmt (*%opts) {
     $!ANSI-spaceafter-pad   = ' ' x $!spaceafter        if $!spaceafter;
     my $highlight-rgb;
     if $!highlight {
-        if my $highlight-rgb   = Color::Names.color-data(<CSS3>).&find-color($!highlight, :exact).values.first<rgb> {
+
+        if $!highlight ~~ Positional {
+            if $!highlight.elems == 3 {
+                $highlight-rgb = $!highlight;
+            }
+            else {
+                note;
+            }
+        }
+        else {
+            $highlight-rgb = Color::Names.color-data(<CSS3>).&find-color($!highlight, :exact).values.first<rgb> {
+        }
+
+        if $highlight-rgb {
             if $!spacebefore {
                 $!ANSI-spacebefore-pad  = "\o33[48;2;"
                                         ~ $highlight-rgb[0] ~ ';'

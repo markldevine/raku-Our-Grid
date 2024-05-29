@@ -4,6 +4,8 @@ use Color::Names:api<2>;
 use Our::Grid::Cell;
 use Our::Utilities;
 
+use Data::Dump::Tree;
+
 has $.body      is required;
 has $.term-size is required;
 
