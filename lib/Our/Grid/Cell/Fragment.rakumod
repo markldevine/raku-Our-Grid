@@ -39,6 +39,7 @@ has Bool    $.metric-unit-to-comma-number;
 has Bool    $.metric-unit-to-number;
 has Bool    $.number-to-metric-unit;
 has Bool    $.add-commas-to-digits;
+has Bool    $.seconds-to-y-d-hh-mm-ss;
 has Bool    $.date-time;
 has Bool    $.trim-input                                        = True;
 has Mu:D    $.text                              is required;
@@ -73,6 +74,9 @@ submethod TWEAK {
         }
         elsif $!bytes-to-bytes-unit {
             $!TEXT  = bytes-to-bytes-unit($text.Int);
+        }
+        elsif $!seconds-to-y-d-hh-mm-ss {
+            $!TEXT  = seconds-to-y-d-hh-mm-ss($text.Int);
         }
     }
     elsif $text ~~ / ^ (<[-+]>)* \s* (\d+ '.' \d+) $ / {
