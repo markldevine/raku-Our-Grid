@@ -5,7 +5,7 @@ use lib '/home/mdevine/github.com/raku-Our-Grid/lib';
 #use lib '/home/mdevine/github.com/raku-Our-Redis/lib';
 
 use Async::Command::Multi;
-use Our::Cache;
+#use Our::Cache;
 use Getopt::Long;
 use Our::Grid;
 use Our::Grid::Cell;
@@ -94,7 +94,7 @@ enum Headings (
 );
 
 sub MAIN (
-    Str                 $servers            = $default-server,  #= server name(s) (comma separated list)
+    Str                 :@server,                               #= server name(s)
     Int                 :$percent-above     = -1,               #= only display file systems above the percentage 
     Bool                :$group-by-system,                      #= group data around systems
     Bool                :$csv,                                  #= dump CSV to STDOUT
@@ -126,16 +126,16 @@ sub MAIN (
         $mailing = True;
     }
     my $reverse-highlight   = $light-mode ?? True !! False;
-    my $preferences-cache-file-name = cache-file-name(:meta<preferences>);
-    my $preferences-cache   = cache(:cache-file-name($preferences-cache-file-name));
-    $preferences-cache      = from-json($preferences-cache) if $preferences-cache;
+    my $identifier          = 'preferences';
+    my $preferences-cache   = Our::Cache.new(:$identifier);
+    my $preferences         = from-json($preferences-cache.fetch) if $preferences-cache.cache-hit;
     without $light-mode {
-        $reverse-highlight  = $preferences-cache<light-mode> if $preferences-cache<light-mode>:exists;
+        $reverse-highlight  = $preferences<light-mode> if $preferences<light-mode>:exists;
     }
-    cache(:cache-file-name($preferences-cache-file-name), :data(to-json({light-mode => $reverse-highlight})));
-    my @servers             = $servers.split(',');
+    $preferences-cache.store(:data(to-json({light-mode => $reverse-highlight})));
+
     my %command;
-    for @servers -> $server {
+    for @server -> $server {
         if $server eq $default-server {
             %command{$server}   = ['/usr/bin/df', '-Pk'];
         }
