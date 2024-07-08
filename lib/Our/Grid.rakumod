@@ -359,9 +359,9 @@ method !datafy (Bool :$raw) {
     @data;
 }
 
-method CSV-print {
+method CSV-print (Bool :$raw) {
     return False unless self!grid-check;
-    csv(in => csv(in => self!datafy(:raw)), out => $*OUT);
+    csv(in => csv(in => self!datafy(:$raw)), out => $*OUT);
 }
 
 method JSON-print {
