@@ -335,7 +335,7 @@ method TEXT-print {
     Our::Grid::To::TEXT.new(:$!body).TEXT-print;
 }
 
-method !datafy {
+method !datafy (Bool :$raw) {
     self!sort-order-check;
     my @data    = Array.new();
     for $!body.headings.list -> $heading {
@@ -344,7 +344,14 @@ method !datafy {
     for $!body.meta<sort-order>.list -> $row {
         loop (my $col = 0; $col < $!body.cells[$row].elems; $col++) {
             given $!body.cells[$row][$col] {
-                when Our::Grid::Cell:D  { @data[$row + 1].push: $!body.cells[$row][$col].TEXT;    }
+                when Our::Grid::Cell:D  {
+                                            if $raw {
+                                                @data[$row + 1].push: $!body.cells[$row][$col].text;
+                                            }
+                                            else {
+                                                @data[$row + 1].push: $!body.cells[$row][$col].TEXT;
+                                            }
+                                        }
                 default                 { @data[$row + 1].push: '';                         }
             }
         }
@@ -354,7 +361,7 @@ method !datafy {
 
 method CSV-print {
     return False unless self!grid-check;
-    csv(in => csv(in => self!datafy), out => $*OUT);
+    csv(in => csv(in => self!datafy(:raw)), out => $*OUT);
 }
 
 method JSON-print {
